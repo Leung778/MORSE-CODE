@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maritime Flag & Morse Code Tool</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --border: #cbd5e1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 920px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    header {
+      background-color: var(--primary);
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      margin-bottom: 5px;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background-color: #f1f5f9;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 14px;
+      text-align: center;
+      background: none;
+      border: none;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: 0.2s;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background-color: #fff;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 25px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Grid for Gallery/Lookup */
+    .flag-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 15px;
+    }
+
+    .flag-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      background: #fff;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .flag-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .flag-svg-box {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #64748b;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .flag-letter {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .flag-morse {
+      font-family: monospace;
+      font-size: 1.2rem;
+      color: var(--primary);
+      letter-spacing: 2px;
+    }
+
+    /* Translator Tab */
+    .field-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    textarea, input[type="text"], select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    button.action-btn {
+      padding: 10px 18px;
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button.action-btn:hover {
+      opacity: 0.9;
+    }
+
+    /* Quiz Tab */
+    .quiz-box {
+      text-align: center;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background-color: #fafafa;
+    }
+
+    .score-board {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      color: #475569;
+      margin-bottom: 15px;
+      font-weight: 600;
+      padding: 6px 14px;
+      background: #f1f5f9;
+      border-radius: 6px;
+    }
+
+    .quiz-options-bar {
+      margin-bottom: 20px;
+    }
+
+    .quiz-target {
+      margin: 20px auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100px;
+    }
+
+    .quiz-input-container {
+      margin-top: 15px;
+    }
+
+    #quizAnswer {
+      width: 200px;
+      margin: 0 auto 15px auto;
+      font-size: 1.5rem;
+      text-align: center;
+      letter-spacing: 2px;
+      font-weight: bold;
+    }
+
+    .quiz-feedback {
+      margin-top: 15px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      min-height: 28px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Maritime Signal Flags & Morse Code</h1>
+    <p>Visual chart, audio translator, and interactive flag practice</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn" onclick="switchTab('lookup')">Chart & Lookup</button>
+    <button class="tab-btn" onclick="switchTab('translator')">Translator</button>
+    <button class="tab-btn active" onclick="switchTab('quiz')">Flag Quiz</button>
+  </nav>
+
+  <!-- TAB 1: Chart & Lookup -->
+  <section id="lookup" class="tab-content">
+    <div class="flag-grid" id="flagGrid"></div>
+  </section>
+
+  <!-- TAB 2: Translator -->
+  <section id="translator" class="tab-content">
+    <div class="field-group">
+      <label for="textInput">English Text (A-Z):</label>
+      <textarea id="textInput" rows="3" placeholder="Type letters here..."></textarea>
+      <div class="btn-row">
+        <button class="action-btn" onclick="convertTextToMorse()">Convert to Morse</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label for="morseInput">Morse Code (Use dots '.', dashes '-', space between letters, '/' for word spaces):</label>
+      <textarea id="morseInput" rows="3" placeholder="... --- ..."></textarea>
+      <div class="btn-row">
+        <button class="action-btn" onclick="convertMorseToText()">Convert to Text</button>
+        <button class="action-btn" style="background:#0284c7;" onclick="playMorseSound()">Play Sound</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 3: Quiz (Direct Input Only) -->
+  <section id="quiz" class="tab-content active">
+    <div class="quiz-box">
+      <div class="score-board">
+        <span>Correct: <span id="scoreCorrect" style="color:#16a34a;">0</span></span>
+        <span>Attempted: <span id="scoreTotal">0</span></span>
+      </div>
+
+      <div class="quiz-options-bar">
+        <label for="quizTargetType" style="display:inline; margin-right: 8px;">Question Type:</label>
+        <select id="quizTargetType" onchange="nextQuestion()" style="width: auto; display:inline-block;">
+          <option value="letter">Flag &rarr; Type Letter (A-Z)</option>
+          <option value="morse">Flag &rarr; Type Morse Code (.-)</option>
+        </select>
+      </div>
+
+      <h3 id="quizInstruction">Look at the flag and type the answer:</h3>
+      <div class="quiz-target" id="quizDisplay"></div>
+
+      <div class="quiz-input-container">
+        <input type="text" id="quizAnswer" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+        <div class="btn-row" style="justify-content:center;">
+          <button class="action-btn" onclick="submitQuiz()">Submit</button>
+          <button class="action-btn" style="background:#64748b;" onclick="nextQuestion()">Skip / Next</button>
+        </div>
+      </div>
+
+      <div class="quiz-feedback" id="quizFeedback"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+  function makeSVG(letter, w, h) {
+    const raw = {
+      'A': `<polygon points="0,0 60,0 45,20 60,40 0,40" fill="#ffffff"/><polygon points="30,0 60,0 45,20 60,40 30,40" fill="#0033a0"/>`,
+      'B': `<polygon points="0,0 60,0 45,20 60,40 0,40" fill="#da291c"/>`,
+      'C': `<rect width="60" height="8" fill="#0033a0"/><rect y="8" width="60" height="8" fill="#ffffff"/><rect y="16" width="60" height="8" fill="#da291c"/><rect y="24" width="60" height="8" fill="#ffffff"/><rect y="32" width="60" height="8" fill="#0033a0"/>`,
+      'D': `<rect width="60" height="10" fill="#ffd100"/><rect y="10" width="60" height="20" fill="#0033a0"/><rect y="30" width="60" height="10" fill="#ffd100"/>`,
+      'E': `<rect width="60" height="20" fill="#0033a0"/><rect y="20" width="60" height="20" fill="#da291c"/>`,
+      'F': `<rect width="60" height="40" fill="#ffffff"/><polygon points="30,5 55,20 30,35 5,20" fill="#da291c"/>`,
+      'G': `<rect width="10" height="40" fill="#ffd100"/><rect x="10" width="10" height="40" fill="#0033a0"/><rect x="20" width="10" height="40" fill="#ffd100"/><rect x="30" width="10" height="40" fill="#0033a0"/><rect x="40" width="10" height="40" fill="#ffd100"/><rect x="50" width="10" height="40" fill="#0033a0"/>`,
+      'H': `<rect width="30" height="40" fill="#ffffff"/><rect x="30" width="30" height="40" fill="#da291c"/>`,
+      'I': `<rect width="60" height="40" fill="#ffd100"/><circle cx="30" cy="20" r="10" fill="#000000"/>`,
+      'J': `<rect width="60" height="13.3" fill="#0033a0"/><rect y="13.3" width="60" height="13.3" fill="#ffffff"/><rect y="26.6" width="60" height="13.4" fill="#0033a0"/>`,
+      'K': `<rect width="30" height="40" fill="#ffd100"/><rect x="30" width="30" height="40" fill="#0033a0"/>`,
+      'L': `<rect width="30" height="20" fill="#ffd100"/><rect x="30" width="30" height="20" fill="#000000"/><rect y="20" width="30" height="20" fill="#000000"/><rect x="30" y="20" width="30" height="20" fill="#ffd100"/>`,
+      'M': `<rect width="60" height="40" fill="#0033a0"/><line x1="0" y1="0" x2="60" y2="40" stroke="#ffffff" stroke-width="8"/><line x1="60" y1="0" x2="0" y2="40" stroke="#ffffff" stroke-width="8"/>`,
+      'N': `<rect width="60" height="40" fill="#ffffff"/><rect width="15" height="10" fill="#0033a0"/><rect x="30" width="15" height="10" fill="#0033a0"/><rect x="15" y="10" width="15" height="10" fill="#0033a0"/><rect x="45" y="10" width="15" height="10" fill="#0033a0"/><rect y="20" width="15" height="10" fill="#0033a0"/><rect x="30" y="20" width="15" height="10" fill="#0033a0"/><rect x="15" y="30" width="15" height="10" fill="#0033a0"/><rect x="45" y="30" width="15" height="10" fill="#0033a0"/>`,
+      'O': `<polygon points="0,0 60,40 0,40" fill="#da291c"/><polygon points="0,0 60,0 60,40" fill="#ffd100"/>`,
+      'P': `<rect width="60" height="40" fill="#0033a0"/><rect x="20" y="12" width="20" height="16" fill="#ffffff"/>`,
+      'Q': `<rect width="60" height="40" fill="#ffd100"/>`,
+      'R': `<rect width="60" height="40" fill="#da291c"/><rect x="25" width="10" height="40" fill="#ffd100"/><rect y="15" width="60" height="10" fill="#ffd100"/>`,
+      'S': `<rect width="60" height="40" fill="#ffffff"/><rect x="20" y="12" width="20" height="16" fill="#0033a0"/>`,
+      'T': `<rect width="20" height="40" fill="#da291c"/><rect x="20" width="20" height="40" fill="#ffffff"/><rect x="40" width="20" height="40" fill="#0033a0"/>`,
+      'U': `<rect width="30" height="20" fill="#da291c"/><rect x="30" width="30" height="20" fill="#ffffff"/><rect y="20" width="30" height="20" fill="#ffffff"/><rect x="30" y="20" width="30" height="20" fill="#da291c"/>`,
+      'V': `<rect width="60" height="40" fill="#ffffff"/><line x1="0" y1="0" x2="60" y2="40" stroke="#da291c" stroke-width="8"/><line x1="60" y1="0" x2="0" y2="40" stroke="#da291c" stroke-width="8"/>`,
+      'W': `<rect width="60" height="40" fill="#0033a0"/><rect x="10" y="7" width="40" height="26" fill="#ffffff"/><rect x="20" y="14" width="20" height="12" fill="#da291c"/>`,
+      'X': `<rect width="60" height="40" fill="#ffffff"/><rect x="25" width="10" height="40" fill="#0033a0"/><rect y="15" width="60" height="10" fill="#0033a0"/>`,
+      'Y': `<rect width="60" height="40" fill="#da291c"/><polygon points="0,0 20,0 0,20" fill="#ffd100"/><polygon points="40,0 60,0 0,40" fill="#ffd100"/><polygon points="60,20 60,40 40,40" fill="#ffd100"/><polygon points="20,40 0,40 0,40" fill="#ffd100"/><polygon points="20,0 60,0 0,40 0,20" fill="#ffd100"/>`,
+      'Z': `<polygon points="0,0 60,0 30,20" fill="#ffd100"/><polygon points="60,0 60,40 30,20" fill="#000000"/><polygon points="0,40 60,40 30,20" fill="#da291c"/><polygon points="0,0 0,40 30,20" fill="#0033a0"/>`
+    };
+
+    return `<div class="flag-svg-box"><svg viewBox="0 0 60 40" width="${w}" height="${h}" style="display:block;">${raw[letter] || ''}</svg></div>`;
+  }
+
+  const MARITIME_MORSE = {
+    'A': '.-',   'B': '-...', 'C': '-.-.', 'D': '-..',  'E': '.',    'F': '..-.',
+    'G': '--.',  'H': '....', 'I': '..',   'J': '.---', 'K': '-.-',  'L': '.-..',
+    'M': '--',   'N': '-.',   'O': '---',  'P': '.--.', 'Q': '--.-', 'R': '.-.',
+    'S': '...',  'T': '-',    'U': '..-',  'V': '...-', 'W': '.--',  'X': '-..-',
+    'Y': '-.--', 'Z': '--..'
+  };
+
+  const REVERSE_MORSE = {};
+  for (const [letter, code] of Object.entries(MARITIME_MORSE)) {
+    REVERSE_MORSE[code] = letter;
+  }
+
+  const letters = Object.keys(MARITIME_MORSE);
+
+  function switchTab(id) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    const clickedBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(id));
+    if (clickedBtn) clickedBtn.classList.add('active');
+    document.getElementById(id).classList.add('active');
+  }
+
+  // Populate Chart
+  const grid = document.getElementById('flagGrid');
+  letters.forEach(letter => {
+    const card = document.createElement('div');
+    card.className = 'flag-card';
+    card.innerHTML = `
+      ${makeSVG(letter, 60, 40)}
+      <div class="flag-letter">${letter}</div>
+      <div class="flag-morse">${MARITIME_MORSE[letter]}</div>
+    `;
+    card.title = `Click to play sound for ${letter}`;
+    card.onclick = () => playSequence(MARITIME_MORSE[letter]);
+    grid.appendChild(card);
+  });
+
+  // Text / Morse Conversion
+  function convertTextToMorse() {
+    const text = document.getElementById('textInput').value.toUpperCase();
+    const morse = text.split('').map(ch => {
+      if (MARITIME_MORSE[ch]) return MARITIME_MORSE[ch];
+      if (ch === ' ') return '/';
+      return '';
+    }).filter(Boolean).join(' ');
+    document.getElementById('morseInput').value = morse;
+  }
+
+  function convertMorseToText() {
+    const morse = document.getElementById('morseInput').value.trim().split(/\s+/);
+    const text = morse.map(code => {
+      if (code === '/') return ' ';
+      return REVERSE_MORSE[code] || '?';
+    }).join('');
+    document.getElementById('textInput').value = text;
+  }
+
+  // Web Audio Sound Engine
+  let audioCtx = null;
+  function getAudioContext() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
+
+  function playTone(freq, duration, delay) {
+    const ctx = getAudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    const startTime = ctx.currentTime + delay;
+    const stopTime = startTime + duration;
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(0.25, startTime + 0.005);
+    gain.gain.setValueAtTime(0.25, stopTime - 0.005);
+    gain.gain.linearRampToValueAtTime(0, stopTime);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(startTime);
+    osc.stop(stopTime);
+  }
+
+  function playSequence(morseStr) {
+    const dot = 0.08;
+    let offset = 0.05;
+    for (let char of morseStr) {
+      if (char === '.') {
+        playTone(600, dot, offset);
+        offset += dot * 2;
+      } else if (char === '-') {
+        playTone(600, dot * 3, offset);
+        offset += dot * 4;
+      } else if (char === ' ') {
+        offset += dot * 2;
+      }
+    }
+  }
+
+  function playMorseSound() {
+    playSequence(document.getElementById('morseInput').value);
+  }
+
+  // Quiz Engine (Direct input only)
+  let currentTarget = '';
+  let score = 0;
+  let total = 0;
+  let answered = false;
+
+  function nextQuestion() {
+    answered = false;
+    document.getElementById('quizFeedback').textContent = '';
+    currentTarget = letters[Math.floor(Math.random() * letters.length)];
+
+    const targetType = document.getElementById('quizTargetType').value;
+    const input = document.getElementById('quizAnswer');
+    const instruction = document.getElementById('quizInstruction');
+    
+    document.getElementById('quizDisplay').innerHTML = makeSVG(currentTarget, 140, 93);
+
+    if (targetType === 'letter') {
+      instruction.textContent = "Type the Letter (A-Z) for this flag:";
+      input.placeholder = "e.g. A";
+      input.maxLength = 1;
+    } else {
+      instruction.textContent = "Type the Morse Code (. and -) for this flag:";
+      input.placeholder = "e.g. .-";
+      input.maxLength = 6;
+    }
+
+    input.value = '';
+    input.focus();
+  }
+
+  function submitQuiz() {
+    if (answered) return;
+    answered = true;
+    total++;
+
+    const targetType = document.getElementById('quizTargetType').value;
+    const input = document.getElementById('quizAnswer');
+    const userVal = input.value.trim().toUpperCase();
+    const feedback = document.getElementById('quizFeedback');
+
+    const expectedAnswer = (targetType === 'letter') ? currentTarget : MARITIME_MORSE[currentTarget];
+    const isCorrect = (userVal === expectedAnswer);
+
+    if (isCorrect) {
+      score++;
+      feedback.style.color = '#16a34a';
+      feedback.textContent = `Correct! Letter ${currentTarget} is ${MARITIME_MORSE[currentTarget]}`;
+      playSequence(MARITIME_MORSE[currentTarget]);
+    } else {
+      feedback.style.color = '#dc2626';
+      feedback.textContent = `Incorrect. Answer: Letter ${currentTarget} (${MARITIME_MORSE[currentTarget]})`;
+    }
+
+    updateScore();
+  }
+
+  function updateScore() {
+    document.getElementById('scoreCorrect').textContent = score;
+    document.getElementById('scoreTotal').textContent = total;
+  }
+
+  document.getElementById('quizAnswer').addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') submitQuiz();
+  });
+
+  // Start the first question
+  nextQuestion();
+</script>
+
+</body>
+</html>

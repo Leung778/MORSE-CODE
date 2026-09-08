@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>INTERCO 摩斯燈號訓練器</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            min-height: 100vh;
+        }
+        h1 { font-size: 1.1rem; letter-spacing: 1px; margin-bottom: 12px; color: #eeeeee; }
+        .lamp-box {
+            width: 130px; height: 130px;
+            background-color: #2b2b2b;
+            border: 4px solid #555555;
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            margin-bottom: 15px;
+        }
+        .lamp-bulb {
+            width: 90px; height: 90px;
+            background-color: #151515;
+            border-radius: 50%;
+            transition: background-color 0.05s ease;
+        }
+        .lamp-bulb.lit {
+            background-color: #ffff33;
+            box-shadow: 0 0 25px #ffff33;
+        }
+        .panel {
+            width: 100%; max-width: 440px;
+            background-color: #252525;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 12px; margin-bottom: 12px;
+        }
+        .row { display: flex; align-items: center; margin-bottom: 10px; font-size: 0.9rem; }
+        .row:last-child { margin-bottom: 0; }
+        .row label { margin-right: 15px; cursor: pointer; }
+        input[type="number"] {
+            width: 50px; padding: 4px; margin: 0 6px;
+            background: #1e1e1e; border: 1px solid #555555; color: #ffffff;
+            text-align: center; border-radius: 4px;
+        }
+        input[type="range"] { flex-grow: 1; margin: 0 10px; }
+        .btn-group { display: flex; width: 100%; max-width: 440px; gap: 8px; margin-bottom: 12px; }
+        button {
+            flex: 1; padding: 11px 0; font-size: 0.95rem; font-weight: bold;
+            border: none; border-radius: 6px; cursor: pointer; color: #ffffff;
+        }
+        .btn-next { background-color: #007acc; }
+        .btn-replay { background-color: #444444; }
+        .btn-stop { background-color: #cc0000; }
+        
+        .stage-box {
+            width: 100%; max-width: 440px;
+            display: flex; flex-direction: column; gap: 8px;
+            margin-bottom: 10px;
+        }
+        input[type="text"] {
+            width: 100%; padding: 12px;
+            background-color: #2a2a2a; border: 1px solid #555555;
+            color: #00ff66; font-size: 1.05rem; text-align: center;
+            border-radius: 6px;
+        }
+        .btn-submit { background-color: #28a745; }
+        
+        .meaning-area {
+            background-color: #222a22;
+            border: 1px solid #336633;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .result-box {
+            width: 100%; max-width: 440px;
+            font-size: 0.92rem; line-height: 1.5; font-family: monospace;
+            padding: 10px; border-radius: 6px; background-color: #1a1a1a;
+            border: 1px solid #333; margin-top: 5px;
+        }
+        .correct { color: #00ff66; }
+        .wrong { color: #ff4444; }
+        .official { color: #ffcc00; }
+        .self-check-btns { display: flex; gap: 8px; margin-top: 8px; }
+        .btn-pass { background-color: #2e7d32; font-size: 0.85rem; padding: 6px; }
+        .btn-fail { background-color: #c62828; font-size: 0.85rem; padding: 6px; }
+    </style>
+</head>
+<body>
+
+    <h1>MORSE FLASHING LIGHT</h1>
+
+    <div class="lamp-box">
+        <div id="bulb" class="lamp-bulb"></div>
+    </div>
+
+    <!-- 設定區 -->
+    <div class="panel">
+        <div class="row">
+            <label><input type="radio" name="trainMode" value="single" checked onchange="toggleMode()"> 單字元模式（含意義測驗）</label>
+            <label><input type="radio" name="trainMode" value="block" onchange="toggleMode()"> 段落組合訓練</label>
+        </div>
+        <div class="row" id="blockConfig" style="display: none;">
+            產生 <input type="number" id="groupCount" value="3" min="1" max="10"> 組，
+            每組 <input type="number" id="charPerGroup" value="5" min="1" max="10"> 字
+        </div>
+        <div class="row">
+            <span>速度: <span id="wpmDisplay">6.0</span> WPM</span>
+            <input type="range" id="wpmSlider" min="3.0" max="15.0" step="0.5" value="6.0" oninput="updateWPM(this.value)">
+        </div>
+    </div>
+
+    <!-- 控制按鈕 -->
+    <div class="btn-group">
+        <button class="btn-next" onclick="nextQuestion()">發送新題</button>
+        <button class="btn-replay" onclick="replaySignal()">重播</button>
+        <button class="btn-stop" onclick="stopSignal()">停止</button>
+    </div>
+
+    <!-- 第一階段：作答字母/字元 -->
+    <div class="stage-box" id="charStage">
+        <input type="text" id="charInput" placeholder="步驟 1: 輸入你看見的字母/組合" autocomplete="off" autocapitalize="characters">
+        <button class="btn-submit" onclick="checkChar()">核對代號 (Enter)</button>
+    </div>
+
+    <!-- 第二階段：回答含意（解鎖後顯示） -->
+    <div class="stage-box meaning-area" id="meaningStage" style="display: none;">
+        <span style="font-size: 0.85rem; color: #a5d6a7;">✔ 字母正確！步驟 2: 請簡述此信號代表的意義/關鍵字：</span>
+        <input type="text" id="meaningInput" placeholder="例如：diver down / dangerous goods..." autocomplete="off">
+        <button class="btn-submit" style="background-color: #1976d2;" onclick="checkMeaning()">評估含意 (Enter)</button>
+    </div>
+
+    <div id="result" class="result-box" style="display: none;"></div>
+
+    <script>
+        const INTERCO_DATABASE = {
+            'A': { morse: '.-', meaning: 'I have a diver down; keep well clear at slow speed.', keys: ['diver', 'down', 'slow', 'clear'] },
+            'B': { morse: '-...', meaning: 'I am taking in, discharging, or carrying dangerous goods.', keys: ['dangerous', 'goods', 'discharging', 'loading'] },
+            'C': { morse: '-.-.', meaning: 'Affirmative (YES).', keys: ['yes', 'affirmative'] },
+            'D': { morse: '-..', meaning: 'I am manoeuvring with difficulty; keep clear of me.', keys: ['manoeuvring', 'maneuvering', 'difficulty', 'clear'] },
+            'E': { morse: '.', meaning: 'I am altering my course to starboard.', keys: ['starboard', 'altering', 'course'] },
+            'F': { morse: '..-.', meaning: 'I am disabled; communicate with me.', keys: ['disabled', 'communicate'] },
+            'G': { morse: '--.', meaning: 'I require a pilot. (Fishing: hauling nets)', keys: ['pilot', 'nets', 'hauling'] },
+            'H': { morse: '....', meaning: 'I have a pilot on board.', keys: ['pilot', 'on board', 'board'] },
+            'I': { morse: '..', meaning: 'I am altering my course to port.', keys: ['port', 'altering', 'course'] },
+            'J': { morse: '.---', meaning: 'I am on fire and have dangerous cargo; keep well clear.', keys: ['fire', 'dangerous', 'cargo', 'clear'] },
+            'K': { morse: '-.-', meaning: 'I wish to communicate with you.', keys: ['communicate', 'wish'] },
+            'L': { morse: '.-..', meaning: 'You should stop your vessel instantly.', keys: ['stop', 'instantly', 'vessel'] },
+            'M': { morse: '--', meaning: 'My vessel is stopped and making no way through the water.', keys: ['stopped', 'no way', 'water'] },
+            'N': { morse: '-.', meaning: 'Negative (NO).', keys: ['no', 'negative'] },
+            'O': { morse: '---', meaning: 'Man overboard.', keys: ['overboard', 'man overboard'] },
+            'P': { morse: '.--.', meaning: 'All persons should report on board; vessel is about to proceed to sea.', keys: ['sea', 'proceed', 'report', 'board', 'harbour'] },
+            'Q': { morse: '--.-', meaning: 'My vessel is healthy and I request free pratique.', keys: ['healthy', 'pratique', 'free pratique'] },
+            'R': { morse: '.-.', meaning: 'Has no single-letter meaning in INTERCO.', keys: ['none', 'no meaning', 'no'] },
+            'S': { morse: '...', meaning: 'My engines are operating stern propulsion.', keys: ['stern', 'propulsion', 'astern', 'engines'] },
+            'T': { morse: '-', meaning: 'I am engaged in pair trawling; keep clear.', keys: ['trawling', 'pair', 'trawl'] },
+            'U': { morse: '..-', meaning: 'You are running into danger.', keys: ['danger', 'running'] },
+            'V': { morse: '...-', meaning: 'I require assistance.', keys: ['assistance', 'require assistance', 'help'] },
+            'W': { morse: '.--', meaning: 'I require medical assistance.', keys: ['medical', 'doctor', 'assistance'] },
+            'X': { morse: '-..-', meaning: 'Stop carrying out your intentions and watch for my signals.', keys: ['intentions', 'signals', 'stop'] },
+            'Y': { morse: '-.--', meaning: 'I am dragging my anchor.', keys: ['dragging', 'anchor'] },
+            'Z': { morse: '--..', meaning: 'I require a tug. (Fishing: shooting nets)', keys: ['tug', 'nets', 'shooting'] },
+            '1': { morse: '.----', meaning: 'Numeral 1', keys: ['1', 'one'] },
+            '2': { morse: '..---', meaning: 'Numeral 2', keys: ['2', 'two'] },
+            '3': { morse: '...--', meaning: 'Numeral 3', keys: ['3', 'three'] },
+            '4': { morse: '....-', meaning: 'Numeral 4', keys: ['4', 'four'] },
+            '5': { morse: '.....', meaning: 'Numeral 5', keys: ['5', 'five'] },
+            '6': { morse: '-....', meaning: 'Numeral 6', keys: ['6', 'six'] },
+            '7': { morse: '--...', meaning: 'Numeral 7', keys: ['7', 'seven'] },
+            '8': { morse: '---..', meaning: 'Numeral 8', keys: ['8', 'eight'] },
+            '9': { morse: '----.', meaning: 'Numeral 9', keys: ['9', 'nine'] },
+            '0': { morse: '-----', meaning: 'Numeral 0', keys: ['0', 'zero'] }
+        };
+
+        const bulb = document.getElementById('bulb');
+        const resultBox = document.getElementById('result');
+        const charInput = document.getElementById('charInput');
+        const meaningInput = document.getElementById('meaningInput');
+        const meaningStage = document.getElementById('meaningStage');
+        
+        let currentText = "";
+        let isFlashing = false;
+        let cancelSignal = false;
+        let currentWpm = 6.0;
+
+        function updateWPM(val) {
+            currentWpm = parseFloat(val);
+            document.getElementById('wpmDisplay').innerText = currentWpm.toFixed(1);
+        }
+
+        function toggleMode() {
+            const mode = document.querySelector('input[name="trainMode"]:checked').value;
+            document.getElementById('blockConfig').style.display = (mode === 'block') ? 'flex' : 'none';
+        }
+
+        function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+        function setLight(state) {
+            bulb.classList.toggle('lit', state);
+        }
+
+        function generateText() {
+            const mode = document.querySelector('input[name="trainMode"]:checked').value;
+            const letters = Object.keys(INTERCO_DATABASE);
+            if (mode === 'single') {
+                return letters[Math.floor(Math.random() * letters.length)];
+            } else {
+                const groupCount = parseInt(document.getElementById('groupCount').value) || 3;
+                const charPerGroup = parseInt(document.getElementById('charPerGroup').value) || 5;
+                let groups = [];
+                for (let g = 0; g < groupCount; g++) {
+                    let s = "";
+                    for (let c = 0; c < charPerGroup; c++) {
+                        s += letters[Math.floor(Math.random() * letters.length)];
+                    }
+                    groups.push(s);
+                }
+                return groups.join(' ');
+            }
+        }
+
+        async function playMorseSequence(text) {
+            isFlashing = true;
+            cancelSignal = false;
+            const dot = (1.2 / currentWpm) * 1000;
+            const dash = dot * 3;
+            const symbolSpace = dot;
+            const charSpace = dot * 3;
+            const wordSpace = dot * 7;
+
+            setLight(false);
+            await sleep(800);
+
+            for (let i = 0; i < text.length; i++) {
+                if (cancelSignal) break;
+                const char = text[i];
+                if (char === ' ') {
+                    await sleep(wordSpace - charSpace);
+                    continue;
+                }
+                const morse = INTERCO_DATABASE[char]?.morse || '';
+                for (let j = 0; j < morse.length; j++) {
+                    if (cancelSignal) break;
+                    setLight(true);
+                    await sleep(morse[j] === '.' ? dot : dash);
+                    setLight(false);
+                    if (j < morse.length - 1) await sleep(symbolSpace);
+                }
+                await sleep(charSpace);
+            }
+            setLight(false);
+            isFlashing = false;
+        }
+
+        async function nextQuestion() {
+            if (isFlashing) {
+                stopSignal();
+                await sleep(200);
+            }
+            currentText = generateText();
+            resultBox.style.display = "none";
+            meaningStage.style.display = "none";
+            charInput.value = "";
+            meaningInput.value = "";
+            // 不主動喚醒鍵盤，避免看燈時被遮擋
+            playMorseSequence(currentText);
+        }
+
+        function replaySignal() {
+            if (isFlashing || !currentText) return;
+            playMorseSequence(currentText);
+        }
+
+        function stopSignal() {
+            cancelSignal = true;
+            isFlashing = false;
+            setLight(false);
+        }
+
+        // 步驟 1: 核對字元
+        function checkChar() {
+            if (!currentText) return;
+            const ans = charInput.value.trim().toUpperCase();
+            const mode = document.querySelector('input[name="trainMode"]:checked').value;
+
+            if (ans === currentText) {
+                if (mode === 'single' && isNaN(currentText)) {
+                    // 單字母模式：解鎖意義作答區
+                    meaningStage.style.display = "flex";
+                    resultBox.style.display = "none";
+                } else {
+                    // 段落模式或數字：直接結算
+                    resultBox.style.display = "block";
+                    resultBox.innerHTML = `<span class="correct">✔ 完全正確！【 ${currentText} 】</span>`;
+                }
+            } else {
+                resultBox.style.display = "block";
+                const info = INTERCO_DATABASE[currentText];
+                resultBox.innerHTML = `<span class="wrong">✘ 字母辨識錯誤！</span><br>正確為：<b>${currentText}</b> (${info?.morse})`;
+            }
+        }
+
+        // 步驟 2: 評估含意（模糊關鍵字比對 + 自主判定）
+        function checkMeaning() {
+            const userMeaning = meaningInput.value.trim().toLowerCase();
+            const target = INTERCO_DATABASE[currentText];
+            if (!target) return;
+
+            // 檢查中了幾個關鍵字
+            const matchedKeys = target.keys.filter(k => userMeaning.includes(k.toLowerCase()));
+            const isMatch = matchedKeys.length > 0;
+
+            resultBox.style.display = "block";
+            let html = `<div><b>信號 【 ${currentText} 】</b></div>`;
+            
+            if (isMatch) {
+                html += `<div class="correct">✔ 關鍵字符合！(命中: ${matchedKeys.join(', ')})</div>`;
+            } else {
+                html += `<div class="wrong">⚠️ 未偵測到預設關鍵字</div>`;
+            }
+
+            html += `<div style="margin-top:6px;"><b>官方標準含意：</b><br><span class="official">${target.meaning}</span></div>`;
+            html += `<div style="margin-top:8px; font-size:0.82rem; color:#aaa;">是否判定為正確？</div>
+                     <div class="self-check-btns">
+                        <button class="btn-pass" onclick="recordSelf(true)">算我對 (+1)</button>
+                        <button class="btn-fail" onclick="recordSelf(false)">算我錯</button>
+                     </div>`;
+
+            resultBox.innerHTML = html;
+        }
+
+        function recordSelf(passed) {
+            const status = passed ? '<span class="correct">已記錄為：正確 ✔</span>' : '<span class="wrong">已記錄為：錯誤 ✘</span>';
+            resultBox.innerHTML += `<div style="margin-top:8px;">${status}，請點擊「發送新題」繼續。</div>`;
+        }
+
+        charInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkChar(); });
+        meaningInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkMeaning(); });
+    </script>
+</body>
+</html>
