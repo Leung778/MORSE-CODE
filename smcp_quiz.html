@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SMCP Maritime Terms Quiz</title>
+<style>
+  :root {
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --border-color: #334155;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent: #38bdf8;
+    --accent-hover: #0284c7;
+    --success: #22c55e;
+    --danger: #ef4444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-color);
+    color: var(--text-primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 1rem;
+  }
+  .container {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    max-width: 720px;
+    width: 100%;
+    padding: 1.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .badge {
+    font-size: 0.8rem;
+    background: #0369a1;
+    color: #e0f2fe;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+  }
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .control-group label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  select {
+    width: 100%;
+    background: #0f172a;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.6rem;
+    border-radius: 6px;
+    outline: none;
+    font-size: 0.9rem;
+  }
+  .question-box {
+    background: #0b1120;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    min-height: 110px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .question-sub {
+    font-size: 0.75rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  .question-text {
+    font-size: 1.1rem;
+    line-height: 1.4;
+    white-space: pre-line;
+  }
+  .options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .mc-option {
+    background: #0f172a;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    white-space: pre-line;
+  }
+  .mc-option:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: #1e293b;
+  }
+  .mc-option.correct {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: var(--success);
+    color: #4ade80;
+  }
+  .mc-option.incorrect {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: var(--danger);
+    color: #f87171;
+  }
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  textarea {
+    width: 100%;
+    background: #0f172a;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-family: inherit;
+    font-size: 0.95rem;
+    min-height: 80px;
+    resize: vertical;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .btn-submit {
+    background: var(--accent);
+    color: #082f49;
+    border: none;
+    font-weight: 600;
+    padding: 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-submit:hover { background: var(--accent-hover); }
+  .result-banner {
+    display: none;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-weight: 600;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+  .result-banner.true-banner {
+    background: rgba(34, 197, 94, 0.2);
+    color: #86efac;
+    border: 1px solid var(--success);
+  }
+  .result-banner.false-banner {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border: 1px solid var(--danger);
+  }
+  .btn-next {
+    display: none;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: #334155;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .btn-next:hover { background: #475569; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div>
+      <h2 style="font-size:1.15rem;">IMO SMCP Reviewer</h2>
+      <small style="color:var(--text-secondary);">Total Glossary Terms: <span id="term-count">0</span></small>
+    </div>
+    <span class="badge" id="card-page">Page --</span>
+  </header>
+
+  <div class="controls">
+    <div class="control-group">
+      <label>Quiz Mode</label>
+      <select id="modeSelect">
+        <option value="mc">Multiple Choice (MC)</option>
+        <option value="input">Text Input (Keyword Detection)</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label>Question Type</label>
+      <select id="typeSelect">
+        <option value="term_to_def">Given Term &rarr; Find Meaning</option>
+        <option value="def_to_term">Given Meaning &rarr; Find Term</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="question-box">
+    <div class="question-sub" id="questionSub">Question</div>
+    <div class="question-text" id="questionText">Press Next to load question...</div>
+  </div>
+
+  <div id="mcContainer" class="options-grid"></div>
+
+  <div id="inputContainer" class="input-group" style="display:none;">
+    <textarea id="userAnswer" placeholder="Type your answer here..."></textarea>
+    <button class="btn-submit" id="btnSubmit">Check Answer</button>
+  </div>
+
+  <div class="result-banner" id="resultBanner"></div>
+  <button class="btn-next" id="btnNext">Next Question &rarr;</button>
+</div>
+
+<script>
+const rawData = [
+  {"number":1,"term":"Abandon vessel","meaning":"To evacuate crew and passengers from a vessel following a distress","page":18},
+  {"number":2,"term":"Accommodation ladder","meaning":"Ladder attached to platform at vessel's side with flat steps and handrails\nenabling persons to embark / disembark from water or shore","page":18},
+  {"number":3,"term":"Adrift","meaning":"Floating, not controlled, without a clearly determinable direction","page":18},
+  {"number":4,"term":"Air draft","meaning":"The height from the waterline to the highest point of the vessel","page":18},
+  {"number":5,"term":"Assembly station","meaning":"Place on deck, in mess rooms, etc., assigned to crew and passengers\nwhere they have to meet according to the muster list when the\ncorresponding alarm is released or announcement made","page":18},
+  {"number":6,"term":"Backing (of wind)","meaning":"Shift of wind direction in an anticlockwise manner, in time (opposite of\nveering)","page":18},
+  {"number":7,"term":"Beach (to)","meaning":"To run a vessel up on a beach to prevent its sinking in deep water","page":18},
+  {"number":8,"term":"Berth","meaning":"1: A sea room to be kept for safety around a vessel, rock, platform, etc..\n2: The place assigned to a vessel when anchored or lying alongside a pier,\netc.","page":18},
+  {"number":9,"term":"Blast","meaning":"A sound signal made with the whistle of the vessel","page":18},
+  {"number":10,"term":"Blind sectors","meaning":"Areas which cannot be scanned by the radar of the vessel because they are\nshielded by parts of its superstructure, masts, etc, or shore obstructions.","page":18},
+  {"number":11,"term":"Boarding arrangements","meaning":"All equipment, such as pilot ladder, accommodation ladder, hoist, etc.,\nnecessary for a safe transfer of the pilot","page":18},
+  {"number":12,"term":"Boarding speed","meaning":"The speed of a vessel adjusted to that of a pilot boat at which the pilot can\nsafely embark / disembark","page":18},
+  {"number":13,"term":"Bob-cat","meaning":"A mini-caterpillar with push-blade used for the careful distribution of\nloose goods in cargo holds of bulk carriers","page":18},
+  {"number":14,"term":"Briefing","meaning":"Concise explanatory information to crew and/or passengers","page":18},
+  {"number":15,"term":"Cable","meaning":"1: Chain, wire or rope connecting a vessel to her anchor(s)\n2: (measurement), 185.2 metres, i.e. one tenth of a nautical mile","page":18},
+  {"number":16,"term":"Capsizing","meaning":"Turning of a vessel upside down while on water","page":18},
+  {"number":17,"term":"Cardinal buoy","meaning":"A seamark, i.e. a buoy, indicating the North, East, South or West, i.e. the\ncardinal points from a fixed point. such as a wreck, shallow water, banks,\netc.","page":18},
+  {"number":18,"term":"Cardinal points","meaning":"The four main points of the compass, i.e. North, East, South and West; for\nthe purpose of the SMCP the intercardinal points, i.e. Northeast,\nSoutheast, etc., are also included","page":19},
+  {"number":19,"term":"Casualty","meaning":"here: Case of death in an accident or shipping disaster","page":19},
+  {"number":20,"term":"Check (to)","meaning":"1: To make sure that equipment etc. is in proper condition or that\neverything is correct and safe\n2: To regulate motion of a cable, rope or wire when it is running out too\nfast","page":19},
+  {"number":21,"term":"Close-coupled towing","meaning":"A method of towing vessels through polar ice by means of icebreaking\ntugs with a special stern notch suited to receive and hold the bow of the\nvessel to be towed","page":19},
+  {"number":22,"term":"Close up (to)","meaning":"To decrease the distance to the vessel ahead by increasing one's own\nspeed","page":19},
+  {"number":23,"term":"Compatibility(of goods)","meaning":"states whether different goods can be stowed together in one hold","page":19},
+  {"number":24,"term":"Convoy","meaning":"A group of vessels which sail together, e.g. through a canal or ice","page":19},
+  {"number":25,"term":"Course","meaning":"The intended direction of movement of a vessel through the water","page":19},
+  {"number":26,"term":"Course made good","meaning":"That course which a vessel makes good over ground, after allowing for\nthe effect of currents, tidal streams, and leeway caused by wind and sea","page":19},
+  {"number":27,"term":"COW","meaning":"Crude Oil Washing: A system of cleaning the cargo tanks by washing\nthem with the cargo of crude oil during discharged","page":19},
+  {"number":28,"term":"CPA/TCPA","meaning":"Closest Point of Approach /Time to Closest Point of Approach limit as\ndefined by the observer to give warning when a tracked target or targets\nwill close to within these limits","page":19},
+  {"number":29,"term":"Crash-stop","meaning":"An emergency reversal operation of the main engine(s) to avoid a\ncollision","page":19},
+  {"number":30,"term":"Damage control team","meaning":"A group of crew members trained for fighting flooding in the vessel","page":19},
+  {"number":31,"term":"Datum","meaning":"1. The most probable position of a search target at a given time\n2. The plane of reference to which all data as to the depth on charts are\nreferenced.","page":19},
+  {"number":32,"term":"Derelict","meaning":"Goods or any other commodity, specifically a vessel abandoned at sea","page":19},
+  {"number":33,"term":"Destination","meaning":"Port which a vessel is bound for","page":19},
+  {"number":34,"term":"Disabled","meaning":"A vessel damaged or impaired in such a manner as to be incapable of\nproceeding on its voyage","page":19},
+  {"number":35,"term":"Disembark (to)","meaning":"To go from a vessel","page":19},
+  {"number":36,"term":"Distress alert (GMDSS)","meaning":"A radio signal from a distressed vessel automatically directed to an\nMRCC giving position, identification, course and speed of the vessel as\nwell as the nature of distress","page":20},
+  {"number":37,"term":"Distress/\nUrgency traffic","meaning":"here: The verbal exchange of information on radio from ship to shore\nand/or ship to ship/ air craft about a distress / urgency situation as defined\nin the relevant ITU Radio Regulations","page":20},
+  {"number":38,"term":"Draft","meaning":"The depth of water which a vessel draws","page":20},
+  {"number":39,"term":"Dragging (of anchor)","meaning":"Moving of an anchor over the sea bottom involuntarily because it is no\nlonger preventing the movement of the vessel","page":20},
+  {"number":40,"term":"Dredging (of anchor)","meaning":"Moving of an anchor over the sea bottom to control the movement of the\nvessel","page":20},
+  {"number":41,"term":"Drifting","meaning":"Floating, caused by winds and current with a determinable direction","page":20},
+  {"number":42,"term":"Drop back (to)","meaning":"To increase the distance to the vessel ahead by reducing one's own speed","page":20},
+  {"number":43,"term":"DSC","meaning":"Digital Selective Calling (in the GMDSS system)","page":20},
+  {"number":44,"term":"Embark (to)","meaning":"To go aboard a vessel","page":20},
+  {"number":45,"term":"EPIRB","meaning":"Emergency Position Indicating Radio Beacon","page":20},
+  {"number":46,"term":"Escape route","meaning":"A clearly marked way in the vessel which has to be followed in case of an\nemergency","page":20},
+  {"number":47,"term":"Escort","meaning":"Attending a vessel, to be available in case of need, e.g. ice-breaker, tug, etc","page":20},
+  {"number":48,"term":"ETA","meaning":"Estimated Time of Arrival","page":20},
+  {"number":49,"term":"ETD","meaning":"Estimated Time of Departure","page":20},
+  {"number":50,"term":"Fire patrol","meaning":"A crew member of the watch going around the vessel at certain intervals\nso that an outbreak of fire may be promptly detected; mandatory in\nvessels carrying more than 36 passengers","page":20},
+  {"number":51,"term":"Flooding","meaning":"Major flow of seawater into the vessel","page":20},
+  {"number":52,"term":"Fire monitor","meaning":"Fixed foam/powder/water cannon shooting fire extinguishing agents on tank\ndeck, manifold etc.","page":20},
+  {"number":53,"term":"Foul (of anchor)","meaning":"Anchor has its own cable twisted around it or has fouled an obstruction","page":20},
+  {"number":54,"term":"Foul (of propeller)","meaning":"A line, wire, net, etc., is wound round the propeller","page":20},
+  {"number":55,"term":"Full speed","meaning":"Highest possible speed of a vessel","page":20},
+  {"number":56,"term":"Fume","meaning":"Often harmful gas produced by fires, chemicals, fuel, etc.","page":20},
+  {"number":57,"term":"General emergency alarm","meaning":"A sound signal of seven short blasts and one prolonged blast given with\nthe vessel's sound system","page":21},
+  {"number":58,"term":"GMDSS","meaning":"Global Maritime Distress and Safety System","page":21},
+  {"number":59,"term":"(D) GPS","meaning":"(Differential)Global (satellite) Positioning System","page":21},
+  {"number":60,"term":"Hampered vessel","meaning":"A vessel restricted by her ability to manoeuvre by the nature of her work\nor her deep draft","page":21},
+  {"number":61,"term":"Hatchrails","meaning":"Ropes supported by stanchions around an open hatch to prevent persons\nfrom falling into a hold","page":21},
+  {"number":62,"term":"Heading","meaning":"The horizontal direction the vessel's bows at a given moment measured\ndegrees clockwise from north","page":21},
+  {"number":63,"term":"Hoist","meaning":"here: A cable used by helicopters for lifting or lowering persons in a pick-\nup operation","page":21},
+  {"number":64,"term":"Icing","meaning":"Coating of ice on an object, e.g. the mast or superstructure of a vessel","page":21},
+  {"number":65,"term":"IMO-Class","meaning":"Group of dangerous or hazardous goods, harmful substances or marine\npollutants in sea transport as classified in the International Maritime\nDangerous Goods Code (IMDG Code)","page":21},
+  {"number":66,"term":"Inert (to)","meaning":"To reduce the oxygen in an oil tank by inert gas to avoid an explosive\natmosphere","page":21},
+  {"number":67,"term":"Initial course","meaning":"Course directed by the OSC or other authorized person to be steered at the\nbeginning of a search","page":21},
+  {"number":68,"term":"Inoperative","meaning":"Not functioning","page":21},
+  {"number":69,"term":"Jettison (to) (of cargo)","meaning":"Throwing overboard of goods in order to lighten the vessel or improve its\nstability in case of an emergency","page":21},
+  {"number":70,"term":"Launch (to)","meaning":"To lower, e.g. lifeboats to the water","page":21},
+  {"number":71,"term":"Leaking","meaning":"Escape of liquids such as water, oil, etc., out of pipes, boilers, tanks, etc.,\nor a minor inflow of seawater into the vessel due to damage to the hull","page":21},
+  {"number":72,"term":"Leeward","meaning":"The general direction to which the wind blows; opposite of windward","page":21},
+  {"number":73,"term":"Leeway","meaning":"The angular effect on the vessel's course caused by the prevailing wind","page":21},
+  {"number":74,"term":"Let go (to)","meaning":"To set free, let loose, or cast off (of anchors, lines, etc.)","page":21},
+  {"number":75,"term":"Lifeboat station","meaning":"Place assigned to crew and passengers where they must gather before\nbeing ordered into the lifeboats","page":21},
+  {"number":76,"term":"List","meaning":"here: Inclination of the vessel to port side or starboard side","page":21},
+  {"number":77,"term":"Located","meaning":"In navigational warnings: Position of object confirmed","page":21},
+  {"number":78,"term":"Make water (to)","meaning":"Seawater flowing into the vessel due to hull damage, or hatches awash\n\nand not properly closed","page":22},
+  {"number":79,"term":"MMSI","meaning":"Maritime Mobile Service Identity number","page":22},
+  {"number":80,"term":"Moor (to)","meaning":"To secure a vessel in a particular place by means of wires or ropes made\nfast to the shore, to anchors, or to anchored mooring buoys, or to ride with\nboth anchors down","page":22},
+  {"number":81,"term":"MRCC","meaning":"Maritime Rescue Co-ordination Centre: Land-based authority responsible\nfor promoting efficient organization of maritime search and rescue and for\nco-ordinating the conduct of search and rescue operations within a search\nand rescue region","page":22},
+  {"number":82,"term":"Muster (to)","meaning":"To assemble crew, passengers or both in a special place for purposes of\nchecking","page":22},
+  {"number":83,"term":"Muster list","meaning":"List of crew, passengers and all on board and their functions in a distress or drill","page":22},
+  {"number":84,"term":"Not under command","meaning":"(abbr. NUC) A vessel which through exceptional circumstances is unable\nto manoeuvre as required by the COLREGS","page":22},
+  {"number":85,"term":"Obstruction","meaning":"An object such as a wreck, net, etc., which blocks a fairway, route, etc.","page":22},
+  {"number":86,"term":"Off air","meaning":"When the transmissions of a radio station etc., have broken down, been\nswitched off or suspended","page":22},
+  {"number":87,"term":"Off station (of buoys)","meaning":"Not in charted position","page":22},
+  {"number":88,"term":"Oil clearance","meaning":"Oil skimming from the surface of the water","page":22},
+  {"number":89,"term":"Operational","meaning":"Ready for immediate use","page":22},
+  {"number":90,"term":"Ordnance exercise","meaning":"Naval firing practice","page":22},
+  {"number":91,"term":"OSC","meaning":"On-Scene Co-ordinator: A person designed to co-ordinate search and\nrescue operations within a specified area","page":22},
+  {"number":92,"term":"Overflow","meaning":"Accidental escape of oil from a tank which is full because pumping was\nnot stopped in time","page":22},
+  {"number":93,"term":"Polluter","meaning":"A vessel emitting harmful substances into the air or spilling oil into the sea","page":22},
+  {"number":94,"term":"Preventers","meaning":"Ropes or wires attached to derricks to prevent them from swinging\nduring cargo handling operations","page":22},
+  {"number":95,"term":"Proceed (to)","meaning":"To sail or head for a certain position or to continue with the voyage","page":22},
+  {"number":96,"term":"PA-system","meaning":"Public address system: Loudspeakers in the vessel's cabins, mess rooms,\netc., and on deck through which important information can be broadcast\nfrom a central point, mostly from the navigation bridge","page":22},
+  {"number":97,"term":"Recover (to)","meaning":"Here: To pick up shipwrecked persons","page":22},
+  {"number":98,"term":"Refloat (to)","meaning":"To pull a vessel off after grounding; to set afloat again","page":22},
+  {"number":99,"term":"Rendez-vous","meaning":"An appointment between vessels normally made on radio to meet in a\ncertain area or position","page":22},
+  {"number":100,"term":"Reported","meaning":"in navigational warnings: Position of object unconfirmed","page":22},
+  {"number":101,"term":"Restricted area","meaning":"A deck, space, area, etc., in vessels, where for safety reasons, entry is only\npermitted for authorized crew members","page":22},
+  {"number":102,"term":"Resume (to)","meaning":"here: To re-start a voyage, service or search","page":22},
+  {"number":103,"term":"Retreat signal","meaning":"Sound, visual or other signal to a team ordering it to return to its base","page":22},
+  {"number":104,"term":"Rig move","meaning":"The movement of an oil rig, drilling platform, etc., from one position to\nanother","page":22},
+  {"number":105,"term":"Roll call","meaning":"The act of checking who of the passengers and crew members are present,\ne.g. at assembly stations, by reading aloud a list of their names","page":22},
+  {"number":106,"term":"Safe speed","meaning":"That speed of a vessel allowing the maximum possible time for effective\naction to be taken to avoid a collision and to be stopped within an\nappropriate distance","page":24},
+  {"number":107,"term":"Safety load","meaning":"The maximum permissible load of a deck, etc.","page":24},
+  {"number":108,"term":"Safe working pressure","meaning":"The maximum permissible pressure in cargo hoses","page":24},
+  {"number":109,"term":"SAR","meaning":"Search and Rescue","page":24},
+  {"number":110,"term":"Scene","meaning":"The area or location where the event, e.g. an accident has happened","page":24},
+  {"number":111,"term":"Search pattern","meaning":"A pattern according to which vessels and/or aircraft may conduct\nco-ordinated search (the IMOSAR offers seven search patterns)","page":24},
+  {"number":112,"term":"Search speed","meaning":"The speed of searching vessels directed by the OSC","page":24},
+  {"number":113,"term":"Seemark","meaning":"An elevated object on land or sea serving as a guide","page":24},
+  {"number":114,"term":"Segregation(of goods)","meaning":"Separation of goods which for different reasons must not be stowed\ntogether","page":24},
+  {"number":115,"term":"Shackle","meaning":"Standard length (15 fathoms) of an anchor cable","page":24},
+  {"number":116,"term":"Shifting cargo","meaning":"Transverse movement of cargo, especially bulk, caused by rolling or a\nheavy list","page":24},
+  {"number":117,"term":"Slings","meaning":"Ropes, nets, and any other means for handling general cargoes","page":24},
+  {"number":118,"term":"Speed of advance","meaning":"The speed at which a storm centre moves","page":24},
+  {"number":119,"term":"Spill (to)","meaning":"The accidental escape of oil, etc., from a vessel, container, etc., into the\nsea","page":24},
+  {"number":120,"term":"Spill control gear","meaning":"Special equipment for fighting accidental oil spills at early stages","page":24},
+  {"number":121,"term":"Spreader","meaning":"here: Step of a pilot ladder which prevents the ladder from twisting","page":24},
+  {"number":122,"term":"Stand by (to)","meaning":"To be in readiness or prepared to execute an order; to be readily available","page":24},
+  {"number":123,"term":"Stand clear (to)","meaning":"here: To keep a boat away from the vessel","page":24},
+  {"number":124,"term":"Standing orders","meaning":"Orders of the Master to the officer of the watch which s/he must comply with","page":24},
+  {"number":125,"term":"Stand on (to)","meaning":"To maintain course and speed","page":24},
+  {"number":126,"term":"Station","meaning":"The allotted place or the duties of each person on board","page":25},
+  {"number":127,"term":"Stripping","meaning":"Draining tanks of the remaining cargo, water, etc.","page":25},
+  {"number":128,"term":"Survivor","meaning":"A person who continues to live in spite of being in an extremely\ndangerous situation, e.g. a shipping disaster.","page":25},
+  {"number":129,"term":"Take off (to)","meaning":"A helicopter lifts off from a vessel's deck","page":25},
+  {"number":130,"term":"Target","meaning":"The echo generated e.g. by a vessel on a radar screen","page":25},
+  {"number":131,"term":"Tension winch","meaning":"A winch which applies tension to mooring lines to keep them tight","page":25},
+  {"number":132,"term":"TEU","meaning":"Twenty Foot Equivalent Unit (standard container dimension)","page":25},
+  {"number":133,"term":"Track","meaning":"The path followed, or to be followed, between one position and another","page":25},
+  {"number":134,"term":"Transit","meaning":"here: The passage of a vessel through a canal, fairway, etc.","page":25},
+  {"number":135,"term":"Transit speed","meaning":"Speed of a vessel required for the passage through a canal, fairway, etc.","page":25},
+  {"number":136,"term":"Transshipment (of cargo)","meaning":"here: The transfer of goods from one vessel to another outside harbours","page":25},
+  {"number":137,"term":"Underway","meaning":"A vessel which is not at anchor, or made fast to the shore, or aground","page":25},
+  {"number":138,"term":"Union purchase","meaning":"A common method of cargo handling by combining two derricks, one of\nwhich is fixed over the quay, the other over the hatchway","page":25},
+  {"number":139,"term":"Unlit","meaning":"When the light characteristics of a buoy or a lighthouse are inoperative","page":25},
+  {"number":140,"term":"UTC","meaning":"Universal Time Co-ordinated (ex GMT)","page":25},
+  {"number":141,"term":"Variable (of winds)","meaning":"When a wind is permanently changing the direction from which it blows","page":25},
+  {"number":142,"term":"Veering (of winds)","meaning":"Shifting of wind direction in a manner, in time; opposite of backing","page":25},
+  {"number":143,"term":"Veer out (to)(of anchors)","meaning":"To let out a greater length of cable","page":25},
+  {"number":144,"term":"VHF","meaning":"Very High Frequency (30-300 MHz)","page":25},
+  {"number":145,"term":"Walk out (to) (of anchors)","meaning":"To reverse the action of a windlass so as to ease the cable","page":25},
+  {"number":146,"term":"Way point","meaning":"A position a vessel has to pass or at which she has to alter course\naccording to her voyage plan","page":25},
+  {"number":147,"term":"Windward","meaning":"The general direction from which the wind blows; opposite of leeward","page":25},
+  {"number":148,"term":"Wreck","meaning":"A vessel which has been destroyed or sunk or abandoned at sea","page":25},
+  {"number":149,"term":"Fairway","meaning":"Navigable part of a waterway","page":25},
+  {"number":150,"term":"Fairway speed","meaning":"Mandatory speed in a fairway","page":25},
+  {"number":151,"term":"ITZ","meaning":"Inshore Traffic Zone (of a TSS): A routing measure comprising a\ndesignated area between the landward boundary of a TSS and the adjacent\ncoast","page":25},
+  {"number":152,"term":"Manoeuvring speed","meaning":"A vessel's reduced rate of speed in restricted waters such as fairways or\nharbours","page":25},
+  {"number":153,"term":"Receiving point","meaning":"A mark or place at which a vessel comes under obligatory entry, transit, or\nescort procedure","page":25},
+  {"number":154,"term":"Reference line","meaning":"A fictive line displayed on the radar screens in VTS Centres and/or\nelectronic sea-charts separating the fairway for inbound and outbound\nvessels so that they can safely pass each other","page":25},
+  {"number":155,"term":"Reporting point","meaning":"A mark or position at which a vessel is required to report to the local\nVTS-Station to establish its position","page":25},
+  {"number":156,"term":"Separation zone / line","meaning":"A zone or line separating the traffic lanes in which vessels are proceeding\nin opposite or nearly opposite directions; or separating a traffic lane from\nthe adjacent sea area; or separating traffic lanes designated for particular\nclasses of vessels proceeding in the same direction","page":25},
+  {"number":157,"term":"Traffic clearance","meaning":"VTS authorization for a vessel to proceed under conditions specified","page":25},
+  {"number":158,"term":"Traffic lane","meaning":"An area within defined limits in which one-way traffic is established","page":25},
+  {"number":159,"term":"TSS","meaning":"Traffic Separation Scheme: A routing measure aimed at the separation of\nopposing streams of traffic by appropriate means and by the establishment\nof traffic lanes","page":25},
+  {"number":160,"term":"VTS","meaning":"Vessel Traffic Services: Services, designed to improve safety and\nefficiency of vessel traffic and to protect the environment","page":25},
+  {"number":161,"term":"VTS-area","meaning":"Area controlled by a VTS-Centre or VTS-Station","page":25}
+];
+
+document.getElementById('term-count').textContent = rawData.length;
+
+let currentEntry = null;
+const stopWords = new Set([
+  'a','about','an','and','are','as','at','be','by','for','from','in','into',
+  'is','it','of','on','or','that','the','their','to','was','when','which','with','etc','here'
+]);
+
+function extractKeywords(text) {
+  return text.toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(word => word.length > 2 && !stopWords.has(word));
+}
+
+function getRandomEntry() {
+  const idx = Math.floor(Math.random() * rawData.length);
+  return rawData[idx];
+}
+
+function getDistractors(correctItem, key, count = 3) {
+  const distractors = [];
+  while (distractors.length < count) {
+    const candidate = getRandomEntry();
+    if (candidate.number !== correctItem.number && !distractors.some(d => d.number === candidate.number)) {
+      distractors.push(candidate);
+    }
+  }
+  return distractors;
+}
+
+function loadQuestion() {
+  currentEntry = getRandomEntry();
+  const mode = document.getElementById('modeSelect').value;
+  const type = document.getElementById('typeSelect').value;
+
+  document.getElementById('card-page').textContent = `Page ${currentEntry.page}`;
+  document.getElementById('resultBanner').style.display = 'none';
+  document.getElementById('btnNext').style.display = 'none';
+  document.getElementById('userAnswer').value = '';
+
+  const qText = type === 'term_to_def' ? currentEntry.term : currentEntry.meaning;
+  document.getElementById('questionSub').textContent = type === 'term_to_def' ? 'Select or provide the Meaning for:' : 'Identify the Term for:';
+  document.getElementById('questionText').textContent = qText;
+
+  if (mode === 'mc') {
+    document.getElementById('mcContainer').style.display = 'flex';
+    document.getElementById('inputContainer').style.display = 'none';
+    renderMC(type);
+  } else {
+    document.getElementById('mcContainer').style.display = 'none';
+    document.getElementById('inputContainer').style.display = 'flex';
+  }
+}
+
+function renderMC(type) {
+  const container = document.getElementById('mcContainer');
+  container.innerHTML = '';
+
+  const key = type === 'term_to_def' ? 'meaning' : 'term';
+  const options = [currentEntry, ...getDistractors(currentEntry, key, 3)];
+  options.sort(() => Math.random() - 0.5);
+
+  options.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'mc-option';
+    btn.textContent = item[key];
+    btn.onclick = () => {
+      const allBtns = container.querySelectorAll('.mc-option');
+      allBtns.forEach(b => b.disabled = true);
+      const banner = document.getElementById('resultBanner');
+      banner.style.display = 'block';
+
+      if (item.number === currentEntry.number) {
+        btn.classList.add('correct');
+        banner.className = 'result-banner true-banner';
+        banner.innerHTML = `&check; TRUE (CORRECT)`;
+      } else {
+        btn.classList.add('incorrect');
+        banner.className = 'result-banner false-banner';
+        banner.innerHTML = `&cross; FALSE (INCORRECT)<br><br><strong>Correct Answer:</strong><br>${currentEntry[key]}`;
+        allBtns.forEach(b => {
+          if (b.textContent === currentEntry[key]) b.classList.add('correct');
+        });
+      }
+      document.getElementById('btnNext').style.display = 'block';
+    };
+    container.appendChild(btn);
+  });
+}
+
+document.getElementById('btnSubmit').onclick = () => {
+  const userInput = document.getElementById('userAnswer').value.trim();
+  const type = document.getElementById('typeSelect').value;
+  const targetText = type === 'term_to_def' ? currentEntry.meaning : currentEntry.term;
+
+  const targetKeywords = extractKeywords(targetText);
+  const userKeywords = extractKeywords(userInput);
+
+  let isTrue = false;
+  let matchInfo = '';
+
+  if (type === 'def_to_term') {
+    const cleanUser = userInput.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const cleanTarget = targetText.toLowerCase().replace(/[^a-z0-9]/g, '');
+    isTrue = cleanUser === cleanTarget || (cleanTarget.length > 3 && cleanUser.includes(cleanTarget));
+  } else {
+    const matched = targetKeywords.filter(k => userKeywords.includes(k));
+    const ratio = targetKeywords.length > 0 ? (matched.length / targetKeywords.length) : 0;
+    // Considered TRUE if >= 40% of substantive target keywords are present
+    isTrue = ratio >= 0.40;
+    matchInfo = `Keyword Match: ${matched.length}/${targetKeywords.length} (${Math.round(ratio*100)}%)<br>Found: [${matched.join(', ') || 'None'}]`;
+  }
+
+  const banner = document.getElementById('resultBanner');
+  banner.style.display = 'block';
+  if (isTrue) {
+    banner.className = 'result-banner true-banner';
+    banner.innerHTML = `&check; TRUE (CORRECT)<br>${matchInfo ? `<small>${matchInfo}</small><br>` : ''}<strong>Full Reference:</strong><br>${targetText}`;
+  } else {
+    banner.className = 'result-banner false-banner';
+    banner.innerHTML = `&cross; FALSE (INCORRECT)<br>${matchInfo ? `<small>${matchInfo}</small><br>` : ''}<strong>Expected Answer:</strong><br>${targetText}`;
+  }
+  document.getElementById('btnNext').style.display = 'block';
+};
+
+document.getElementById('modeSelect').onchange = loadQuestion;
+document.getElementById('typeSelect').onchange = loadQuestion;
+document.getElementById('btnNext').onclick = loadQuestion;
+
+// Initial start
+loadQuestion();
+</script>
+</body>
+</html>

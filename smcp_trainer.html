@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IMO SMCP Glossary Trainer</title>
+  <style>
+    :root {
+      --navy: #0f172a;
+      --sea-blue: #0284c7;
+      --light-bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --border-color: #cbd5e1;
+      --success: #16a34a;
+      --danger: #dc2626;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--light-bg);
+      color: var(--text-main);
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 900px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    header {
+      background: var(--navy);
+      color: #fff;
+      padding: 24px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    header p {
+      font-size: 0.95rem;
+      color: #94a3b8;
+    }
+
+    nav.tab-bar {
+      display: flex;
+      background: #f1f5f9;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 14px;
+      background: none;
+      border: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #64748b;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      color: var(--sea-blue);
+      border-bottom-color: var(--sea-blue);
+      background: #fff;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 24px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Common Card & Control Styling */
+    .control-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    select, input[type="text"], textarea {
+      padding: 9px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    select:focus, input[type="text"]:focus, textarea:focus {
+      border-color: var(--sea-blue);
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    .btn-primary {
+      background: var(--sea-blue);
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: #64748b;
+      color: #fff;
+    }
+
+    /* MC Quiz Styles */
+    .quiz-box {
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .question-prompt {
+      font-size: 1.15rem;
+      font-weight: 600;
+      line-height: 1.5;
+      margin-bottom: 20px;
+      color: var(--navy);
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .option-btn {
+      text-align: left;
+      padding: 14px 18px;
+      background: #fff;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .option-btn:hover {
+      border-color: var(--sea-blue);
+      background: #f0f9ff;
+    }
+
+    .option-btn.correct {
+      background: #dcfce7 !important;
+      border-color: var(--success) !important;
+      color: #14532d;
+    }
+
+    .option-btn.incorrect {
+      background: #fee2e2 !important;
+      border-color: var(--danger) !important;
+      color: #7f1d1d;
+    }
+
+    .score-strip {
+      font-weight: 600;
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+
+    /* True/False Verifier */
+    .tf-box {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      background: #f8fafc;
+      margin-bottom: 20px;
+    }
+
+    .statement-display {
+      font-size: 1.1rem;
+      padding: 16px;
+      background: #fff;
+      border-radius: 6px;
+      border-left: 4px solid var(--sea-blue);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .keyword-chips {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      background: #e2e8f0;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* Glossary Browser */
+    .glossary-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .glossary-item:last-child {
+      border-bottom: none;
+    }
+
+    .glossary-term {
+      font-weight: 700;
+      color: var(--sea-blue);
+      margin-bottom: 4px;
+    }
+
+    .glossary-meaning {
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <header>
+    <h1>IMO SMCP Glossary Interactive App</h1>
+    <p>Navigational & VTS Terminology Practice</p>
+  </header>
+
+  <nav class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('quiz')">Multiple Choice Quiz</button>
+    <button class="tab-btn" onclick="switchTab('tf')">True / False Verifier</button>
+    <button class="tab-btn" onclick="switchTab('dict')">Glossary Directory</button>
+  </nav>
+
+  <!-- TAB 1: Multiple Choice Quiz -->
+  <section id="quiz" class="tab-content active">
+    <div class="control-panel">
+      <div>
+        <label for="quizDirection" style="font-weight: 600; margin-right: 6px;">Mode:</label>
+        <select id="quizDirection" onchange="resetQuiz()">
+          <option value="def_to_term">Meaning &rarr; Answer Term</option>
+          <option value="term_to_def">Term &rarr; Answer Meaning</option>
+        </select>
+      </div>
+      <div class="score-strip">
+        Score: <span id="scoreVal" style="color:var(--success);">0</span> / <span id="totalVal">0</span>
+      </div>
+    </div>
+
+    <div class="quiz-box">
+      <div class="question-prompt" id="quizQuestion">Loading question...</div>
+      <div class="options-grid" id="optionsContainer"></div>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end;">
+      <button class="btn btn-secondary" onclick="loadNextQuestion()">Skip / Next &rarr;</button>
+    </div>
+  </section>
+
+  <!-- TAB 2: True / False Keyword Verifier -->
+  <section id="tf" class="tab-content">
+    <div class="control-panel">
+      <button class="btn btn-secondary" onclick="generateTFQuestion()">Generate Random Statement</button>
+      <span style="font-size:0.9rem; color:#64748b;">Or evaluate custom text below</span>
+    </div>
+
+    <div class="tf-box">
+      <div class="statement-display" id="tfStatement">Click "Generate Random Statement" to practice.</div>
+      <div class="btn-row" style="display:flex; gap:12px; margin-bottom:15px;">
+        <button class="btn" style="background:var(--success); color:#fff; flex:1;" onclick="checkTFAnswer(true)">TRUE</button>
+        <button class="btn" style="background:var(--danger); color:#fff; flex:1;" onclick="checkTFAnswer(false)">FALSE</button>
+      </div>
+      <div id="tfFeedback" style="font-weight:600; min-height:24px;"></div>
+    </div>
+
+    <hr style="border:0; border-top:1px solid var(--border-color); margin: 25px 0;">
+
+    <h3 style="margin-bottom:10px;">Keyword Verifier: Test a Term & Definition</h3>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <div>
+        <label style="font-weight:600; font-size:0.9rem;">Select Term:</label>
+        <select id="customTermSelect" style="width:100%; margin-top:4px;"></select>
+      </div>
+      <div>
+        <label style="font-weight:600; font-size:0.9rem;">Input Definition / Sentence:</label>
+        <textarea id="customInputText" rows="3" placeholder="Type a sentence or definition to check if key facts are present..." style="width:100%; margin-top:4px;"></textarea>
+      </div>
+      <button class="btn btn-primary" style="align-self:flex-start;" onclick="evaluateKeywords()">Verify Match</button>
+      <div id="verifyResult" style="margin-top:10px;"></div>
+    </div>
+  </section>
+
+  <!-- TAB 3: Glossary Reference -->
+  <section id="dict" class="tab-content">
+    <div class="control-panel">
+      <input type="text" id="searchBar" placeholder="Search terms or definitions..." oninput="filterGlossary()" style="width: 100%;" />
+    </div>
+    <div id="glossaryList" style="border:1px solid var(--border-color); border-radius:8px; max-height:500px; overflow-y:auto; background:#fff;"></div>
+  </section>
+</div>
+
+<script>
+  // Complete Dataset extracted from IMO NAV 46/WP.3 ANNEX Glossary
+    const SMCP_DATA = [
+    // --- Page 18 ---
+    { term: "Abandon vessel", def: "To evacuate crew and passengers from a vessel following a distress", keywords: ["evacuate", "crew", "passengers", "distress"] },
+    { term: "Accommodation ladder", def: "Ladder attached to platform at vessel's side with flat steps and handrails enabling persons to embark / disembark from water or shore", keywords: ["ladder", "platform", "flat steps", "handrails", "embark", "disembark"] },
+    { term: "Adrift", def: "Floating, not controlled, without a clearly determinable direction", keywords: ["floating", "not controlled", "without", "direction"] },
+    { term: "Air draft", def: "The height from the waterline to the highest point of the vessel", keywords: ["height", "waterline", "highest point"] },
+    { term: "Assembly station", def: "Place on deck, in mess rooms, etc., assigned to crew and passengers where they have to meet according to the muster list when the corresponding alarm is released or announcement made", keywords: ["place", "deck", "mess rooms", "meet", "muster list", "alarm"] },
+    { term: "Backing (of wind)", def: "Shift of wind direction in an anticlockwise manner, in time (opposite of veering)", keywords: ["shift", "wind direction", "anticlockwise", "veering"] },
+    { term: "Beach (to)", def: "To run a vessel up on a beach to prevent its sinking in deep water", keywords: ["run a vessel", "beach", "prevent", "sinking", "deep water"] },
+    { term: "Berth", def: "1: A sea room to be kept for safety around a vessel, rock, platform, etc. 2: The place assigned to a vessel when anchored or lying alongside a pier", keywords: ["sea room", "safety", "anchored", "alongside", "pier"] },
+    { term: "Blast", def: "A sound signal made with the whistle of the vessel", keywords: ["sound signal", "whistle"] },
+    { term: "Blind sectors", def: "Areas which cannot be scanned by the radar of the vessel because they are shielded by parts of its superstructure, masts, etc, or shore obstructions", keywords: ["cannot be scanned", "radar", "shielded", "superstructure", "masts", "obstructions"] },
+    { term: "Boarding arrangements", def: "All equipment, such as pilot ladder, accommodation ladder, hoist, etc., necessary for a safe transfer of the pilot", keywords: ["equipment", "pilot ladder", "accommodation ladder", "hoist", "transfer", "pilot"] },
+    { term: "Boarding speed", def: "The speed of a vessel adjusted to that of a pilot boat at which the pilot can safely embark / disembark", keywords: ["speed", "adjusted", "pilot boat", "safely", "embark", "disembark"] },
+    { term: "Bob-cat", def: "A mini-caterpillar with push-blade used for the careful distribution of loose goods in cargo holds of bulk carriers", keywords: ["mini-caterpillar", "push-blade", "distribution", "loose goods", "bulk carriers"] },
+    { term: "Briefing", def: "Concise explanatory information to crew and/or passengers", keywords: ["concise", "explanatory information", "crew", "passengers"] },
+    { term: "Cable", def: "1: Chain, wire or rope connecting a vessel to her anchor(s). 2: (measurement), 185.2 metres, i.e. one tenth of a nautical mile", keywords: ["chain", "wire", "rope", "anchor", "185.2 metres", "tenth", "nautical mile"] },
+    { term: "Capsizing", def: "Turning of a vessel upside down while on water", keywords: ["turning", "upside down", "water"] },
+    { term: "Cardinal buoy", def: "A seamark, i.e. a buoy, indicating the North, East, South or West, i.e. the cardinal points from a fixed point. such as a wreck, shallow water, banks, etc.", keywords: ["seamark", "buoy", "north", "east", "south", "west", "cardinal points"] },
+
+    // --- Page 19 ---
+    { term: "Cardinal points", def: "The four main points of the compass, i.e. North, East, South and West; for the purpose of the SMCP the intercardinal points, i.e. Northeast, Southeast, etc., are also included", keywords: ["four main points", "compass", "north", "east", "south", "west", "intercardinal"] },
+    { term: "Casualty", def: "here: Case of death in an accident or shipping disaster", keywords: ["death", "accident", "shipping disaster"] },
+    { term: "Check (to)", def: "1: To make sure that equipment etc. is in proper condition or that everything is correct and safe. 2: To regulate motion of a cable, rope or wire when it is running out too fast", keywords: ["proper condition", "correct", "safe", "regulate motion", "running out too fast"] },
+    { term: "Close-coupled towing", def: "A method of towing vessels through polar ice by means of icebreaking tugs with a special stern notch suited to receive and hold the bow of the vessel to be towed", keywords: ["towing", "polar ice", "icebreaking tugs", "stern notch", "bow"] },
+    { term: "Close up (to)", def: "To decrease the distance to the vessel ahead by increasing one's own speed", keywords: ["decrease the distance", "vessel ahead", "increasing", "speed"] },
+    { term: "Compatibility (of goods)", def: "states whether different goods can be stowed together in one hold", keywords: ["different goods", "stowed together", "one hold"] },
+    { term: "Convoy", def: "A group of vessels which sail together, e.g. through a canal or ice", keywords: ["group of vessels", "sail together", "canal", "ice"] },
+    { term: "Course", def: "The intended direction of movement of a vessel through the water", keywords: ["intended direction", "movement", "through the water"] },
+    { term: "Course made good", def: "That course which a vessel makes good over ground, after allowing for the effect of currents, tidal streams, and leeway caused by wind and sea", keywords: ["course", "over ground", "currents", "tidal streams", "leeway"] },
+    { term: "COW", def: "Crude Oil Washing: A system of cleaning the cargo tanks by washing them with the cargo of crude oil during discharge", keywords: ["crude oil washing", "cleaning", "cargo tanks", "washing", "discharge"] },
+    { term: "CPA/TCPA", def: "Closest Point of Approach /Time to Closest Point of Approach limit as defined by the observer to give warning when a tracked target or targets will close to within these limits", keywords: ["closest point of approach", "warning", "tracked target", "close to within"] },
+    { term: "Crash-stop", def: "An emergency reversal operation of the main engine(s) to avoid a collision", keywords: ["emergency reversal", "main engine", "avoid a collision"] },
+    { term: "Damage control team", def: "A group of crew members trained for fighting flooding in the vessel", keywords: ["crew members", "trained", "fighting flooding"] },
+    { term: "Datum", def: "1. The most probable position of a search target at a given time. 2. The plane of reference to which all data as to the depth on charts are referenced", keywords: ["probable position", "search target", "plane of reference", "depth on charts"] },
+    { term: "Derelict", def: "Goods or any other commodity, specifically a vessel abandoned at sea", keywords: ["goods", "commodity", "vessel abandoned at sea"] },
+    { term: "Destination", def: "Port which a vessel is bound for", keywords: ["port", "bound for"] },
+    { term: "Disabled", def: "A vessel damaged or impaired in such a manner as to be incapable of proceeding on its voyage", keywords: ["damaged", "impaired", "incapable", "proceeding on its voyage"] },
+    { term: "Disembark (to)", def: "To go from a vessel", keywords: ["go from", "vessel"] },
+
+    // --- Page 20 ---
+    { term: "Distress alert (GMDSS)", def: "A radio signal from a distressed vessel automatically directed to an MRCC giving position, identification, course and speed of the vessel as well as the nature of distress", keywords: ["radio signal", "distressed vessel", "mrcc", "position", "identification", "course", "speed", "nature of distress"] },
+    { term: "Distress / Urgency traffic", def: "here: The verbal exchange of information on radio from ship to shore and/or ship to ship/ aircraft about a distress / urgency situation as defined in the relevant ITU Radio Regulations", keywords: ["verbal exchange", "information on radio", "distress", "urgency", "itu radio regulations"] },
+    { term: "Draft", def: "The depth of water which a vessel draws", keywords: ["depth of water", "draws"] },
+    { term: "Dragging (of anchor)", def: "Moving of an anchor over the sea bottom involuntarily because it is no longer preventing the movement of the vessel", keywords: ["anchor", "sea bottom", "involuntarily", "preventing the movement"] },
+    { term: "Dredging (of anchor)", def: "Moving of an anchor over the sea bottom to control the movement of the vessel", keywords: ["anchor", "sea bottom", "control the movement"] },
+    { term: "Drifting", def: "Floating, caused by winds and current with a determinable direction", keywords: ["floating", "winds", "current", "determinable direction"] },
+    { term: "Drop back (to)", def: "To increase the distance to the vessel ahead by reducing one's own speed", keywords: ["increase the distance", "vessel ahead", "reducing", "speed"] },
+    { term: "DSC", def: "Digital Selective Calling (in the GMDSS system)", keywords: ["digital selective calling", "gmdss"] },
+    { term: "Embark (to)", def: "To go aboard a vessel", keywords: ["go aboard", "vessel"] },
+    { term: "EPIRB", def: "Emergency Position Indicating Radio Beacon", keywords: ["emergency", "position", "radio beacon"] },
+    { term: "Escape route", def: "A clearly marked way in the vessel which has to be followed in case of an emergency", keywords: ["clearly marked way", "followed", "emergency"] },
+    { term: "Escort", def: "Attending a vessel, to be available in case of need, e.g. ice-breaker, tug, etc.", keywords: ["attending a vessel", "available", "need", "ice-breaker", "tug"] },
+    { term: "ETA", def: "Estimated Time of Arrival", keywords: ["estimated time of arrival"] },
+    { term: "ETD", def: "Estimated Time of Departure", keywords: ["estimated time of departure"] },
+    { term: "Fire patrol", def: "A crew member of the watch going around the vessel at certain intervals so that an outbreak of fire may be promptly detected; mandatory in vessels carrying more than 36 passengers", keywords: ["crew member of the watch", "intervals", "fire", "promptly detected", "36 passengers"] },
+    { term: "Flooding", def: "Major flow of seawater into the vessel", keywords: ["major flow", "seawater", "vessel"] },
+    { term: "Fire monitor", def: "Fixed foam/powder/water cannon shooting fire extinguishing agents on tank deck, manifold etc.", keywords: ["fixed", "cannon", "extinguishing agents", "tank deck", "manifold"] },
+    { term: "Foul (of anchor)", def: "Anchor has its own cable twisted around it or has fouled an obstruction", keywords: ["cable twisted around it", "fouled an obstruction"] },
+    { term: "Foul (of propeller)", def: "A line, wire, net, etc., is wound round the propeller", keywords: ["line", "wire", "net", "wound round the propeller"] },
+    { term: "Full speed", def: "Highest possible speed of a vessel", keywords: ["highest possible speed", "vessel"] },
+    { term: "Fume", def: "Often harmful gas produced by fires, chemicals, fuel, etc.", keywords: ["harmful gas", "fires", "chemicals", "fuel"] },
+
+    // --- Page 21 ---
+    { term: "General emergency alarm", def: "A sound signal of seven short blasts and one prolonged blast given with the vessel's sound system", keywords: ["seven short blasts", "one prolonged blast", "sound system"] },
+    { term: "GMDSS", def: "Global Maritime Distress and Safety System", keywords: ["global maritime distress and safety system"] },
+    { term: "(D) GPS", def: "(Differential) Global (satellite) Positioning System", keywords: ["differential", "global", "satellite", "positioning system"] },
+    { term: "Hampered vessel", def: "A vessel restricted by her ability to manoeuvre by the nature of her work or her deep draft", keywords: ["restricted", "ability to manoeuvre", "nature of her work", "deep draft"] },
+    { term: "Hatchrails", def: "Ropes supported by stanchions around an open hatch to prevent persons from falling into a hold", keywords: ["ropes", "stanchions", "open hatch", "prevent persons from falling", "hold"] },
+    { term: "Heading", def: "The horizontal direction the vessel's bows at a given moment measured degrees clockwise from north", keywords: ["horizontal direction", "bows", "degrees clockwise from north"] },
+    { term: "Hoist", def: "here: A cable used by helicopters for lifting or lowering persons in a pick-up operation", keywords: ["cable", "helicopters", "lifting or lowering", "pick-up operation"] },
+    { term: "Icing", def: "Coating of ice on an object, e.g. the mast or superstructure of a vessel", keywords: ["coating of ice", "mast", "superstructure"] },
+    { term: "IMO-Class", def: "Group of dangerous or hazardous goods, harmful substances or marine pollutants in sea transport as classified in the International Maritime Dangerous Goods Code (IMDG Code)", keywords: ["dangerous", "hazardous goods", "marine pollutants", "imdg code"] },
+    { term: "Inert (to)", def: "To reduce the oxygen in an oil tank by inert gas to avoid an explosive atmosphere", keywords: ["reduce the oxygen", "oil tank", "inert gas", "explosive atmosphere"] },
+    { term: "Initial course", def: "Course directed by the OSC or other authorized person to be steered at the beginning of a search", keywords: ["course", "osc", "steered", "beginning of a search"] },
+    { term: "Inoperative", def: "Not functioning", keywords: ["not functioning"] },
+    { term: "Jettison (to) (of cargo)", def: "Throwing overboard of goods in order to lighten the vessel or improve its stability in case of an emergency", keywords: ["throwing overboard", "lighten the vessel", "improve its stability", "emergency"] },
+    { term: "Launch (to)", def: "To lower, e.g. lifeboats to the water", keywords: ["lower", "lifeboats", "water"] },
+    { term: "Leaking", def: "Escape of liquids such as water, oil, etc., out of pipes, boilers, tanks, etc., or a minor inflow of seawater into the vessel due to damage to the hull", keywords: ["escape of liquids", "minor inflow", "seawater", "damage to the hull"] },
+    { term: "Leeward", def: "The general direction to which the wind blows; opposite of windward", keywords: ["direction to which the wind blows", "opposite of windward"] },
+    { term: "Leeway", def: "The angular effect on the vessel's course caused by the prevailing wind", keywords: ["angular effect", "course", "prevailing wind"] },
+    { term: "Let go (to)", def: "To set free, let loose, or cast off (of anchors, lines, etc.)", keywords: ["set free", "let loose", "cast off", "anchors", "lines"] },
+    { term: "Lifeboat station", def: "Place assigned to crew and passengers where they must gather before being ordered into the lifeboats", keywords: ["place assigned", "gather", "ordered into the lifeboats"] },
+    { term: "List", def: "here: Inclination of the vessel to port side or starboard side", keywords: ["inclination", "port side", "starboard side"] },
+    { term: "Located", def: "In navigational warnings: Position of object confirmed", keywords: ["position of object confirmed", "navigational warnings"] },
+
+    // --- Page 22 ---
+    { term: "Make water (to)", def: "Seawater flowing into the vessel due to hull damage, or hatches awash and not properly closed", keywords: ["seawater flowing", "hull damage", "hatches awash", "not properly closed"] },
+    { term: "MMSI", def: "Maritime Mobile Service Identity number", keywords: ["maritime mobile service identity number"] },
+    { term: "Moor (to)", def: "To secure a vessel in a particular place by means of wires or ropes made fast to the shore, to anchors, or to anchored mooring buoys, or to ride with both anchors down", keywords: ["secure a vessel", "wires or ropes", "fast to the shore", "anchors", "mooring buoys"] },
+    { term: "MRCC", def: "Maritime Rescue Co-ordination Centre: Land-based authority responsible for promoting efficient organization of maritime search and rescue and for co-ordinating the conduct of search and rescue operations within a search and rescue region", keywords: ["maritime rescue co-ordination centre", "land-based authority", "search and rescue operations"] },
+    { term: "Muster (to)", def: "To assemble crew, passengers or both in a special place for purposes of checking", keywords: ["assemble", "crew", "passengers", "special place", "checking"] },
+    { term: "Muster list", def: "List of crew, passengers and all on board and their functions in a distress or drill", keywords: ["list of crew", "functions", "distress", "drill"] },
+    { term: "Not under command", def: "(abbr. NUC) A vessel which through exceptional circumstances is unable to manoeuvre as required by the COLREGS", keywords: ["nuc", "exceptional circumstances", "unable to manoeuvre", "colregs"] },
+    { term: "Obstruction", def: "An object such as a wreck, net, etc., which blocks a fairway, route, etc.", keywords: ["object", "wreck", "net", "blocks a fairway", "route"] },
+    { term: "Off air", def: "When the transmissions of a radio station etc., have broken down, been switched off or suspended", keywords: ["transmissions", "radio station", "broken down", "switched off", "suspended"] },
+    { term: "Off station (of buoys)", def: "Not in charted position", keywords: ["not in charted position"] },
+    { term: "Oil clearance", def: "Oil skimming from the surface of the water", keywords: ["oil skimming", "surface of the water"] },
+    { term: "Operational", def: "Ready for immediate use", keywords: ["ready for immediate use"] },
+    { term: "Ordnance exercise", def: "Naval firing practice", keywords: ["naval firing practice"] },
+    { term: "OSC", def: "On-Scene Co-ordinator: A person designed to co-ordinate search and rescue operations within a specified area", keywords: ["on-scene co-ordinator", "person designed to co-ordinate", "search and rescue"] },
+    { term: "Overflow", def: "Accidental escape of oil from a tank which is full because pumping was not stopped in time", keywords: ["accidental escape of oil", "tank which is full", "pumping was not stopped in time"] },
+    { term: "Polluter", def: "A vessel emitting harmful substances into the air or spilling oil into the sea", keywords: ["emitting harmful substances", "spilling oil into the sea"] },
+    { term: "Preventers", def: "Ropes or wires attached to derricks to prevent them from swinging during cargo handling operations", keywords: ["ropes or wires", "derricks", "prevent them from swinging", "cargo handling operations"] },
+    { term: "Proceed (to)", def: "To sail or head for a certain position or to continue with the voyage", keywords: ["sail or head", "continue with the voyage"] },
+    { term: "PA-system", def: "Public address system: Loudspeakers in the vessel's cabins, mess rooms, etc., and on deck through which important information can be broadcast from a central point, mostly from the navigation bridge", keywords: ["public address system", "loudspeakers", "broadcast", "navigation bridge"] },
+    { term: "Recover (to)", def: "Here: To pick up shipwrecked persons", keywords: ["pick up", "shipwrecked persons"] },
+    { term: "Refloat (to)", def: "To pull a vessel off after grounding; to set afloat again", keywords: ["pull a vessel off", "grounding", "set afloat again"] },
+    { term: "Rendez-vous", def: "An appointment between vessels normally made on radio to meet in a certain area or position", keywords: ["appointment between vessels", "radio", "meet in a certain area"] },
+    { term: "Reported", def: "in navigational warnings: Position of object unconfirmed", keywords: ["position of object unconfirmed", "navigational warnings"] },
+    { term: "Restricted area", def: "A deck, space, area, etc., in vessels, where for safety reasons, entry is only permitted for authorized crew members", keywords: ["safety reasons", "entry is only permitted", "authorized crew members"] },
+{ term: "Resume (to)", def: "here: To re-start a voyage, service or search", keywords: ["re-start", "voyage", "service", "search"] },
+    { term: "Retreat signal", def: "Sound, visual or other signal to a team ordering it to return to its base", keywords: ["signal", "ordering it to return to its base"] },
+    { term: "Rig move", def: "The movement of an oil rig, drilling platform, etc., from one position to another", keywords: ["movement of an oil rig", "drilling platform", "position to another"] },
+    { term: "Roll call", def: "The act of checking who of the passengers and crew members are present, e.g. at assembly stations, by reading aloud a list of their names", keywords: ["checking who of the passengers and crew members are present", "reading aloud a list of their names"] },
+
+    // --- Page 23 ---
+    { term: "Safe speed", def: "That speed of a vessel allowing the maximum possible time for effective action to be taken to avoid a collision and to be stopped within an appropriate distance", keywords: ["speed", "maximum possible time", "effective action", "avoid a collision", "stopped"] },
+    { term: "Safety load", def: "The maximum permissible load of a deck, etc.", keywords: ["maximum permissible load", "deck"] },
+    { term: "Safe working pressure", def: "The maximum permissible pressure in cargo hoses", keywords: ["maximum permissible pressure", "cargo hoses"] },
+    { term: "SAR", def: "Search and Rescue", keywords: ["search and rescue"] },
+    { term: "Scene", def: "The area or location where the event, e.g. an accident has happened", keywords: ["area or location", "event", "accident has happened"] },
+    { term: "Search pattern", def: "A pattern according to which vessels and/or aircraft may conduct co-ordinated search (the IMOSAR offers seven search patterns)", keywords: ["pattern", "conduct co-ordinated search", "imosar", "seven search patterns"] },
+    { term: "Search speed", def: "The speed of searching vessels directed by the OSC", keywords: ["speed of searching vessels", "directed by the osc"] },
+    { term: "Seamark", def: "An elevated object on land or sea serving as a guide", keywords: ["elevated object", "land or sea", "serving as a guide"] },
+    { term: "Segregation (of goods)", def: "Separation of goods which for different reasons must not be stowed together", keywords: ["separation of goods", "must not be stowed together"] },
+    { term: "Shackle", def: "Standard length (15 fathoms) of an anchor cable", keywords: ["standard length", "15 fathoms", "anchor cable"] },
+    { term: "Shifting cargo", def: "Transverse movement of cargo, especially bulk, caused by rolling or a heavy list", keywords: ["transverse movement of cargo", "bulk", "rolling", "heavy list"] },
+    { term: "Slings", def: "Ropes, nets, and any other means for handling general cargoes", keywords: ["ropes", "nets", "handling general cargoes"] },
+    { term: "Speed of advance", def: "The speed at which a storm centre moves", keywords: ["speed", "storm centre moves"] },
+
+    // --- Page 24 ---
+    { term: "Spill (to)", def: "The accidental escape of oil, etc., from a vessel, container, etc., into the sea", keywords: ["accidental escape of oil", "vessel", "container", "into the sea"] },
+    { term: "Spill control gear", def: "Special equipment for fighting accidental oil spills at early stages", keywords: ["special equipment", "fighting accidental oil spills", "early stages"] },
+    { term: "Spreader", def: "here: Step of a pilot ladder which prevents the ladder from twisting", keywords: ["step of a pilot ladder", "prevents the ladder from twisting"] },
+    { term: "Stand by (to)", def: "To be in readiness or prepared to execute an order; to be readily available", keywords: ["readiness", "prepared to execute an order", "readily available"] },
+    { term: "Stand clear (to)", def: "here: To keep a boat away from the vessel", keywords: ["keep a boat away from the vessel"] },
+    { term: "Standing orders", def: "Orders of the Master to the officer of the watch which s/he must comply with", keywords: ["orders of the master", "officer of the watch", "comply with"] },
+    { term: "Stand on (to)", def: "To maintain course and speed", keywords: ["maintain course and speed"] },
+    { term: "Station", def: "The allotted place or the duties of each person on board", keywords: ["allotted place", "duties of each person"] },
+    { term: "Stripping", def: "Draining tanks of the remaining cargo, water, etc.", keywords: ["draining tanks", "remaining cargo", "water"] },
+    { term: "Survivor", def: "A person who continues to live in spite of being in an extremely dangerous situation, e.g. a shipping disaster.", keywords: ["continues to live", "extremely dangerous situation", "shipping disaster"] },
+    { term: "Take off (to)", def: "A helicopter lifts off from a vessel's deck", keywords: ["helicopter lifts off", "vessel's deck"] },
+    { term: "Target", def: "The echo generated e.g. by a vessel on a radar screen", keywords: ["echo generated", "radar screen"] },
+    { term: "Tension winch", def: "A winch which applies tension to mooring lines to keep them tight", keywords: ["winch", "applies tension", "mooring lines", "keep them tight"] },
+    { term: "TEU", def: "Twenty Foot Equivalent Unit (standard container dimension)", keywords: ["twenty foot equivalent unit", "standard container dimension"] },
+    { term: "Track", def: "The path followed, or to be followed, between one position and another", keywords: ["path followed", "between one position and another"] },
+    { term: "Transit", def: "here: The passage of a vessel through a canal, fairway, etc.", keywords: ["passage of a vessel", "canal", "fairway"] },
+    { term: "Transit speed", def: "Speed of a vessel required for the passage through a canal, fairway, etc.", keywords: ["speed of a vessel", "passage through a canal", "fairway"] },
+    { term: "Transshipment (of cargo)", def: "here: The transfer of goods from one vessel to another outside harbours", keywords: ["transfer of goods", "one vessel to another", "outside harbours"] },
+    { term: "Underway", def: "A vessel which is not at anchor, or made fast to the shore, or aground", keywords: ["not at anchor", "not made fast to the shore", "not aground"] },
+    { term: "Union purchase", def: "A common method of cargo handling by combining two derricks, one of which is fixed over the quay, the other over the hatchway", keywords: ["cargo handling", "combining two derricks", "quay", "hatchway"] },
+    { term: "Unlit", def: "When the light characteristics of a buoy or a lighthouse are inoperative", keywords: ["light characteristics", "buoy", "lighthouse", "inoperative"] },
+    { term: "UTC", def: "Universal Time Co-ordinated (ex GMT)", keywords: ["universal time co-ordinated", "gmt"] },
+    { term: "Variable (of winds)", def: "When a wind is permanently changing the direction from which it blows", keywords: ["permanently changing the direction", "wind blows"] },
+    { term: "Veering (of winds)", def: "Shifting of wind direction in a clockwise manner, in time; opposite of backing", keywords: ["shifting of wind direction", "clockwise", "opposite of backing"] },
+    { term: "Veer out (to) (of anchors)", def: "To let out a greater length of cable", keywords: ["let out a greater length of cable"] },
+    { term: "VHF", def: "Very High Frequency (30-300 MHz)", keywords: ["very high frequency", "30-300 mhz"] },
+    { term: "Walk out (to) (of anchors)", def: "To reverse the action of a windlass so as to ease the cable", keywords: ["reverse the action of a windlass", "ease the cable"] },
+    { term: "Way point", def: "A position a vessel has to pass or at which she has to alter course according to her voyage plan", keywords: ["position a vessel has to pass", "alter course", "voyage plan"] },
+    { term: "Windward", def: "The general direction from which the wind blows; opposite of leeward", keywords: ["direction from which the wind blows", "opposite of leeward"] },
+    { term: "Wreck", def: "A vessel which has been destroyed or sunk or abandoned at sea", keywords: ["destroyed", "sunk", "abandoned at sea"] },
+ // --- Page 25: VTS Special Terms ---
+    { term: "Fairway", def: "Navigable part of a waterway", keywords: ["navigable part", "waterway"] },
+    { term: "Fairway speed", def: "Mandatory speed in a fairway", keywords: ["mandatory speed", "fairway"] },
+    { term: "ITZ", def: "Inshore Traffic Zone (of a TSS): A routing measure comprising a designated area between the landward boundary of a TSS and the adjacent coast", keywords: ["inshore traffic zone", "tss", "landward boundary", "adjacent coast"] },
+    { term: "Manoeuvring speed", def: "A vessel's reduced rate of speed in restricted waters such as fairways or harbours", keywords: ["reduced rate of speed", "restricted waters", "fairways", "harbours"] },
+    { term: "Receiving point", def: "A mark or place at which a vessel comes under obligatory entry, transit, or escort procedure", keywords: ["mark or place", "obligatory entry", "transit", "escort procedure"] },
+    { term: "Reference line", def: "A fictive line displayed on the radar screens in VTS Centres and/or electronic sea-charts separating the fairway for inbound and outbound vessels so that they can safely pass each other", keywords: ["fictive line", "radar screens", "vts centres", "electronic sea-charts", "separating the fairway", "inbound and outbound vessels"] },
+    { term: "Reporting point", def: "A mark or position at which a vessel is required to report to the local VTS-Station to establish its position", keywords: ["mark or position", "required to report", "vts-station", "establish its position"] },
+    { term: "Separation zone / line", def: "A zone or line separating the traffic lanes in which vessels are proceeding in opposite or nearly opposite directions; or separating a traffic lane from the adjacent sea area; or separating traffic lanes designated for particular classes of vessels proceeding in the same direction", keywords: ["zone or line separating the traffic lanes", "opposite directions", "adjacent sea area"] },
+    { term: "Traffic clearance", def: "VTS authorization for a vessel to proceed under conditions specified", keywords: ["vts authorization", "proceed under conditions specified"] },
+    { term: "Traffic lane", def: "An area within defined limits in which one-way traffic is established", keywords: ["area within defined limits", "one-way traffic is established"] },
+    { term: "TSS", def: "Traffic Separation Scheme: A routing measure aimed at the separation of opposing streams of traffic by appropriate means and by the establishment of traffic lanes", keywords: ["traffic separation scheme", "separation of opposing streams of traffic", "establishment of traffic lanes"] },
+    { term: "VTS", def: "Vessel Traffic Services: Services, designed to improve safety and efficiency of vessel traffic and to protect the environment", keywords: ["vessel traffic services", "improve safety and efficiency", "protect the environment"] },
+    { term: "VTS-area", def: "Area controlled by a VTS-Centre or VTS-Station", keywords: ["area controlled", "vts-centre", "vts-station"] }
+  ];
+    
+    
+    
+    
+  // TAB SWITCHER
+  function switchTab(id) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(id));
+    if (btn) btn.classList.add('active');
+    document.getElementById(id).classList.add('active');
+  }
+
+  // --- TAB 1: MC QUIZ LOGIC ---
+  let currentQ = null;
+  let quizScore = 0;
+  let quizTotal = 0;
+  let quizAnswered = false;
+
+  function resetQuiz() {
+    quizScore = 0;
+    quizTotal = 0;
+    document.getElementById('scoreVal').textContent = "0";
+    document.getElementById('totalVal').textContent = "0";
+    loadNextQuestion();
+  }
+
+  function loadNextQuestion() {
+    quizAnswered = false;
+    const mode = document.getElementById('quizDirection').value;
+    const qIndex = Math.floor(Math.random() * SMCP_DATA.length);
+    currentQ = SMCP_DATA[qIndex];
+
+    // Pick 3 random distractors
+    const choices = [currentQ];
+    while (choices.length < 4) {
+      const rand = SMCP_DATA[Math.floor(Math.random() * SMCP_DATA.length)];
+      if (!choices.some(c => c.term === rand.term)) choices.push(rand);
+    }
+    choices.sort(() => Math.random() - 0.5);
+
+    const qPrompt = document.getElementById('quizQuestion');
+    const container = document.getElementById('optionsContainer');
+    container.innerHTML = '';
+
+    if (mode === 'def_to_term') {
+      qPrompt.textContent = `"${currentQ.def}"`;
+      choices.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = opt.term;
+        btn.onclick = () => selectOption(btn, opt.term === currentQ.term, currentQ.term);
+        container.appendChild(btn);
+      });
+    } else {
+      qPrompt.textContent = `What is the definition of: "${currentQ.term}"?`;
+      choices.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = opt.def;
+        btn.onclick = () => selectOption(btn, opt.term === currentQ.term, currentQ.def);
+        container.appendChild(btn);
+      });
+    }
+  }
+
+  function selectOption(btn, isCorrect, correctText) {
+    if (quizAnswered) return;
+    quizAnswered = true;
+    quizTotal++;
+
+    const buttons = document.querySelectorAll('.option-btn');
+    if (isCorrect) {
+      quizScore++;
+      btn.classList.add('correct');
+    } else {
+      btn.classList.add('incorrect');
+      buttons.forEach(b => {
+        if (b.textContent === correctText) b.classList.add('correct');
+      });
+    }
+    document.getElementById('scoreVal').textContent = quizScore;
+    document.getElementById('totalVal').textContent = quizTotal;
+  }
+    // --- TAB 2: TRUE / FALSE & KEYWORD EVALUATOR ---
+  let currentTF = null;
+  let tfAnswered = false;
+
+  function generateTFQuestion() {
+    tfAnswered = false;
+    document.getElementById('tfFeedback').textContent = '';
+    const item = SMCP_DATA[Math.floor(Math.random() * SMCP_DATA.length)];
+    const isTrue = Math.random() > 0.5;
+
+    if (isTrue) {
+      currentTF = { term: item.term, def: item.def, actual: true, correctDef: item.def };
+    } else {
+      let wrongItem = SMCP_DATA[Math.floor(Math.random() * SMCP_DATA.length)];
+      while (wrongItem.term === item.term) {
+        wrongItem = SMCP_DATA[Math.floor(Math.random() * SMCP_DATA.length)];
+      }
+      currentTF = { term: item.term, def: wrongItem.def, actual: false, correctDef: item.def };
+    }
+
+    document.getElementById('tfStatement').innerHTML = `
+      <strong>Statement:</strong><br>
+      The term <strong>"${currentTF.term}"</strong> is defined as:<br>
+      <em>"${currentTF.def}"</em>
+    `;
+  }
+
+  function checkTFAnswer(userChoice) {
+    if (!currentTF || tfAnswered) return;
+    tfAnswered = true;
+    const fb = document.getElementById('tfFeedback');
+    if (userChoice === currentTF.actual) {
+      fb.style.color = "var(--success)";
+      fb.textContent = "Correct assessment!";
+    } else {
+      fb.style.color = "var(--danger)";
+      fb.innerHTML = `Incorrect. The correct definition for <strong>${currentTF.term}</strong> is: "${currentTF.correctDef}"`;
+    }
+  }
+
+  // Populate Dropdown for custom keyword checker
+  const termSelect = document.getElementById('customTermSelect');
+  SMCP_DATA.forEach(item => {
+    const opt = document.createElement('option');
+    opt.value = item.term;
+    opt.textContent = item.term;
+    termSelect.appendChild(opt);
+  });
+
+  function evaluateKeywords() {
+    const selectedTerm = termSelect.value;
+    const input = document.getElementById('customInputText').value.toLowerCase();
+    const resultBox = document.getElementById('verifyResult');
+    const matchedData = SMCP_DATA.find(d => d.term === selectedTerm);
+
+    if (!input.trim()) {
+      resultBox.innerHTML = '<span style="color:var(--danger)">Please enter some text to test.</span>';
+      return;
+    }
+
+    let hits = 0;
+    const chipsHtml = matchedData.keywords.map(kw => {
+      const isFound = input.includes(kw.toLowerCase());
+      if (isFound) hits++;
+      const color = isFound ? '#dcfce7; color:#14532d; border:1px solid #86efac;' : '#fee2e2; color:#7f1d1d; border:1px solid #fca5a5;';
+      return `<span class="chip" style="background:${color}">${kw} ${isFound ? '✓' : '✗'}</span>`;
+    }).join('');
+
+    const matchRatio = hits / matchedData.keywords.length;
+    const verdict = matchRatio >= 0.5;
+
+    resultBox.innerHTML = `
+      <div style="padding:12px; border-radius:6px; background:#fff; border:1px solid var(--border-color);">
+        <strong>Verdict: </strong>
+        <span style="font-weight:bold; color:${verdict ? 'var(--success)' : 'var(--danger)'}">
+          ${verdict ? 'TRUE / MATCH' : 'FALSE / INSUFFICIENT MATCH'}
+        </span>
+        <div style="font-size:0.85rem; color:#64748b; margin:6px 0;">
+          Required keyword matches: ${hits} of ${matchedData.keywords.length} found.
+        </div>
+        <div class="keyword-chips">${chipsHtml}</div>
+        <div style="margin-top:10px; font-size:0.9rem;">
+          <strong>Official Definition:</strong> ${matchedData.def}
+        </div>
+      </div>
+    `;
+  }
+
+  // --- TAB 3: GLOSSARY SEARCH ---
+  function renderGlossary(items) {
+    const list = document.getElementById('glossaryList');
+    list.innerHTML = '';
+    items.forEach(d => {
+      const row = document.createElement('div');
+      row.className = 'glossary-item';
+      row.innerHTML = `
+        <div class="glossary-term">${d.term}</div>
+        <div class="glossary-meaning">${d.def}</div>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  function filterGlossary() {
+    const q = document.getElementById('searchBar').value.toLowerCase();
+    const filtered = SMCP_DATA.filter(d => 
+      d.term.toLowerCase().includes(q) || d.def.toLowerCase().includes(q)
+    );
+    renderGlossary(filtered);
+  }
+
+  // Initialization
+  loadNextQuestion();
+  generateTFQuestion();
+  renderGlossary(SMCP_DATA);
+</script>
+
+</body>
+</html>
