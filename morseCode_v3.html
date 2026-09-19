@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maritime Flag & Morse Code Tool</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --border: #cbd5e1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    header {
+      background-color: var(--primary);
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      margin-bottom: 5px;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background-color: #f1f5f9;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 14px;
+      text-align: center;
+      background: none;
+      border: none;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: 0.2s;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background-color: #fff;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 25px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Grid for Gallery/Lookup */
+    .flag-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 15px;
+    }
+
+    .flag-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .flag-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .flag-card svg {
+      border: 1px solid #94a3b8;
+      border-radius: 2px;
+      margin-bottom: 8px;
+    }
+
+    .flag-letter {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .flag-morse {
+      font-family: monospace;
+      font-size: 1.2rem;
+      color: var(--primary);
+      letter-spacing: 2px;
+    }
+
+    /* Translator Tab */
+    .field-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    button.action-btn {
+      padding: 10px 18px;
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button.action-btn:hover {
+      opacity: 0.9;
+    }
+
+    /* Quiz Tab */
+    .quiz-box {
+      text-align: center;
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .quiz-target {
+      margin: 15px 0;
+      font-size: 2.2rem;
+      font-family: monospace;
+      letter-spacing: 4px;
+      color: var(--primary);
+      min-height: 50px;
+    }
+
+    .quiz-feedback {
+      margin-top: 15px;
+      font-weight: bold;
+      min-height: 24px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Maritime Signal Flags & Morse Code</h1>
+    <p>Visual chart, translator with audio, and flashcard practice</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="showTab('lookup')">Chart & Lookup</button>
+    <button class="tab-btn" onclick="showTab('translator')">Translator</button>
+    <button class="tab-btn" onclick="showTab('quiz')">Quiz Practice</button>
+  </nav>
+
+  <!-- TAB 1: Chart & Lookup -->
+  <section id="lookup" class="tab-content active">
+    <div class="flag-grid" id="flagGrid"></div>
+  </section>
+
+  <!-- TAB 2: Translator -->
+  <section id="translator" class="tab-content">
+    <div class="field-group">
+      <label for="textInput">English Text (A-Z):</label>
+      <textarea id="textInput" rows="3" placeholder="Type text here..."></textarea>
+      <div class="btn-row">
+        <button class="action-btn" onclick="convertTextToMorse()">Convert to Morse</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label for="morseInput">Morse Code (Use dots '.', dashes '-', space between letters, '/' for word gap):</label>
+      <textarea id="morseInput" rows="3" placeholder="... --- ..."></textarea>
+      <div class="btn-row">
+        <button class="action-btn" onclick="convertMorseToText()">Convert to Text</button>
+        <button class="action-btn" style="background:#0284c7;" onclick="playMorseSound()">Play Sound</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 3: Quiz -->
+  <section id="quiz" class="tab-content">
+    <div class="quiz-box">
+      <h3>Identify the Letter</h3>
+      <div class="quiz-target" id="quizQuestion"></div>
+      <input type="text" id="quizAnswer" maxlength="1" placeholder="Enter letter" style="text-align:center; font-size:1.5rem; text-transform:uppercase;" />
+      <div class="btn-row" style="justify-content:center; margin-top:15px;">
+        <button class="action-btn" onclick="submitQuiz()">Check</button>
+        <button class="action-btn" style="background:#64748b;" onclick="nextQuestion()">Next</button>
+      </div>
+      <div class="quiz-feedback" id="quizFeedback"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+  // Maritime flag SVG generation & Morse mapping
+  const MARITIME_DATA = {
+    'A': { morse: '.-', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><polygon points="0,0 60,0 45,20 60,40 0,40" fill="#ffffff"/><polygon points="0,0 30,0 30,40 0,40" fill="#ffffff"/><polygon points="30,0 60,0 45,20 60,40 30,40" fill="#0033a0"/></svg>' },
+    'B': { morse: '-...', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><polygon points="0,0 60,0 45,20 60,40 0,40" fill="#da291c"/></svg>' },
+    'C': { morse: '-.-.', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="60" height="8" fill="#0033a0"/><rect y="8" width="60" height="8" fill="#ffffff"/><rect y="16" width="60" height="8" fill="#da291c"/><rect y="24" width="60" height="8" fill="#ffffff"/><rect y="32" width="60" height="8" fill="#0033a0"/></svg>' },
+    'D': { morse: '-..', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="60" height="10" fill="#ffd100"/><rect y="10" width="60" height="20" fill="#0033a0"/><rect y="30" width="60" height="10" fill="#ffd100"/></svg>' },
+    'E': { morse: '.', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="60" height="20" fill="#0033a0"/><rect y="20" width="60" height="20" fill="#da291c"/></svg>' },
+    'F': { morse: '..-.', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="60" height="40" fill="#ffffff"/><polygon points="30,5 55,20 30,35 5,20" fill="#da291c"/></svg>' },
+    'G': { morse: '--.', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="10" height="40" fill="#ffd100"/><rect x="10" width="10" height="40" fill="#0033a0"/><rect x="20" width="10" height="40" fill="#ffd100"/><rect x="30" width="10" height="40" fill="#0033a0"/><rect x="40" width="10" height="40" fill="#ffd100"/><rect x="50" width="10" height="40" fill="#0033a0"/></svg>' },
+    'H': { morse: '....', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="30" height="40" fill="#ffffff"/><rect x="30" width="30" height="40" fill="#da291c"/></svg>' },
+    'I': { morse: '..', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="60" height="40" fill="#ffd100"/><circle cx="30" cy="20" r="10" fill="#000000"/></svg>' },
+    'J': { morse: '.---', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="60" height="13.3" fill="#0033a0"/><rect y="13.3" width="60" height="13.3" fill="#ffffff"/><rect y="26.6" width="60" height="13.4" fill="#0033a0"/></svg>' },
+    'K': { morse: '-.-', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="30" height="40" fill="#ffd100"/><rect x="30" width="30" height="40" fill="#0033a0"/></svg>' },
+    'L': { morse: '.-..', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="30" height="20" fill="#ffd100"/><rect x="30" width="30" height="20" fill="#000000"/><rect y="20" width="30" height="20" fill="#000000"/><rect x="30" y="20" width="30" height="20" fill="#ffd100"/></svg>' },
+    'M': { morse: '--', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="60" height="40" fill="#0033a0"/><line x1="0" y1="0" x2="60" y2="40" stroke="#ffffff" stroke-width="8"/><line x1="60" y1="0" x2="0" y2="40" stroke="#ffffff" stroke-width="8"/></svg>' },
+    'N': { morse: '-.', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="60" height="40" fill="#ffffff"/><rect width="15" height="10" fill="#0033a0"/><rect x="30" width="15" height="10" fill="#0033a0"/><rect x="15" y="10" width="15" height="10" fill="#0033a0"/><rect x="45" y="10" width="15" height="10" fill="#0033a0"/><rect y="20" width="15" height="10" fill="#0033a0"/><rect x="30" y="20" width="15" height="10" fill="#0033a0"/><rect x="15" y="30" width="15" height="10" fill="#0033a0"/><rect x="45" y="30" width="15" height="10" fill="#0033a0"/></svg>' },
+    'O': { morse: '---', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><polygon points="0,0 60,40 0,40" fill="#da291c"/><polygon points="0,0 60,0 60,40" fill="#ffd100"/></svg>' },
+    'P': { morse: '.--.', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="60" height="40" fill="#0033a0"/><rect x="20" y="12" width="20" height="16" fill="#ffffff"/></svg>' },
+    'Q': { morse: '--.-', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="60" height="40" fill="#ffd100"/></svg>' },
+    'R': { morse: '.-.', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="60" height="40" fill="#da291c"/><rect x="25" width="10" height="40" fill="#ffd100"/><rect y="15" width="60" height="10" fill="#ffd100"/></svg>' },
+    'S': { morse: '...', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="60" height="40" fill="#ffffff"/><rect x="20" y="12" width="20" height="16" fill="#0033a0"/></svg>' },
+    'T': { morse: '-', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="20" height="40" fill="#da291c"/><rect x="20" width="20" height="40" fill="#ffffff"/><rect x="40" width="20" height="40" fill="#0033a0"/></svg>' },
+    'U': { morse: '..-', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="30" height="20" fill="#da291c"/><rect x="30" width="30" height="20" fill="#ffffff"/><rect y="20" width="30" height="20" fill="#ffffff"/><rect x="30" y="20" width="30" height="20" fill="#da291c"/></svg>' },
+    'V': { morse: '...-', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="60" height="40" fill="#ffffff"/><line x1="0" y1="0" x2="60" y2="40" stroke="#da291c" stroke-width="8"/><line x1="60" y1="0" x2="0" y2="40" stroke="#da291c" stroke-width="8"/></svg>' },
+    'W': { morse: '.--', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="60" height="40" fill="#0033a0"/><rect x="10" y="7" width="40" height="26" fill="#ffffff"/><rect x="20" y="14" width="20" height="12" fill="#da291c"/></svg>' },
+    'X': { morse: '-..-', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><rect width="60" height="40" fill="#ffffff"/><rect x="25" width="10" height="40" fill="#0033a0"/><rect y="15" width="60" height="10" fill="#0033a0"/></svg>' },
+    'Y': { morse: '-.--', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><defs><pattern id="stripes" width="20" height="20" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse"><rect width="10" height="20" fill="#ffd100"/><rect x="10" width="10" height="20" fill="#da291c"/></pattern></defs><rect width="60" height="40" fill="url(#stripes)"/></svg>' },
+    'Z': { morse: '--..', svg: '<svg viewBox="0 0 60 40" width="60" height="40"><polygon points="0,0 60,0 30,20" fill="#ffd100"/><polygon points="60,0 60,40 30,20" fill="#000000"/><polygon points="0,40 60,40 30,20" fill="#da291c"/><polygon points="0,0 0,40 30,20" fill="#0033a0"/></svg>' }
+  };
+
+  const REVERSE_MORSE = {};
+  for (const [letter, val] of Object.entries(MARITIME_DATA)) {
+    REVERSE_MORSE[val.morse] = letter;
+  }
+
+  // Populate Grid
+  const grid = document.getElementById('flagGrid');
+  for (const [letter, data] of Object.entries(MARITIME_DATA)) {
+    const card = document.createElement('div');
+    card.className = 'flag-card';
+    card.innerHTML = `
+      ${data.svg}
+      <div class="flag-letter">${letter}</div>
+      <div class="flag-morse">${data.morse}</div>
+    `;
+    card.title = `Click to hear Morse for ${letter}`;
+    card.onclick = () => playSequence(data.morse);
+    grid.appendChild(card);
+  }
+
+  // Tab Switching
+  function showTab(id) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById(id).classList.add('active');
+  }
+
+  // Text / Morse Conversion
+  function convertTextToMorse() {
+    const text = document.getElementById('textInput').value.toUpperCase();
+    const morse = text.split('').map(ch => {
+      if (MARITIME_DATA[ch]) return MARITIME_DATA[ch].morse;
+      if (ch === ' ') return '/';
+      return '';
+    }).join(' ');
+    document.getElementById('morseInput').value = morse.replace(/\s+/g, ' ').trim();
+  }
+
+  function convertMorseToText() {
+    const morse = document.getElementById('morseInput').value.trim().split(/\s+/);
+    const text = morse.map(code => {
+      if (code === '/') return ' ';
+      return REVERSE_MORSE[code] || '?';
+    }).join('');
+    document.getElementById('textInput').value = text;
+  }
+
+  // Web Audio API for Morse Sound
+  let audioCtx = null;
+  function getAudioContext() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioCtx;
+  }
+
+  function playTone(freq, duration, delay) {
+    const ctx = getAudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+
+    const startTime = ctx.currentTime + delay;
+    const stopTime = startTime + duration;
+
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(0.3, startTime + 0.005);
+    gain.gain.setValueAtTime(0.3, stopTime - 0.005);
+    gain.gain.linearRampToValueAtTime(0, stopTime);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(startTime);
+    osc.stop(stopTime);
+  }
+
+  function playSequence(morseStr) {
+    const dotDuration = 0.08;
+    const dashDuration = dotDuration * 3;
+    const elementGap = dotDuration;
+    const letterGap = dotDuration * 3;
+
+    let timeOffset = 0.05;
+    for (let char of morseStr) {
+      if (char === '.') {
+        playTone(600, dotDuration, timeOffset);
+        timeOffset += dotDuration + elementGap;
+      } else if (char === '-') {
+        playTone(600, dashDuration, timeOffset);
+        timeOffset += dashDuration + elementGap;
+      } else if (char === ' ') {
+        timeOffset += letterGap;
+      }
+    }
+  }
+
+  function playMorseSound() {
+    const morse = document.getElementById('morseInput').value;
+    playSequence(morse);
+  }
+
+  // Flashcard / Quiz
+  let currentTarget = '';
+  const letters = Object.keys(MARITIME_DATA);
+
+  function nextQuestion() {
+    document.getElementById('quizFeedback').textContent = '';
+    document.getElementById('quizAnswer').value = '';
+    currentTarget = letters[Math.floor(Math.random() * letters.length)];
+    document.getElementById('quizQuestion').textContent = MARITIME_DATA[currentTarget].morse;
+    document.getElementById('quizAnswer').focus();
+  }
+
+  function submitQuiz() {
+    const val = document.getElementById('quizAnswer').value.trim().toUpperCase();
+    const feedback = document.getElementById('quizFeedback');
+    if (val === currentTarget) {
+      feedback.style.color = '#16a34a';
+      feedback.textContent = 'Correct!';
+    } else {
+      feedback.style.color = '#dc2626';
+      feedback.textContent = `Incorrect. The letter is ${currentTarget}`;
+    }
+  }
+
+  document.getElementById('quizAnswer').addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') submitQuiz();
+  });
+
+  nextQuestion();
+</script>
+
+</body>
+</html>
+
