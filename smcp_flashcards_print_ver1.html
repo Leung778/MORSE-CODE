@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMCP 航海術語閃卡（字體放大與分行版）</title>
+  <style>
+    :root {
+      --primary-color: #0b2545;
+      --accent-color: #1d4ed8;
+      --border-dash: #94a3b8;
+      --card-bg: #ffffff;
+      --card-w: 90mm;
+      --card-h: 62mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    body {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      padding: 20px;
+    }
+
+    .no-print {
+      max-width: 900px;
+      margin: 0 auto 20px auto;
+      text-align: center;
+      background: #ffffff;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    }
+
+    .no-print h1 {
+      font-size: 1.3rem;
+      color: var(--primary-color);
+      margin-bottom: 6px;
+    }
+
+    .no-print p {
+      font-size: 0.88rem;
+      color: #475569;
+      margin-bottom: 12px;
+    }
+
+    .print-btn {
+      background-color: var(--accent-color);
+      color: #ffffff;
+      border: none;
+      padding: 9px 22px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .print-btn:hover {
+      background-color: #1e40af;
+    }
+
+    /* 網格卡片容器 (A4 直向雙排) */
+    .cards-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0;
+      max-width: 190mm;
+      margin: 0 auto;
+    }
+
+    /* 卡片主體（固定尺寸，方便裁剪） */
+    .card {
+      width: var(--card-w);
+      height: var(--card-h);
+      background-color: var(--card-bg);
+      border: 1px dashed var(--border-dash);
+      padding: 6mm 7mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      overflow: hidden;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #cbd5e1;
+      padding-bottom: 3px;
+      margin-bottom: 4px;
+    }
+
+    .card-id {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #64748b;
+    }
+
+    .card-category {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #0284c7;
+      background: #f0f9ff;
+      padding: 1px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .term {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    /* 放大英文釋義字體，並支援分行 */
+    .meaning-en {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: #1e293b;
+      line-height: 1.35;
+      margin-bottom: 4px;
+    }
+
+    .meaning-item {
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .meaning-item:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 口語中文解說 */
+    .meaning-zh {
+      font-size: 0.78rem;
+      color: #334155;
+      background: #f8fafc;
+      border-left: 3px solid var(--accent-color);
+      padding: 3px 6px;
+      line-height: 1.3;
+      border-radius: 2px;
+    }
+
+    /* 列印樣式優化 */
+    @media print {
+      body {
+        background: transparent;
+        padding: 0;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .cards-wrapper {
+        max-width: 100%;
+        margin: 0 auto;
+      }
+
+      .card {
+        border: 1px dashed #94a3b8;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      @page {
+        size: A4 portrait;
+        margin: 8mm 8mm;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="no-print">
+    <h1>SMCP 航海術語閃卡（字體放大 & 自動分行版）</h1>
+    <p>英文 Meaning 已調大字號，若釋義內包含「1: / 2:」或「1. / 2.」會自動另起一行條列顯示。</p>
+    <button class="print-btn" onclick="window.print()">列印字卡 (A4)</button>
+  </div>
+
+  <div class="cards-wrapper" id="cardContainer"></div>
+
+  <script>
+    const cardData = [
+      // 1. 遇險、撤離與搜救 (Distress, Abandonment & SAR)
+      { group: "遇險與搜救", term: "Abandon vessel", en: "To evacuate crew and passengers from a vessel following a distress", zh: "棄船。船隻遇險救唔返嗰陣，下令全體船員同乘客即刻撤離。" },
+      { group: "遇險與搜救", term: "Capsizing", en: "Turning of a vessel upside down while on water", zh: "翻船／傾覆。隻船喺水上面徹底底朝天翻咗轉。" },
+      { group: "遇險與搜救", term: "Casualty", en: "here: Case of death in an accident or shipping disaster", zh: "死傷／罹難者。海難或者事故入面出現嘅死亡個案。" },
+      { group: "遇險與搜救", term: "Survivor", en: "A person who continues to live in spite of being in an extremely dangerous situation, e.g. a shipping disaster.", zh: "生還者。經歷海難或嚴重災難後大難不死嘅倖存者。" },
+      { group: "遇險與搜救", term: "Recover (to)", en: "Here: To pick up shipwrecked persons", zh: "救起／撈返。喺海入面救起落水嘅海難生還者。" },
+      { group: "遇險與搜救", term: "SAR", en: "Search and Rescue", zh: "搜救。海上搜索同救援行動。" },
+      { group: "遇險與搜救", term: "MRCC", en: "Maritime Rescue Co-ordination Centre: Land-based authority responsible for promoting efficient organization of maritime search and rescue and for co-ordinating the conduct of search and rescue operations within a search and rescue region", zh: "海事救援協調中心。陸上專責統一指揮、統籌海上搜救任務嘅官方總部。" },
+      { group: "遇險與搜救", term: "OSC", en: "On-Scene Co-ordinator: A person designed to co-ordinate search and rescue operations within a specified area", zh: "現場指揮官。喺搜救事發海面直接統籌現場所有搜救船同飛機嘅負責人。" },
+      { group: "遇險與搜救", term: "Datum", en: "1. The most probable position of a search target at a given time\n2. The plane of reference to which all data as to the depth on charts are referenced.", zh: "基準點／海圖基準：\n1. 搜救嗰陣計出目標最可能出現嘅坐標\n2. 海圖量度水深嘅基準面" },
+      { group: "遇險與搜救", term: "Initial course", en: "Course directed by the OSC or other authorized person to be steered at the beginning of a search", zh: "搜救初始航向。搜救現場指揮官（OSC）一開始指示搜救船行嘅航向。" },
+      { group: "遇險與搜救", term: "Search pattern", en: "A pattern according to which vessels and/or aircraft may conduct co-ordinated search (the IMOSAR offers seven search patterns)", zh: "搜尋航路模式。搜救船隻或飛機按規律梳理海面嘅搜尋走線。" },
+      { group: "遇險與搜救", term: "Search speed", en: "The speed of searching vessels directed by the OSC", zh: "搜尋航速。搜救現場指揮官要求各搜救船統一保持嘅航速。" },
+      { group: "遇險與搜救", term: "Scene", en: "The area or location where the event, e.g. an accident has happened", zh: "現場。事故或海難發生嘅事發海面範圍。" },
+      { group: "遇險與搜救", term: "Hoist", en: "here: A cable used by helicopters for lifting or lowering persons in a pick-up operation", zh: "直升機吊纜。直升機空中救人嗰陣放落嚟吊人上落嘅鋼索。" },
+      { group: "遇險與搜救", term: "Take off (to)", en: "A helicopter lifts off from a vessel's deck", zh: "起飛。直升機由船上甲板起飛離艦。" },
+      { group: "遇險與搜救", term: "EPIRB", en: "Emergency Position Indicating Radio Beacon", zh: "應急示位無線電信標。沉船或遇險浮出水面自動射衛星訊號報告位置嘅信標。" },
+      { group: "遇險與搜救", term: "Distress alert (GMDSS)", en: "A radio signal from a distressed vessel automatically directed to an MRCC giving position, identification, course and speed of the vessel as well as the nature of distress", zh: "遇險求救警報。遇事船隻自動射畀搜救中心嘅求救訊號。" },
+      { group: "遇險與搜救", term: "Distress/ Urgency traffic", en: "here: The verbal exchange of information on radio from ship to shore and/or ship to ship/ air craft about a distress / urgency situation as defined in the relevant ITU Radio Regulations", zh: "遇險／緊急通訊。船與岸、船與船／飛機之間傾遇險緊急情況嘅專用無線電對話。" },
+
+      // 2. 船上應急、火警與安全部署 (Emergency, Fire & Muster)
+      { group: "船上應急與部署", term: "General emergency alarm", en: "A sound signal of seven short blasts and one prolonged blast given with the vessel's sound system", zh: "通用應急警報。全船警報系統發出嘅「七短一長」鳴笛聲號。" },
+      { group: "船上應急與部署", term: "Muster list", en: "List of crew, passengers and all on board and their functions in a distress or drill", zh: "應急部署表。貼喺船上列明遇險或演習時每個人崗位同集合位嘅總名單。" },
+      { group: "船上應急與部署", term: "Muster (to)", en: "To assemble crew, passengers or both in a special place for purposes of checking", zh: "集合／召集。召集所有人去指定地點集合核對點名。" },
+      { group: "船上應急與部署", term: "Assembly station", en: "Place on deck, in mess rooms, etc., assigned to crew and passengers where they have to meet according to the muster list when the corresponding alarm is released or announcement made", zh: "緊急集合點。警報響嗰陣，大家跟名單去甲板或飯堂集合嘅指定位置。" },
+      { group: "船上應急與部署", term: "Roll call", en: "The act of checking who of the passengers and crew members are present, e.g. at assembly stations, by reading aloud a list of their names", zh: "點名。喺集合點按名冊讀名，清點邊個到齊、邊個走失。" },
+      { group: "船上應急與部署", term: "Lifeboat station", en: "Place assigned to crew and passengers where they must gather before being ordered into the lifeboats", zh: "救生艇集合處。上救生艇之前，船員同乘客等候指令嘅指定集合位。" },
+      { group: "船上應急與部署", term: "Launch (to)", en: "To lower, e.g. lifeboats to the water", zh: "放艇。將救生艇降落低到水面。" },
+      { group: "船上應急與部署", term: "Escape route", en: "A clearly marked way in the vessel which has to be followed in case of an emergency", zh: "逃生通道。船上面有清晰綠色指示牌、逃生時必須跟住行嘅路徑。" },
+      { group: "船上應急與部署", term: "PA-system", en: "Public address system: Loudspeakers in the vessel's cabins, mess rooms, etc., and on deck through which important information can be broadcast from a central point, mostly from the navigation bridge", zh: "全船廣播。由駕駛台開咪，全船房間、通道同甲板同步廣播嘅系統。" },
+      { group: "船上應急與部署", term: "Fire patrol", en: "A crew member of the watch going around the vessel at certain intervals so that an outbreak of fire may be promptly detected; mandatory in vessels carrying more than 36 passengers", zh: "防火巡邏員。定時巡邏船艙巡查火位嘅船員（載客超36人客船必備）。" },
+      { group: "船上應急與部署", term: "Fire monitor", en: "Fixed foam/powder/water cannon shooting fire extinguishing agents on tank deck, manifold etc.", zh: "消防水炮。固定喺甲板上向油艙噴水、泡沫或粉劑嘅強力滅火炮。" },
+      { group: "船上應急與部署", term: "Fume", en: "Often harmful gas produced by fires, chemicals, fuel, etc.", zh: "毒煙／有害氣體。火燭、化學品或燃油揮發出嚟嘅濃煙或刺鼻有害氣體。" },
+      { group: "船上應急與部署", term: "Damage control team", en: "A group of crew members trained for fighting flooding in the vessel", zh: "損管隊／堵漏小組。受過專門訓練處理水浸、爆喉同破口堵漏嘅船員隊。" },
+      { group: "船上應急與部署", term: "Retreat signal", en: "Sound, visual or other signal to a team ordering it to return to its base", zh: "撤退信號。命令前線搶險隊伍即刻撤退返基地的信號。" },
+      { group: "船上應急與部署", term: "Briefing", en: "Concise explanatory information to crew and/or passengers", zh: "簡報。行動或演習前，同船員、乘客做嘅簡明安全同任務指示。" },
+
+      // 3. 船身狀態與進水損害 (Hull Damage, Flooding & Grounding)
+      { group: "船身狀況與損害", term: "Flooding", en: "Major flow of seawater into the vessel", zh: "大入水。大量海水迅速灌入船艙內部。" },
+      { group: "船身狀況與損害", term: "Make water (to)", en: "Seawater flowing into the vessel due to hull damage, or hatches awash and not properly closed", zh: "進水。船底穿窿或者艙蓋未扱好，有海水持續滲入船內。" },
+      { group: "船身狀況與損害", term: "Leaking", en: "Escape of liquids such as water, oil, etc., out of pipes, boilers, tanks, etc., or a minor inflow of seawater into the vessel due to damage to the hull", zh: "漏水／滲漏。水喉、油櫃滲漏，或船體微裂少量海水滲入。" },
+      { group: "船身狀況與損害", term: "List", en: "here: Inclination of the vessel to port side or starboard side", zh: "船身傾側。隻船側埋咗去左舷（Port）或者右舷（Starboard）。" },
+      { group: "船身狀況與損害", term: "Beach (to)", en: "To run a vessel up on a beach to prevent its sinking in deep water", zh: "搶灘／衝灘。隻船入水就沉嗰陣，特登將佢開上沙灘防止佢沉入深海。" },
+      { group: "船身狀況與損害", term: "Refloat (to)", en: "To pull a vessel off after grounding; to set afloat again", zh: "脫淺。隻船擱淺坐底之後，拉返佢出水或者等漲潮重新浮返起嚟。" },
+      { group: "船身狀況與損害", term: "Disabled", en: "A vessel damaged or impaired in such a manner as to be incapable of proceeding on its voyage", zh: "喪失能力／拋錨壞船。架船受損或故障，自己失去航行動力。" },
+      { group: "船身狀況與損害", term: "Derelict", en: "Goods or any other commodity, specifically a vessel abandoned at sea", zh: "海上遺棄物／棄船。特指喺海上被人遺棄漂浮嘅廢船或貨物。" },
+      { group: "船身狀況與損害", term: "Wreck", en: "A vessel which has been destroyed or sunk or abandoned at sea", zh: "沉船／殘骸。喺海入面爛咗、沉沒或者棄置嘅船身殘骸。" },
+
+      // 4. 錨泊與繫泊操作 (Anchoring & Mooring Operations)
+      { group: "錨泊與繫泊", term: "Dragging (of anchor)", en: "Moving of an anchor over the sea bottom involuntarily because it is no longer preventing the movement of the vessel", zh: "走錨。個錨咬唔實海底捉唔住隻船，被風流拖住喺海底刮移。" },
+      { group: "錨泊與繫泊", term: "Dredging (of anchor)", en: "Moving of an anchor over the sea bottom to control the movement of the vessel", zh: "拖錨（操縱）。特登放少少錨喺海底拖行，藉以減慢船速或輔助轉向。" },
+      { group: "錨泊與繫泊", term: "Foul (of anchor)", en: "Anchor has its own cable twisted around it or has fouled an obstruction", zh: "纏錨。個錨被自己啲錨鏈兜實晒，或者鉤住咗海底障礙物。" },
+      { group: "錨泊與繫泊", term: "Walk out (to) (of anchors)", en: "To reverse the action of a windlass so as to ease the cable", zh: "絞出錨鏈。開動絞錨機馬達倒波，慢慢送出錨鏈而唔係飛鏈鬆掣。" },
+      { group: "錨泊與繫泊", term: "Veer out (to)(of anchors)", en: "To let out a greater length of cable", zh: "鬆長錨鏈。將錨鏈進一步放長更多節出去。" },
+      { group: "錨泊與繫泊", term: "Cable", en: "1: Chain, wire or rope connecting a vessel to her anchor(s)\n2: (measurement), 185.2 metres, i.e. one tenth of a nautical mile", zh: "錨鏈／鏈（距離）：\n1: 駁住個錨嘅鐵鏈或鋼索\n2: 航海距離單位（十分之一浬，185.2米）" },
+      { group: "錨泊與繫泊", term: "Shackle", en: "Standard length (15 fathoms) of an anchor cable", zh: "節（錨鏈單位）。一節錨鏈長度，海事標準係15噚（約27.4米）。" },
+      { group: "錨泊與繫泊", term: "Moor (to)", en: "To secure a vessel in a particular place by means of wires or ropes made fast to the shore, to anchors, or to anchored mooring buoys, or to ride with both anchors down", zh: "繫泊／綁纜。將船用纜緊緊固定喺碼頭、浮筒或者拋雙錨停定。" },
+      { group: "錨泊與繫泊", term: "Tension winch", en: "A winch which applies tension to mooring lines to keep them tight", zh: "張力絞車。識自動調節拉力、保持纜繩時刻拉緊適中嘅絞車。" },
+      { group: "錨泊與繫泊", term: "Let go (to)", en: "To set free, let loose, or cast off (of anchors, lines, etc.)", zh: "鬆開／放落去。鬆解纜繩、拋錨放手嘅操作口令。" },
+      { group: "錨泊與繫泊", term: "Berth", en: "1: A sea room to be kept for safety around a vessel, rock, platform, etc..\n2: The place assigned to a vessel when anchored or lying alongside a pier, etc.", zh: "泊位／安全水域：\n1: 避碰嘅安全間距空間\n2: 船隻靠泊碼頭或拋錨嘅指定位置" },
+
+      // 5. 導航、通訊與電子儀表 (Navigation, Comms & Instruments)
+      { group: "導航與通訊儀表", term: "Heading", en: "The horizontal direction the vessel's bows at a given moment measured degrees clockwise from north", zh: "船首向。當前一刻船頭實時指住嘅羅經度數（由正北順時針計）。" },
+      { group: "導航與通訊儀表", term: "Course", en: "The intended direction of movement of a vessel through the water", zh: "計劃航向。隻船原本打算向住水面行駛嘅預定方向。" },
+      { group: "導航與通訊儀表", term: "Course made good", en: "That course which a vessel makes good over ground, after allowing for the effect of currents, tidal streams, and leeway caused by wind and sea", zh: "對地實際航向。抵消風、流、潮水影響後，隻船真真正正行出嘅對地軌跡。" },
+      { group: "導航與通訊儀表", term: "Track", en: "The path followed, or to be followed, between one position and another", zh: "航跡。船隻喺海面實際行過或預定要跟住行嘅軌跡線。" },
+      { group: "導航與通訊儀表", term: "Way point", en: "A position a vessel has to pass or at which she has to alter course according to her voyage plan", zh: "航路轉折點／轉向點。船隻航線計劃入面，規定要經過或轉方向嘅導航點。" },
+      { group: "導航與通訊儀表", term: "Cardinal points", en: "The four main points of the compass, i.e. North, East, South and West; for the purpose of the SMCP the intercardinal points, i.e. Northeast, Southeast, etc., are also included", zh: "基本方位。羅盤指南針上嘅東、南、西、北（亦包含東北、東南等）。" },
+      { group: "導航與通訊儀表", term: "Cardinal buoy", en: "A seamark, i.e. a buoy, indicating the North, East, South or West, i.e. the cardinal points from a fixed point. such as a wreck, shallow water, banks, etc.", zh: "方位浮標。指示危險物（如沉船、淺灘）東南西北邊個方向安全嘅導航標。" },
+      { group: "導航與通訊儀表", term: "Seemark", en: "An elevated object on land or sea serving as a guide", zh: "航標。陸上或海上顯眼突出、用嚟引航嘅標記或參照物。" },
+      { group: "導航與通訊儀表", term: "Unlit", en: "When the light characteristics of a buoy or a lighthouse are inoperative", zh: "熄燈／盲燈。燈塔或者燈浮標嘅航標燈壞咗唔著燈。" },
+      { group: "導航與通訊儀表", term: "Off station (of buoys)", en: "Not in charted position", zh: "移位浮標。浮標漂走咗，唔喺海圖標記嘅原本正確位置。" },
+      { group: "導航與通訊儀表", term: "Blind sectors", en: "Areas which cannot be scanned by the radar of the vessel because they are shielded by parts of its superstructure, masts, etc, or shore obstructions.", zh: "雷達盲區。受自己隻船嘅建築、桅杆或岸邊障礙物遮蔽，雷達睇唔到嘅死角。" },
+      { group: "導航與通訊儀表", term: "Target", en: "The echo generated e.g. by a vessel on a radar screen", zh: "目標（回波）。雷達螢幕上面掃描偵測出嚟嘅船隻或障礙物回波點。" },
+      { group: "導航與通訊儀表", term: "CPA/TCPA", en: "Closest Point of Approach /Time to Closest Point of Approach limit as defined by the observer to give warning when a tracked target or targets will close to within these limits", zh: "最接近距離同時間。設定嘅避碰邊界：最貼近距離（CPA）同幾時貼到最近（TCPA）。" },
+      { group: "導航與通訊儀表", term: "GMDSS", en: "Global Maritime Distress and Safety System", zh: "全球海上遇險和安全系統。國際海事統一嘅搜救與應急通訊架構。" },
+      { group: "導航與通訊儀表", term: "(D) GPS", en: "(Differential)Global (satellite) Positioning System", zh: "（差分）全球定位系統。靠人造衛星（配合差分地面站）定出精密位置嘅系統。" },
+      { group: "導航與通訊儀表", term: "MMSI", en: "Maritime Mobile Service Identity number", zh: "海上移動識別碼。船隻唯一的九位數身份識別碼，好似船隻嘅專屬電話號碼。" },
+      { group: "導航與通訊儀表", term: "VHF", en: "Very High Frequency (30-300 MHz)", zh: "甚高頻無線電。近距離船對船、船對港口通話必備嘅語音無線電話頻段。" },
+      { group: "導航與通訊儀表", term: "DSC", en: "Digital Selective Calling (in the GMDSS system)", zh: "數碼選擇呼叫。GMDSS 系統入面以數碼訊號呼叫特定船舶或發遇險報警嘅功能。" },
+      { group: "導航與通訊儀表", term: "Off air", en: "When the transmissions of a radio station etc., have broken down, been switched off or suspended", zh: "停播／斷線。無線電台或通訊站壞機、關閉或暫停發射信號。" },
+      { group: "導航與通訊儀表", term: "UTC", en: "Universal Time Co-ordinated (ex GMT)", zh: "世界協調時間。航海計時間嘅全球標準時間（即以前嘅格林威治時間 GMT）。" },
+
+      // 6. 航行狀態、操船與避碰 (Navigation Status & Manoeuvring)
+      { group: "航行操縱與避碰", term: "Underway", en: "A vessel which is not at anchor, or made fast to the shore, or aground", zh: "在航。冇拋錨、冇泊岸綁纜、又冇擱淺，喺水面上浮動或航行緊。" },
+      { group: "航行操縱與避碰", term: "Adrift", en: "Floating, not controlled, without a clearly determinable direction", zh: "漂流／漂浮。失去控制與動力，冇特定方向隨風浪漂流。" },
+      { group: "航行操縱與避碰", term: "Drifting", en: "Floating, caused by winds and current with a determinable direction", zh: "順水漂流。受風同洋流推動，順住特定可測方向漂移。" },
+      { group: "航行操縱與避碰", term: "Not under command", en: "(abbr. NUC) A vessel which through exceptional circumstances is unable to manoeuvre as required by the COLREGS", zh: "失去操縱能力（NUC）。機器或舵機故障，完全操縱唔到嚟符合避碰規則。" },
+      { group: "航行操縱與避碰", term: "Hampered vessel", en: "A vessel restricted by her ability to manoeuvre by the nature of her work or her deep draft", zh: "受限制船隻。因工作性質（如拖網、工程）或深吃水而操縱能力大受限制嘅船。" },
+      { group: "航行操縱與避碰", term: "Stand on (to)", en: "To maintain course and speed", zh: "保持航向及航速。作為避碰規則規定嘅「直航船」，繼續保持原定航向與航速。" },
+      { group: "航行操縱與避碰", term: "Safe speed", en: "That speed of a vessel allowing the maximum possible time for effective action to be taken to avoid a collision and to be stopped within an appropriate distance", zh: "安全航速。能及時採取避碰措施並喺適當距離停住架船嘅安全速度。" },
+      { group: "航行操縱與避碰", term: "Full speed", en: "Highest possible speed of a vessel", zh: "全速。船隻機械能推動出嚟嘅最高航速。" },
+      { group: "航行操縱與避碰", term: "Crash-stop", en: "An emergency reversal operation of the main engine(s) to avoid a collision", zh: "緊急全速倒車。為免相撞，即刻將主機全速倒波煞停隻船嘅應急操作。" },
+      { group: "航行操縱與避碰", term: "Foul (of propeller)", en: "A line, wire, net, etc., is wound round the propeller", zh: "纏車葉。大俥螺旋槳俾魚網、粗繩或鋼纜死死捲住。" },
+      { group: "航行操縱與避碰", term: "Blast", en: "A sound signal made with the whistle of the vessel", zh: "鳴笛／響笛。用船上大汽笛吹出嚟嘅聲號信號。" },
+      { group: "航行操縱與避碰", term: "Proceed (to)", en: "To sail or head for a certain position or to continue with the voyage", zh: "駛向／前進。開往指定位置或繼續原有航程。" },
+      { group: "航行操縱與避碰", term: "Standing orders", en: "Orders of the Master to the officer of the watch which s/he must comply with", zh: "船長常規指令。船長寫畀值更高級船員必須嚴格遵守嘅航行守則。" },
+
+      // 7. 編隊、引水與甲板作業 (Convoy, Pilot & Deck Operations)
+      { group: "引水、編隊與甲板", term: "Convoy", en: "A group of vessels which sail together, e.g. through a canal or ice", zh: "船隊／護航編隊。一齊排隊整齊航行通過運河或冰區嘅船組。" },
+      { group: "引水、編隊與甲板", term: "Close up (to)", en: "To decrease the distance to the vessel ahead by increasing one's own speed", zh: "跟近啲／拉近距離。自己加速以縮減與前船嘅距離。" },
+      { group: "引水、編隊與甲板", term: "Drop back (to)", en: "To increase the distance to the vessel ahead by reducing one's own speed", zh: "放慢減速／拉開距離。自己減速以拉大與前船嘅距離。" },
+      { group: "引水、編隊與甲板", term: "Close-coupled towing", en: "A method of towing vessels through polar ice by means of icebreaking tugs with a special stern notch suited to receive and hold the bow of the vessel to be towed", zh: "緊抱式破冰拖帶。破冰船尾卡入被拖船頭頂住開路嘅極地拖帶法。" },
+      { group: "引水、編隊與甲板", term: "Escort", en: "Attending a vessel, to be available in case of need, e.g. ice-breaker, tug, etc", zh: "伴航／護航。拖船或破冰船隨行待命，有需要隨時提供支援。" },
+      { group: "引水、編隊與甲板", term: "Boarding arrangements", en: "All equipment, such as pilot ladder, accommodation ladder, hoist, etc., necessary for a safe transfer of the pilot", zh: "登船接送設施。接送引水員安全上下船所需嘅全套器材（如引水梯、舷梯）。" },
+      { group: "引水、編隊與甲板", term: "Boarding speed", en: "The speed of a vessel adjusted to that of a pilot boat at which the pilot can safely embark / disembark", zh: "引水登船航速。為配合引水艇靠泊上落而維持嘅平穩安全船速。" },
+      { group: "引水、編隊與甲板", term: "Accommodation ladder", en: "Ladder attached to platform at vessel's side with flat steps and handrails enabling persons to embark / disembark from water or shore", zh: "大梯／舷梯。掛喺船邊有踏板同欄杆、方便人由碼頭或小艇上下嘅舷梯。" },
+      { group: "引水、編隊與甲板", term: "Spreader", en: "here: Step of a pilot ladder which prevents the ladder from twisting", zh: "防扭長板。引水梯每隔幾格設置嘅長橫木板，防止軟梯打扭麻花。" },
+      { group: "引水、編隊與甲板", term: "Embark (to)", en: "To go aboard a vessel", zh: "上船。登上船隻。" },
+      { group: "引水、編隊與甲板", term: "Disembark (to)", en: "To go from a vessel", zh: "落船。離開船隻下船。" },
+      { group: "引水、編隊與甲板", term: "Stand clear (to)", en: "here: To keep a boat away from the vessel", zh: "避開／保持距離。指令小艇避開彈開，勿靠近大船危險範圍。" },
+      { group: "引水、編隊與甲板", term: "Hatchrails", en: "Ropes supported by stanchions around an open hatch to prevent persons from falling into a hold", zh: "艙口圍欄／安全繩。貨艙開口周圍拉起嘅防護欄繩，防止人失足跌入深艙。" },
+      { group: "引水、編隊與甲板", term: "Restricted area", en: "A deck, space, area, etc., in vessels, where for safety reasons, entry is only permitted for authorized crew members", zh: "禁區／受限區域。為安全起見只准獲授權船員進入嘅危險區域。" },
+
+      // 8. 貨物裝卸與油艙操作 (Cargo Handling & Tank Cleaning)
+      { group: "貨運與油艙作業", term: "TEU", en: "Twenty Foot Equivalent Unit (standard container dimension)", zh: "標準貨櫃單位。20呎標準貨櫃單位，用嚟計算貨櫃船載運量。" },
+      { group: "貨運與油艙作業", term: "Compatibility(of goods)", en: "states whether different goods can be stowed together in one hold", zh: "貨物相容性。評估唔同貨物放喺同一艙內會唔會起化學反應或互損。" },
+      { group: "貨運與油艙作業", term: "Segregation(of goods)", en: "Separation of goods which for different reasons must not be stowed together", zh: "貨物隔離。規定互相有衝突或危險嘅貨物必須分艙裝載嘅隔離措施。" },
+      { group: "貨運與油艙作業", term: "IMO-Class", en: "Group of dangerous or hazardous goods, harmful substances or marine pollutants in sea transport as classified in the International Maritime Dangerous Goods Code (IMDG Code)", zh: "國際危險品等級。IMDG Code 按易燃、腐蝕、爆炸等定義嘅危險品級別。" },
+      { group: "貨運與油艙作業", term: "Shifting cargo", en: "Transverse movement of cargo, especially bulk, caused by rolling or a heavy list", zh: "貨物移位。船身搖擺過大導致散裝貨物滑移一側，極易造成傾覆。" },
+      { group: "貨運與油艙作業", term: "Jettison (to) (of cargo)", en: "Throwing overboard of goods in order to lighten the vessel or improve its stability in case of an emergency", zh: "拋貨／棄貨。危急時為挽救船體穩定度而特登將貨物抌落海。" },
+      { group: "貨運與油艙作業", term: "Slings", en: "Ropes, nets, and any other means for handling general cargoes", zh: "吊索／吊網。裝卸雜貨時用嚟網兜住貨物吊起嘅索具。" },
+      { group: "貨運與油艙作業", term: "Union purchase", en: "A common method of cargo handling by combining two derricks, one of which is fixed over the quay, the other over the hatchway", zh: "雙吊桿聯動吊貨。船艙頂與碼頭頂兩條吊桿聯合固定快速吊運貨物。" },
+      { group: "貨運與油艙作業", term: "Preventers", en: "Ropes or wires attached to derricks to prevent them from swinging during cargo handling operations", zh: "防擺繩／保險索。吊貨時防止吊臂意外橫向擺動嘅加強安全鋼纜。" },
+      { group: "貨運與油艙作業", term: "Bob-cat", en: "A mini-caterpillar with push-blade used for the careful distribution of loose goods in cargo holds of bulk carriers", zh: "山貓平艙機。散貨艙內用以推勻散裝物料（如礦沙、糧食）嘅小型鏟泥車。" },
+      { group: "貨運與油艙作業", term: "Transshipment (of cargo)", en: "here: The transfer of goods from one vessel to another outside harbours", zh: "海上過駁。喺港口界限以外嘅錨地將貨物由一艘船轉移到另一艘船。" },
+      { group: "貨運與油艙作業", term: "Safety load", en: "The maximum permissible load of a deck, etc.", zh: "安全載重。甲板或艙底結構所允許承受嘅最大安全重量。" },
+      { group: "貨運與油艙作業", term: "Safe working pressure", en: "The maximum permissible pressure in cargo hoses", zh: "安全工作壓力。貨油軟管在輸送時允許承受嘅最高安全壓力值。" },
+      { group: "貨運與油艙作業", term: "Inert (to)", en: "To reduce the oxygen in an oil tank by inert gas to avoid an explosive atmosphere", zh: "充惰氣。往油艙注入惰性氣體將氧氣降至8%以下，防止油氣爆炸。" },
+      { group: "貨運與油艙作業", term: "COW", en: "Crude Oil Washing: A system of cleaning the cargo tanks by washing them with the cargo of crude oil during discharged", zh: "原油洗艙。卸油時直接以原油沖刷艙壁，洗去沉澱殘渣嘅系統。" },
+      { group: "貨運與油艙作業", term: "Stripping", en: "Draining tanks of the remaining cargo, water, etc.", zh: "掃艙／抽清。卸貨尾聲用專門掃艙泵徹底抽乾艙底剩餘殘液嘅操作。" },
+      { group: "貨運與油艙作業", term: "Overflow", en: "Accidental escape of oil from a tank which is full because pumping was not stopped in time", zh: "溢流／谷爆油艙。灌油無及時停泵導致油料溢出滿瀉甲板。" },
+      { group: "貨運與油艙作業", term: "Spill (to)", en: "The accidental escape of oil, etc., from a vessel, container, etc., into the sea", zh: "漏油／溢出。液體或燃油意外溢漏出船外流入大海。" },
+      { group: "貨運與油艙作業", term: "Spill control gear", en: "Special equipment for fighting accidental oil spills at early stages", zh: "溢油應急器材。漏油初期用作圍油、吸油同防擴散嘅應急器材。" },
+      { group: "貨運與油艙作業", term: "Oil clearance", en: "Oil skimming from the surface of the water", zh: "清除溢油。喺海面打撈回收或清理浮油污漬嘅作業。" },
+      { group: "貨運與油艙作業", term: "Polluter", en: "A vessel emitting harmful substances into the air or spilling oil into the sea", zh: "排污船。違例向海面漏油或向大氣排有毒黑煙嘅污染船舶。" },
+
+      // 9. 氣象、環境與通航條件 (Weather, Wind & Environment)
+      { group: "氣象海況與航行環境", term: "Windward", en: "The general direction from which the wind blows; opposite of leeward", zh: "上風處／迎風側。風吹過嚟嗰個方向（迎風面）。" },
+      { group: "氣象海況與航行環境", term: "Leeward", en: "The general direction to which the wind blows; opposite of windward", zh: "下風處／背風側。風吹過去嗰個方向（背風面）。" },
+      { group: "氣象海況與航行環境", term: "Veering (of winds)", en: "Shifting of wind direction in a manner, in time; opposite of backing", zh: "風向順時針轉。風向隨時間轉變為順時針方向偏轉。" },
+      { group: "氣象海況與航行環境", term: "Backing (of wind)", en: "Shift of wind direction in an anticlockwise manner, in time (opposite of veering)", zh: "風向逆時針轉。風向隨時間轉變為逆時針方向偏轉。" },
+      { group: "氣象海況與航行環境", term: "Variable (of winds)", en: "When a wind is permanently changing the direction from which it blows", zh: "無定向風。風向持續不定、無固定吹拂方向。" },
+      { group: "氣象海況與航行環境", term: "Leeway", en: "The angular effect on the vessel's course caused by the prevailing wind", zh: "風壓差。海風橫吹將船身向橫推移而產生嘅航向角度偏差。" },
+      { group: "氣象海況與航行環境", term: "Speed of advance", en: "The speed at which a storm centre moves", zh: "風暴移速。颱風或低氣壓中心向前推移嘅前進速度。" },
+      { group: "氣象海況與航行環境", term: "Icing", en: "Coating of ice on an object, e.g. the mast or superstructure of a vessel", zh: "結冰／積冰。海水浪花喺桅杆或甲板結冰，極度增重甚至引發翻船。" },
+      { group: "氣象海況與航行環境", term: "Air draft", en: "The height from the waterline to the highest point of the vessel", zh: "水上高度。由水面起計直到隻船最高點嘅垂直高度（過橋必算）。" },
+      { group: "氣象海況與航行環境", term: "Draft", en: "The depth of water which a vessel draws", zh: "吃水。船底至水面嘅垂直距離（浸喺水入面嘅深度）。" },
+
+      // 10. VTS 船舶交通服務與港航管制 (VTS & Traffic Routing)
+      { group: "VTS 與港航管制", term: "VTS", en: "Vessel Traffic Services: Services, designed to improve safety and efficiency of vessel traffic and to protect the environment", zh: "船舶交通服務。海事處嘅「航空管制」，監控指引船舶出入港。" },
+      { group: "VTS 與港航管制", term: "VTS-area", en: "Area controlled by a VTS-Centre or VTS-Station", zh: "VTS 管制海域。由海事管制作業中心負責監察涵蓋嘅港灣水域。" },
+      { group: "VTS 與港航管制", term: "Traffic clearance", en: "VTS authorization for a vessel to proceed under conditions specified", zh: "交通放行許可。VTS 正式授權許可船舶按照指定條件航行或進港。" },
+      { group: "VTS 與港航管制", term: "Reporting point", en: "A mark or position at which a vessel is required to report to the local VTS-Station to establish its position", zh: "報告點。駛經特定航標或經緯度時，必須主動向海事台報告船位。" },
+      { group: "VTS 與港航管制", term: "Receiving point", en: "A mark or place at which a vessel comes under obligatory entry, transit, or escort procedure", zh: "管制交接點。行到此點船舶必須強制遵守進入、通航或拖船護航程序。" },
+      { group: "VTS 與港航管制", term: "TSS", en: "Traffic Separation Scheme: A routing measure aimed at the separation of opposing streams of traffic by appropriate means and by the establishment of traffic lanes", zh: "分道通航制。海面劃分左右行車線嘅分流公路系統，杜絕迎面相撞。" },
+      { group: "VTS 與港航管制", term: "Traffic lane", en: "An area within defined limits in which one-way traffic is established", zh: "單向通航分道。規定只准向同一指定方向前進嘅海上單行道。" },
+      { group: "VTS 與港航管制", term: "Separation zone / line", en: "A zone or line separating the traffic lanes in which vessels are proceeding in opposite or nearly opposite directions; or separating a traffic lane from the adjacent sea area; or separating traffic lanes designated for particular classes of vessels proceeding in the same direction", zh: "分隔帶／分隔線。劃喺對向航道中間如雙白線或安全島嘅隔離區。" },
+      { group: "VTS 與港航管制", term: "ITZ", en: "Inshore Traffic Zone (of a TSS): A routing measure comprising a designated area between the landward boundary of a TSS and the adjacent coast", zh: "沿岸通航帶。分道通航制內側邊界與海岸之間嘅水域，供小型沿海船隻通行。" },
+      { group: "VTS 與港航管制", term: "Reference line", en: "A fictive line displayed on the radar screens in VTS Centres and/or electronic sea-charts separating the fairway for inbound and outbound vessels so that they can safely pass each other", zh: "雷達參考線。海事雷達或電子海圖上標明嘅虛擬中心分道線。" },
+      { group: "VTS 與港航管制", term: "Fairway", en: "Navigable part of a waterway", zh: "主航道。成個水域入面水深足夠、供大船安全進出通行嘅指定水道。" },
+      { group: "VTS 與港航管制", term: "Fairway speed", en: "Mandatory speed in a fairway", zh: "航道法定限速。駛入指定主航道必須嚴格遵守嘅強制航速管制。" },
+      { group: "VTS 與港航管制", term: "Transit", en: "here: The passage of a vessel through a canal, fairway, etc.", zh: "通過／通航。船舶穿過狹窄航道或運河嘅整個通航過程。" },
+      { group: "VTS 與港航管制", term: "Transit speed", en: "Speed of a vessel required for the passage through a canal, fairway, etc.", zh: "過境航速。穿過運河或狹窄航道時所強制規定必須保持嘅航速。" },
+      { group: "VTS 與港航管制", term: "Manoeuvring speed", en: "A vessel's reduced rate of speed in restricted waters such as fairways or harbours", zh: "操縱航速。港內狹窄水域慢車行駛、以便敏捷轉舵操縱嘅減速航速。" },
+
+      // 11. 航行通告與一般操作 (Notices & Operational Status)
+      { group: "航行告示與常規", term: "Located", en: "In navigational warnings: Position of object confirmed", zh: "已確認位置。航行警告術語，代表目標或障礙物位置已經實測證實。" },
+      { group: "航行告示與常規", term: "Reported", en: "in navigational warnings: Position of object unconfirmed", zh: "據報／未證實。航行警告術語，代表目標雖有人通報但當局尚未核實。" },
+      { group: "航行告示與常規", term: "Obstruction", en: "An object such as a wreck, net, etc., which blocks a fairway, route, etc.", zh: "障礙物。阻擋航道嘅沉船、魚網或大型水下殘骸。" },
+      { group: "航行告示與常規", term: "Ordnance exercise", en: "Naval firing practice", zh: "實彈射擊演習。海軍於特定海域劃定進行嘅火砲射擊演練。" },
+      { group: "航行告示與常規", term: "Rig move", en: "The movement of an oil rig, drilling platform, etc., from one position to another", zh: "鑽油台移位。大型海上鑽井平台遷移作業位置嘅拖航過程。" },
+      { group: "航行告示與常規", term: "Rendez-vous", en: "An appointment between vessels normally made on radio to meet in a certain area or position", zh: "會合約定。船隻雙方事前約定於指定座標位置碰頭會合。" },
+      { group: "航行告示與常規", term: "Destination", en: "Port which a vessel is bound for", zh: "目的地／目的港。船舶航程預定開往嘅終點港口。" },
+      { group: "航行告示與常規", term: "ETA", en: "Estimated Time of Arrival", zh: "預計到達時間。預計船舶駛抵港口或交接點嘅時刻。" },
+      { group: "航行告示與常規", term: "ETD", en: "Estimated Time of Departure", zh: "預計離泊開船時間。預計船舶解纜出發嘅時刻。" },
+      { group: "航行告示與常規", term: "Check (to)", en: "1: To make sure that equipment etc. is in proper condition or that everything is correct and safe\n2: To regulate motion of a cable, rope or wire when it is running out too fast", zh: "檢查／煞住纜繩：\n1: 巡查裝備是否處於良好安全狀態\n2: 當纜繩出得太快時收力制動拉住" },
+      { group: "航行告示與常規", term: "Operational", en: "Ready for immediate use", zh: "可用／正常運作中。設備處於良好狀態，隨時可即時投入使用。" },
+      { group: "航行告示與常規", term: "Inoperative", en: "Not functioning", zh: "壞咗／失效。設備故障失靈，無法維持正常運轉。" },
+      { group: "航行告示與常規", term: "Stand by (to)", en: "To be in readiness or prepared to execute an order; to be readily available", zh: "備便／待命。全體準備就緒，隨時聽候口令即刻行動。" },
+      { group: "航行告示與常規", term: "Station", en: "The allotted place or the duties of each person on board", zh: "崗位／指定戰位。每個人喺船上被指派嘅專屬值更或應急位置。" },
+      { group: "航行告示與常規", term: "Resume (to)", en: "here: To re-start a voyage, service or search", zh: "恢復。中斷後重新開展航行、客運班次或搜救行動。" }
+    ];
+
+    // 將包含 1:, 2: 或 1., 2. 或換行符號的文字自動切成獨立行數
+    function formatNumberedLines(text) {
+      let normalized = text.replace(/([0-9][.:])\s*/g, "\n$1 ");
+      const lines = normalized.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+      return lines.map(line => `<span class="meaning-item">${line}</span>`).join("");
+    }
+
+    const container = document.getElementById("cardContainer");
+
+    cardData.forEach((card, index) => {
+      const idStr = String(index + 1).padStart(3, '0');
+      const cardEl = document.createElement("div");
+      cardEl.className = "card";
+
+      const formattedEn = formatNumberedLines(card.en);
+      const formattedZh = formatNumberedLines(card.zh);
+
+      cardEl.innerHTML = `
+        <div>
+          <div class="card-top">
+            <span class="card-id">#${idStr}</span>
+            <span class="card-category">${card.group}</span>
+          </div>
+          <div class="term">${card.term}</div>
+          <div class="meaning-en">${formattedEn}</div>
+        </div>
+        <div class="meaning-zh">
+          ${formattedZh}
+        </div>
+      `;
+      container.appendChild(cardEl);
+    });
+  </script>
+</body>
+</html>
