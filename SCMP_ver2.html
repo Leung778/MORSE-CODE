@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="zh-HK">
 <head>
@@ -596,4 +597,604 @@
     }
 </script>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Marine Terminology App | 航海術語學習系統</title>
+    <style>
+        :root {
+            --primary: #0056b3;
+            --secondary: #e9ecef;
+            --success: #28a745;
+            --danger: #dc3545;
+            --text: #222;
+            --bg: #f4f6f9;
+        }
+        /* 字體放大，優化手機閱讀 */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; margin: 0; padding: 0; background-color: var(--bg); color: var(--text); font-size: 18px; line-height: 1.6; }
+        
+        header { background: var(--primary); color: white; padding: 1.2rem 1rem; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        header h2 { margin: 0; font-size: 1.5rem; }
+        header p { margin: 0.2rem 0 0 0; font-size: 1rem; opacity: 0.9; }
+
+        /* 導覽列適應手機，加大點擊區域 */
+        nav { display: flex; flex-wrap: nowrap; overflow-x: auto; background: #343a40; -webkit-overflow-scrolling: touch; }
+        nav button { flex: 0 0 auto; background: none; border: none; color: white; padding: 1rem 1.2rem; cursor: pointer; font-size: 1.1rem; font-weight: bold; border-bottom: 4px solid transparent; white-space: nowrap; }
+        nav button:hover, nav button.active { background: #495057; border-bottom: 4px solid #66b0ff; }
+        
+        .container { max-width: 1000px; margin: 1rem auto; padding: 0 0.8rem; }
+        .tab-content { display: none; background: white; padding: 1.5rem 1rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .tab-content.active { display: block; }
+        
+        /* 表單與按鈕加大 */
+        .btn { padding: 0.8rem 1.2rem; border: none; border-radius: 6px; cursor: pointer; background: var(--primary); color: white; font-size: 1.1rem; font-weight: bold; width: 100%; box-sizing: border-box; margin-bottom: 0.5rem; text-align: center; transition: background 0.2s; }
+        .btn:active { background: #004494; transform: scale(0.98); }
+        .btn-secondary { background: #6c757d; }
+        .btn-active { background: #003d80 !important; border-left: 5px solid #ffc107; }
+        
+        .settings-bar { margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.8rem; background: var(--secondary); padding: 1rem; border-radius: 8px; }
+        select, input[type="text"] { padding: 0.8rem; border: 1px solid #ccc; border-radius: 6px; font-size: 1.1rem; width: 100%; box-sizing: border-box; }
+        
+        /* 測驗區塊優化 */
+        .question-box { font-size: 1.35rem; font-weight: bold; margin-bottom: 1.5rem; color: #000; background: #fff3cd; padding: 1rem; border-radius: 8px; border-left: 5px solid #ffc107; }
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 0.8rem; }
+        .option-btn { text-align: left; padding: 1.2rem; border: 2px solid #dee2e6; background: white; border-radius: 8px; cursor: pointer; font-size: 1.15rem; line-height: 1.5; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .option-btn:active { background: var(--secondary); }
+        .option-btn.correct { background: var(--success); color: white; border-color: var(--success); font-weight: bold; }
+        .option-btn.wrong { background: var(--danger); color: white; border-color: var(--danger); }
+        .feedback { margin-top: 1.2rem; font-weight: bold; font-size: 1.25rem; padding: 1rem; border-radius: 8px; }
+        
+        /* 資料卡片優化 */
+        .data-card { border: 1px solid #e0e0e0; padding: 1.2rem; border-radius: 8px; margin-bottom: 1rem; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .data-card h3 { margin: 0 0 0.6rem 0; color: var(--primary); font-size: 1.3rem; border-bottom: 1px solid #eee; padding-bottom: 0.5rem; }
+        .data-card p { margin: 0.4rem 0; }
+        .keyword-tag { display: inline-block; background: #e7f1ff; color: #0056b3; border: 1px solid #b8daff; padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 1rem; margin: 0.2rem 0.2rem 0.2rem 0; font-weight: 500; }
+        
+        /* 主題標題 */
+        .theme-header { background: #e2e6ea; padding: 1rem; border-left: 5px solid var(--primary); border-radius: 4px; margin: 2rem 0 1rem 0; font-size: 1.2rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h2>Marine Terminology App</h2>
+    <p>航海術語行動版學習系統</p>
+</header>
+
+<nav>
+    <button class="nav-btn active" onclick="switchTab('mcq', this)">選擇題<br><small>MCQ</small></button>
+    <button class="nav-btn" onclick="switchTab('input', this)">輸入題<br><small>Input</small></button>
+    <button class="nav-btn" onclick="switchTab('plan', this)">七天計畫<br><small>7-Day Plan</small></button>
+    <button class="nav-btn" onclick="switchTab('category', this)">主題分類<br><small>By Theme</small></button>
+    <button class="nav-btn" onclick="switchTab('all', this)">全部<br><small>All Data</small></button>
+</nav>
+
+<div class="container">
+    
+    <!-- 1. Multiple Choice Tab -->
+    <div id="mcq" class="tab-content active">
+        <div class="settings-bar">
+            <select id="mcq-category">
+                <option value="All">All Topics (所有術語)</option>
+                <option value="General terms">General terms (一般術語)</option>
+                <option value="VTS special terms">VTS special terms (VTS專用術語)</option>
+            </select>
+            <select id="mcq-mode">
+                <option value="ask-meaning">看術語 👉 選含義 (Ask Meaning)</option>
+                <option value="ask-term">看含義 👉 選術語 (Ask Term)</option>
+            </select>
+            <button class="btn" onclick="nextMCQ()">開始 / 下一題 (Next)</button>
+        </div>
+        <div id="mcq-area">
+            <div id="mcq-question" class="question-box">點擊上方「下一題」開始測驗。</div>
+            <div id="mcq-options" class="options-grid"></div>
+            <div id="mcq-feedback" class="feedback"></div>
+        </div>
+    </div>
+
+    <!-- 2. Keyword Input Tab -->
+    <div id="input" class="tab-content">
+        <div class="settings-bar">
+            <span style="font-size: 1rem; color: #444;"><strong>作答說明：</strong> 請輸入英文關鍵字，只要命中一半(50%)的核心單字即算正確。</span>
+            <button class="btn" onclick="nextInput()">開始 / 下一題 (Next)</button>
+        </div>
+        <div id="input-area">
+            <div id="input-question" class="question-box">點擊上方「下一題」開始。</div>
+            <p id="input-kw-hint" style="display:none; font-weight:bold; color:var(--primary);">最少需命中關鍵字數：<span id="input-kw-count"></span> 詞</p>
+            <div class="settings-bar" id="input-controls" style="display:none; background: transparent; padding: 0;">
+                <input type="text" id="input-answer" placeholder="在此輸入英文...">
+                <button class="btn" onclick="checkInput()">送出答案 (Submit)</button>
+            </div>
+            <div id="input-feedback" class="feedback"></div>
+            <div id="input-solution" style="margin-top:1rem; display:none; background:#f1f3f5; padding:1.2rem; border-radius:8px;"></div>
+        </div>
+    </div>
+
+    <!-- 3. 7-Day Plan Tab (Thematic) -->
+    <div id="plan" class="tab-content">
+        <p style="margin-top:0; color:#555;">為增強記憶，七天計畫已根據<strong>「情境主題」</strong>重新分組。</p>
+        <div class="settings-bar" id="day-buttons">
+            <!-- Rendered via JS -->
+        </div>
+        <div id="plan-list"></div>
+    </div>
+
+    <!-- 4. Category / Theme Tab -->
+    <div id="category" class="tab-content">
+        <div class="settings-bar" id="theme-buttons">
+            <!-- Rendered via JS -->
+        </div>
+        <div id="category-list"></div>
+    </div>
+
+    <!-- 5. All Details Tab -->
+    <div id="all" class="tab-content">
+        <div class="settings-bar">
+            <input type="text" id="search-bar" placeholder="🔍 搜尋英文、中文或含義..." onkeyup="renderAllDetails()">
+        </div>
+        <div id="all-list"></div>
+    </div>
+
+</div>
+
+<script>
+    // 原始 161 條資料 (因篇幅限制，這裡注入之前的 JSON 數據)
+    // 為了確保順利執行，我已隱藏龐大的 JSON 陣列，請將您上面複製的 rawData 完全貼入這裡：
+    const rawData = `[
+  {"id":1,"category":"General terms","category_zh":"一般術語","term":"Abandon vessel","term_zh":"棄船","meaning":"To evacuate crew and passengers from a vessel following a distress","meaning_zh":"船舶遇險後，疏散船上全體船員及乘客","keywords":["evacuate","crew and passengers","distress"]},
+  {"id":2,"category":"General terms","category_zh":"一般術語","term":"Accommodation ladder","term_zh":"舷梯","meaning":"Ladder attached to platform at vessel's side with flat steps and handrails enabling persons to embark / disembark from water or shore","meaning_zh":"附著於船舷平台的梯子，具平坦踏板及扶手，供人員自水面或岸上上下船","keywords":["ladder","platform","embark / disembark","handrails"]},
+  {"id":3,"category":"General terms","category_zh":"一般術語","term":"Adrift","term_zh":"漂流（失控漂泊）","meaning":"Floating, not controlled, without a clearly determinable direction","meaning_zh":"在水面漂浮、處於失控狀態，且無明確可測定的方向","keywords":["floating","not controlled","no direction"]},
+  {"id":4,"category":"General terms","category_zh":"一般術語","term":"Air draft","term_zh":"水面以上高度（淨空高度）","meaning":"The height from the waterline to the highest point of the vessel","meaning_zh":"自水線至船舶最高點之垂直高度","keywords":["height","waterline","highest point"]},
+  {"id":5,"category":"General terms","category_zh":"一般術語","term":"Assembly station","term_zh":"集合地點","meaning":"Place on deck, in mess rooms, etc., assigned to crew and passengers where they have to meet according to the muster list when the corresponding alarm is released or announcement made","meaning_zh":"甲板或餐廳等指定場所；當相應警報發出或廣播宣布時，船員及乘客須依應變部署表在此集合","keywords":["muster list","alarm","meet","passengers and crew"]},
+  {"id":6,"category":"General terms","category_zh":"一般術語","term":"Backing (of wind)","term_zh":"風向逆轉（逆時針轉變）","meaning":"Shift of wind direction in an anticlockwise manner, in time (opposite of veering)","meaning_zh":"風向隨時間呈逆時針方向改變（與順轉相反）","keywords":["anticlockwise","wind shift","opposite of veering"]},
+  {"id":7,"category":"General terms","category_zh":"一般術語","term":"Beach (to)","term_zh":"衝灘／擱灘","meaning":"To run a vessel up on a beach to prevent its sinking in deep water","meaning_zh":"將船駛上淺灘，以防止其在深水中沉沒","keywords":["run up on beach","prevent sinking","shallow water"]},
+  {"id":8,"category":"General terms","category_zh":"一般術語","term":"Berth","term_zh":"泊位／安全水域","meaning":"1: A sea room to be kept for safety around a vessel, rock, platform, etc.. 2: The place assigned to a vessel when anchored or lying alongside a pier","meaning_zh":"1：船舶、礁石或平台周圍應保留的安全水域。2：船舶錨泊或靠泊碼頭時獲指定的停泊位置","keywords":["sea room","safety distance","anchored","alongside pier"]},
+  {"id":9,"category":"General terms","category_zh":"一般術語","term":"Blast","term_zh":"鳴笛／笛聲","meaning":"A sound signal made with the whistle of the vessel","meaning_zh":"由船笛所發出的聲響信號","keywords":["sound signal","whistle"]},
+  {"id":10,"category":"General terms","category_zh":"一般術語","term":"Blind sectors","term_zh":"雷達盲區","meaning":"Areas which cannot be scanned by the radar of the vessel because they are shielded by parts of its superstructure, masts, etc, or shore obstructions.","meaning_zh":"因受船體上層建築、桅杆或岸上障礙物遮擋，導致船用雷達無法掃描覆蓋的區域","keywords":["radar","cannot be scanned","shielded","obstructions"]},
+  {"id":11,"category":"General terms","category_zh":"一般術語","term":"Boarding arrangements","term_zh":"登船裝置","meaning":"All equipment, such as pilot ladder, accommodation ladder, hoist, etc., necessary for a safe transfer of the pilot","meaning_zh":"為確保領航員（引水人）安全交接所需的一切設備，例如引水梯、舷梯、升降吊具等","keywords":["pilot ladder","accommodation ladder","hoist","safe transfer"]},
+  {"id":12,"category":"General terms","category_zh":"一般術語","term":"Boarding speed","term_zh":"引水船接送航速","meaning":"The speed of a vessel adjusted to that of a pilot boat at which the pilot can safely embark / disembark","meaning_zh":"本船配合引水船速度進行調節，以便領航員能安全登船或離船的航速","keywords":["pilot boat","adjusted speed","safe embark / disembark"]},
+  {"id":13,"category":"General terms","category_zh":"一般術語","term":"Bob-cat","term_zh":"小型推土機（清艙鏟車）","meaning":"A mini-caterpillar with push-blade used for the careful distribution of loose goods in cargo holds of bulk carriers","meaning_zh":"散裝貨船貨艙內用於精細推拔、平整或清理散裝貨物的小型履帶推土機","keywords":["mini-caterpillar","push-blade","bulk carrier","cargo holds"]},
+  {"id":14,"category":"General terms","category_zh":"一般術語","term":"Briefing","term_zh":"簡報／指引","meaning":"Concise explanatory information to crew and/or passengers","meaning_zh":"向全體船員及／或乘客提供的簡要說明與指示","keywords":["concise information","crew","passengers","explanatory"]},
+  {"id":15,"category":"General terms","category_zh":"一般術語","term":"Cable","term_zh":"錨鏈／鏈（長度單位）","meaning":"1: Chain, wire or rope connecting a vessel to her anchor(s) 2: (measurement), 185.2 metres, i.e. one tenth of a nautical mile","meaning_zh":"1：連接船舶與錨之鏈條、鋼索或繩索。2：（計量單位）185.2公尺，即十分之一海里","keywords":["anchor chain","measurement","185.2 metres","tenth of nautical mile"]},
+  {"id":16,"category":"General terms","category_zh":"一般術語","term":"Capsizing","term_zh":"傾覆","meaning":"Turning of a vessel upside down while on water","meaning_zh":"船舶在水面上翻覆底朝天","keywords":["upside down","overturn","water"]},
+  {"id":17,"category":"General terms","category_zh":"一般術語","term":"Cardinal buoy","term_zh":"方位浮標","meaning":"A seamark, i.e. a buoy, indicating the North, East, South or West, i.e. the cardinal points from a fixed point. such as a wreck, shallow water, banks, etc.","meaning_zh":"用以指示沈船、淺水區或暗灘等固定危險物之東、南、西、北四個基準方位的航標浮標","keywords":["seamark","cardinal points","hazard","navigational aid"]},
+  {"id":18,"category":"General terms","category_zh":"一般術語","term":"Cardinal points","term_zh":"羅經基準點（主方位）","meaning":"The four main points of the compass, i.e. North, East, South and West; for the purpose of the SMCP the intercardinal points, i.e. Northeast, Southeast, etc., are also included","meaning_zh":"羅經四個主要方位：東、南、西、北；在SMCP標準中亦包含東北、東南等隅點方位","keywords":["compass","North East South West","intercardinal points"]},
+  {"id":19,"category":"General terms","category_zh":"一般術語","term":"Casualty","term_zh":"傷亡人員","meaning":"here: Case of death in an accident or shipping disaster","meaning_zh":"此處指海難或事故中的死亡案例","keywords":["death","accident","shipping disaster"]},
+  {"id":20,"category":"General terms","category_zh":"一般術語","term":"Check (to)","term_zh":"核查／制動控制","meaning":"1: To make sure that equipment etc. is in proper condition or that everything is correct and safe 2: To regulate motion of a cable, rope or wire when it is running out too fast","meaning_zh":"1：確認設備處於良好狀態或一切正常安全。2：當錨鏈、繩索或纜線放出速度過快時予以煞住或調節","keywords":["verify","inspect","regulate speed","cable payout"]},
+  {"id":21,"category":"General terms","category_zh":"一般術語","term":"Close-coupled towing","term_zh":"近距聯結拖帶","meaning":"A method of towing vessels through polar ice by means of icebreaking tugs with a special stern notch suited to receive and hold the bow of the vessel to be towed","meaning_zh":"極地破冰拖帶法；破冰拖船尾部設有凹槽，可直接嵌合固定被拖船的船首並進行拖帶","keywords":["polar ice","icebreaker","stern notch","towing"]},
+  {"id":22,"category":"General terms","category_zh":"一般術語","term":"Close up (to)","term_zh":"縮短船距","meaning":"To decrease the distance to the vessel ahead by increasing one's own speed","meaning_zh":"透過提高自身航速，以縮減與前船之間的距離","keywords":["decrease distance","vessel ahead","increase speed"]},
+  {"id":23,"category":"General terms","category_zh":"一般術語","term":"Compatibility(of goods)","term_zh":"貨物相容性","meaning":"states whether different goods can be stowed together in one hold","meaning_zh":"說明不同貨物是否可安全配載於同一貨艙之性質","keywords":["goods","stowed together","one hold","segregation"]},
+  {"id":24,"category":"General terms","category_zh":"一般術語","term":"Convoy","term_zh":"船隊／護航船隊","meaning":"A group of vessels which sail together, e.g. through a canal or ice","meaning_zh":"編隊結伴同航的船群（例如一同通過運河或冰區）","keywords":["group of vessels","sail together","canal","ice passage"]},
+  {"id":25,"category":"General terms","category_zh":"一般術語","term":"Course","term_zh":"航向（水面航向）","meaning":"The intended direction of movement of a vessel through the water","meaning_zh":"船舶在水中航行的預定運動方向","keywords":["intended direction","through water","navigation"]},
+  {"id":26,"category":"General terms","category_zh":"一般術語","term":"Course made good","term_zh":"實際對地航向（航跡向）","meaning":"That course which a vessel makes good over ground, after allowing for the effect of currents, tidal streams, and leeway caused by wind and sea","meaning_zh":"修正水流、潮流以及風浪所引起的風壓差後，船舶實際相對海床對地運動之航向","keywords":["over ground","currents","leeway","tidal stream"]},
+  {"id":27,"category":"General terms","category_zh":"一般術語","term":"COW","term_zh":"原油洗艙","meaning":"Crude Oil Washing: A system of cleaning the cargo tanks by washing them with the cargo of crude oil during discharged","meaning_zh":"原油洗艙系統：在卸貨過程中，以船上所載的原油循環沖洗貨油艙壁的清洗作業","keywords":["Crude Oil Washing","cleaning cargo tanks","discharge"]},
+  {"id":28,"category":"General terms","category_zh":"一般術語","term":"CPA/TCPA","term_zh":"最近相遇距離／至最近相遇點時間","meaning":"Closest Point of Approach /Time to Closest Point of Approach limit as defined by the observer to give warning when a tracked target or targets will close to within these limits","meaning_zh":"觀測者設定之最近會遇距離／距最近會遇點之時間極限值，當雷達追蹤目標進入該警戒範圍即發出警報","keywords":["Closest Point of Approach","warning limits","tracked target","collision risk"]},
+  {"id":29,"category":"General terms","category_zh":"一般術語","term":"Crash-stop","term_zh":"緊急倒車停船","meaning":"An emergency reversal operation of the main engine(s) to avoid a collision","meaning_zh":"為避免碰撞而對主機施行的緊急全速倒車操作","keywords":["emergency reversal","main engine","avoid collision","stop"]},
+  {"id":30,"category":"General terms","category_zh":"一般術語","term":"Damage control team","term_zh":"損管隊（堵漏隊）","meaning":"A group of crew members trained for fighting flooding in the vessel","meaning_zh":"受過專門訓練以應對船體破損及進水堵漏的船員應變小組","keywords":["fighting flooding","crew members","emergency team"]},
+  {"id":31,"category":"General terms","category_zh":"一般術語","term":"Datum","term_zh":"搜救基準點／海圖基準面","meaning":"1. The most probable position of a search target at a given time 2. The plane of reference to which all data as to the depth on charts are referenced.","meaning_zh":"1：特定時間內搜尋目標最可能處於的位置。2：海圖上標註所有水深數據時所依據的基準面","keywords":["probable position","search target","chart depth","reference plane"]},
+  {"id":32,"category":"General terms","category_zh":"一般術語","term":"Derelict","term_zh":"遺棄物／海上棄船","meaning":"Goods or any other commodity, specifically a vessel abandoned at sea","meaning_zh":"遺留在海上的貨物或任何物資，尤指在海上遭棄置漂流的無人船舶","keywords":["abandoned at sea","goods","abandoned vessel"]},
+  {"id":33,"category":"General terms","category_zh":"一般術語","term":"Destination","term_zh":"目的港","meaning":"Port which a vessel is bound for","meaning_zh":"船舶預定前往的目標港口","keywords":["port","bound for","arrival destination"]},
+  {"id":34,"category":"General terms","category_zh":"一般術語","term":"Disabled","term_zh":"失去航行能力（失能）","meaning":"A vessel damaged or impaired in such a manner as to be incapable of proceeding on its voyage","meaning_zh":"船舶受損或機能受阻，導致無法繼續航行","keywords":["damaged","incapable","voyage halted"]},
+  {"id":35,"category":"General terms","category_zh":"一般術語","term":"Disembark (to)","term_zh":"離船／下船","meaning":"To go from a vessel","meaning_zh":"離開船舶前往陸地或另一艘小艇","keywords":["leave vessel","alight","ashore"]},
+  {"id":36,"category":"General terms","category_zh":"一般術語","term":"Distress alert (GMDSS)","term_zh":"遇險報警（GMDSS）","meaning":"A radio signal from a distressed vessel automatically directed to an MRCC giving position, identification, course and speed of the vessel as well as the nature of distress","meaning_zh":"遇險船隻自動發送至海難救助協調中心的無線電信號，內容包含船位、呼號、航向、航速及遇險性質","keywords":["radio signal","MRCC","nature of distress","position and ID"]},
+  {"id":37,"category":"General terms","category_zh":"一般術語","term":"Distress/ Urgency traffic","term_zh":"遇險／緊急通訊","meaning":"here: The verbal exchange of information on radio from ship to shore and/or ship to ship/ air craft about a distress / urgency situation as defined in the relevant ITU Radio Regulations","meaning_zh":"此處指依據ITU無線電規則定義，船與岸、船與船或船與航空器之間就遇險／緊急狀況所進行之無線電話口頭通訊","keywords":["radio verbal exchange","ITU Radio Regulations","distress situation"]},
+  {"id":38,"category":"General terms","category_zh":"一般術語","term":"Draft","term_zh":"吃水","meaning":"The depth of water which a vessel draws","meaning_zh":"船舶浸入水中的垂直深度","keywords":["water depth","vessel draws","draught"]},
+  {"id":39,"category":"General terms","category_zh":"一般術語","term":"Dragging (of anchor)","term_zh":"走錨（拖錨）","meaning":"Moving of an anchor over the sea bottom involuntarily because it is no longer preventing the movement of the vessel","meaning_zh":"錨因無法抓住海底而失去抑制船隻移動之功能，在海床上非自主性地拖移滑動","keywords":["anchor slipping","involuntary movement","sea bottom"]},
+  {"id":40,"category":"General terms","category_zh":"一般術語","term":"Dredging (of anchor)","term_zh":"拖錨操縱（主動拖錨）","meaning":"Moving of an anchor over the sea bottom to control the movement of the vessel","meaning_zh":"刻意讓錨在海床上拖曳以控制與限制船舶的移動速度或船身位置","keywords":["anchor on bottom","control movement","intentional maneuver"]},
+  {"id":41,"category":"General terms","category_zh":"一般術語","term":"Drifting","term_zh":"隨流漂移","meaning":"Floating, caused by winds and current with a determinable direction","meaning_zh":"船舶受風與水流作用在水面漂浮，並具有可測定的方向","keywords":["floating","wind and current","determinable direction"]},
+  {"id":42,"category":"General terms","category_zh":"一般術語","term":"Drop back (to)","term_zh":"拉開前船距離","meaning":"To increase the distance to the vessel ahead by increasing one's own speed","meaning_zh":"藉由減低自身航速，以加大與前船之間的距離","keywords":["increase distance","vessel ahead","reduce speed"]},
+  {"id":43,"category":"General terms","category_zh":"一般術語","term":"DSC","term_zh":"數位選擇呼叫","meaning":"Digital Selective Calling (in the GMDSS system)","meaning_zh":"全球海上遇險及安全系統（GMDSS）中的數位選擇呼叫技術","keywords":["Digital Selective Calling","GMDSS","radio communication"]},
+  {"id":44,"category":"General terms","category_zh":"一般術語","term":"Embark (to)","term_zh":"登船／上船","meaning":"To go aboard a vessel","meaning_zh":"登上或進入船舶內部","keywords":["board vessel","go aboard"]},
+  {"id":45,"category":"General terms","category_zh":"一般術語","term":"EPIRB","term_zh":"應急指位無線電示位標","meaning":"Emergency Position Indicating Radio Beacon","meaning_zh":"應急示位無線電信標，遇險時自動或手動發射求救訊號以利搜救","keywords":["emergency beacon","radio indicator","satellite SAR"]},
+  {"id":46,"category":"General terms","category_zh":"一般術語","term":"Escape route","term_zh":"逃生路線","meaning":"A clearly marked way in the vessel which has to be followed in case of an emergency","meaning_zh":"船上標記明確的通道，供人員在發生緊急情況時循線撤離","keywords":["marked way","emergency exit","evacuation route"]},
+  {"id":47,"category":"General terms","category_zh":"一般術語","term":"Escort","term_zh":"護航／伴航","meaning":"Attending a vessel, to be available in case of need, e.g. ice-breaker, tug, etc","meaning_zh":"由破冰船、拖船等在旁隨行跟隨，以備在需要時隨時提供協助","keywords":["attending vessel","icebreaker","tug support"]},
+  {"id":48,"category":"General terms","category_zh":"一般術語","term":"ETA","term_zh":"預計抵達時間","meaning":"Estimated Time of Arrival","meaning_zh":"預估到達指定港口或航路點的時間","keywords":["Estimated Time of Arrival","arrival schedule"]},
+  {"id":49,"category":"General terms","category_zh":"一般術語","term":"ETD","term_zh":"預計離港時間","meaning":"Estimated Time of Departure","meaning_zh":"預估自港口開航出發的時間","keywords":["Estimated Time of Departure","departure schedule"]},
+  {"id":50,"category":"General terms","category_zh":"一般術語","term":"Fire patrol","term_zh":"防火巡邏員","meaning":"A crew member of the watch going around the vessel at certain intervals so that an outbreak of fire may be promptly detected; mandatory in vessels carrying more than 36 passengers","meaning_zh":"依固定時間巡查船艙各處的值班船員，以便及早發現火警；載客超過36人之客船強制要求指派","keywords":["fire detection","watchkeeping","mandatory patrol","passenger vessel"]},
+  {"id":51,"category":"General terms","category_zh":"一般術語","term":"Flooding","term_zh":"大量進水","meaning":"Major flow of seawater into the vessel","meaning_zh":"海水大量湧入船體內部的嚴重險情","keywords":["major flow","seawater inflow","hull breach"]},
+  {"id":52,"category":"General terms","category_zh":"一般術語","term":"Fire monitor","term_zh":"消防水炮／滅火炮","meaning":"Fixed foam/powder/water cannon shooting fire extinguishing agents on tank deck, manifold etc.","meaning_zh":"固定安裝之泡沫、乾粉或水炮，可將滅火劑噴射至油輪甲板或油管接頭處","keywords":["foam/water cannon","fire extinguishing","fixed installation"]},
+  {"id":53,"category":"General terms","category_zh":"一般術語","term":"Foul (of anchor)","term_zh":"纏錨／絞錨","meaning":"Anchor has its own cable twisted around it or has fouled an obstruction","meaning_zh":"錨被自身的錨鏈纏繞纏住，或鉤住海底障礙物","keywords":["cable twisted","anchor tangled","obstruction caught"]},
+  {"id":54,"category":"General terms","category_zh":"一般術語","term":"Foul (of propeller)","term_zh":"纏車葉／螺旋槳絞纏","meaning":"A line, wire, net, etc., is wound round the propeller","meaning_zh":"繩索、鋼纜或漁網等雜物纏繞在推進器螺旋槳上","keywords":["propeller entangled","net","wire line"]},
+  {"id":55,"category":"General terms","category_zh":"一般術語","term":"Full speed","term_zh":"全速","meaning":"Highest possible speed of a vessel","meaning_zh":"船舶主機運轉可達到的最高極限航速","keywords":["highest speed","maximum speed","full power"]},
+  {"id":56,"category":"General terms","category_zh":"一般術語","term":"Fume","term_zh":"有害煙氣／毒煙","meaning":"Often harmful gas produced by fires, chemicals, fuel, etc.","meaning_zh":"由火災、化學品或燃油等產生的具有危害性的氣體或煙霧","keywords":["harmful gas","fire smoke","chemical vapor"]},
+  {"id":57,"category":"General terms","category_zh":"一般術語","term":"General emergency alarm","term_zh":"通用應急警報","meaning":"A sound signal of seven short blasts and one prolonged blast given with the vessel's sound system","meaning_zh":"由船用警報系統發出的七短聲加一長聲的緊急警號","keywords":["seven short blasts","one prolonged blast","alarm system"]},
+  {"id":58,"category":"General terms","category_zh":"一般術語","term":"GMDSS","term_zh":"全球海上遇險與安全系統","meaning":"Global Maritime Distress and Safety System","meaning_zh":"國際海事組織建立之全球綜合海難通信及安全聯絡體系","keywords":["Global Maritime Distress and Safety System","maritime radio"]},
+  {"id":59,"category":"General terms","category_zh":"一般術語","term":"(D) GPS","term_zh":"（差分）全球定位系統","meaning":"(Differential)Global (satellite) Positioning System","meaning_zh":"利用衛星提供精確地面及海上座標之差分全球定位系統","keywords":["satellite positioning","differential GPS","navigation coordinates"]},
+  {"id":60,"category":"General terms","category_zh":"一般術語","term":"Hampered vessel","term_zh":"受妨礙船舶（操縱能力受限制船舶）","meaning":"A vessel restricted by her ability to manoeuvre by the nature of her work or her deep draft","meaning_zh":"因工作性質特殊或吃水過深導致轉向與操縱能力受限的船舶","keywords":["restricted maneuvering","nature of work","deep draft"]},
+  {"id":61,"category":"General terms","category_zh":"一般術語","term":"Hatchrails","term_zh":"艙口欄杆／防護護欄","meaning":"Ropes supported by stanchions around an open hatch to prevent persons from falling into a hold","meaning_zh":"在開放貨艙口周圍由支柱支撐的防護繩欄，防止人員墜入貨艙深處","keywords":["stanchions","open hatch","fall prevention","safety fence"]},
+  {"id":62,"category":"General terms","category_zh":"一般術語","term":"Heading","term_zh":"船首向","meaning":"The horizontal direction the vessel's bows at a given moment measured degrees clockwise from north","meaning_zh":"某一瞬間船首所指向的水平方向，以正北為起點依順時針度數計量","keywords":["vessel bows","clockwise from north","instantaneous direction"]},
+  {"id":63,"category":"General terms","category_zh":"一般術語","term":"Hoist","term_zh":"直升機吊纜","meaning":"here: A cable used by helicopters for lifting or lowering persons in a pick-up operation","meaning_zh":"此處指直升機在搜救接吊作業中用於升降人員的鋼索","keywords":["helicopter cable","lifting lowering","pick-up operation"]},
+  {"id":64,"category":"General terms","category_zh":"一般術語","term":"Icing","term_zh":"結冰／覆冰","meaning":"Coating of ice on an object, e.g. the mast or superstructure of a vessel","meaning_zh":"物體表面（如桅杆或船身上層建築）凝結附著的冰層","keywords":["ice coating","mast","superstructure","stability risk"]},
+  {"id":65,"category":"General terms","category_zh":"一般術語","term":"IMO-Class","term_zh":"國際危規類別","meaning":"Group of dangerous or hazardous goods, harmful substances or marine pollutants in sea transport as classified in the International Maritime Dangerous Goods Code (IMDG Code)","meaning_zh":"依據《國際海運危險貨物規則》（IMDG規則）對海運危險品、有害物質或海洋污染物所作出的分類組別","keywords":["IMDG Code","dangerous goods","marine pollutants"]},
+  {"id":66,"category":"General terms","category_zh":"一般術語","term":"Inert (to)","term_zh":"惰化（油艙）","meaning":"To reduce the oxygen in an oil tank by inert gas to avoid an explosive atmosphere","meaning_zh":"向貨油艙注入惰性氣體以降低氧氣濃度，防止形成爆炸性混合氣體環境","keywords":["reduce oxygen","inert gas","oil tank","prevent explosion"]},
+  {"id":67,"category":"General terms","category_zh":"一般術語","term":"Initial course","term_zh":"初始搜尋航向","meaning":"Course directed by the OSC or other authorized person to be steered at the beginning of a search","meaning_zh":"搜尋作業開始時，由現場指揮官（OSC）或授權主管指定採取的導向航向","keywords":["OSC directed","search start","steering course"]},
+  {"id":68,"category":"General terms","category_zh":"一般術語","term":"Inoperative","term_zh":"無法運作／失效","meaning":"Not functioning","meaning_zh":"失去機能、停擺無法工作","keywords":["not functioning","broken","out of order"]},
+  {"id":69,"category":"General terms","category_zh":"一般術語","term":"Jettison (to) (of cargo)","term_zh":"拋棄貨物（應急拋貨）","meaning":"Throwing overboard of goods in order to lighten the vessel or improve its stability in case of an emergency","meaning_zh":"在緊急情況下將貨物拋入海中，以減輕船重或改善船舶穩定性","keywords":["throwing overboard","lighten vessel","improve stability"]},
+  {"id":70,"category":"General terms","category_zh":"一般術語","term":"Launch (to)","term_zh":"降放（救生艇）","meaning":"To lower, e.g. lifeboats to the water","meaning_zh":"將救生艇等下放到水面上","keywords":["lower lifeboat","into water","abandon drill"]},
+  {"id":71,"category":"General terms","category_zh":"一般術語","term":"Leaking","term_zh":"滲漏／輕微漏水","meaning":"Escape of liquids such as water, oil, etc., out of pipes, boilers, tanks, etc., or a minor inflow of seawater into the vessel due to damage to the hull","meaning_zh":"水、油等液體由管路、鍋爐或油艙漏出，或因船體局部輕微受損導致海水滲入","keywords":["liquid escape","minor inflow","pipes or tanks","hull damage"]},
+  {"id":72,"category":"General terms","category_zh":"一般術語","term":"Leeward","term_zh":"下風側","meaning":"The general direction to which the wind blows; opposite of windward","meaning_zh":"風吹向的大致方向（背風面）；與上風方向（windward）相反","keywords":["wind blows towards","downwind","opposite of windward"]},
+  {"id":73,"category":"General terms","category_zh":"一般術語","term":"Leeway","term_zh":"偏航角／風壓差","meaning":"The angular effect on the vessel's course caused by the prevailing wind","meaning_zh":"盛行風吹拂在船身上引起航向偏離的角度差","keywords":["angular drift","wind effect","course deflection"]},
+  {"id":74,"category":"General terms","category_zh":"一般術語","term":"Let go (to)","term_zh":"鬆開／拋下（解纜／拋錨）","meaning":"To set free, let loose, or cast off (of anchors, lines, etc.)","meaning_zh":"釋放、解開或拋出（指錨、纜繩等）","keywords":["set free","cast off","drop anchor","release line"]},
+  {"id":75,"category":"General terms","category_zh":"一般術語","term":"Lifeboat station","term_zh":"救生艇集合處","meaning":"Place assigned to crew and passengers where they must gather before being ordered into the lifeboats","meaning_zh":"船員及乘客在接獲登艇指令前所指定的集中集合地點","keywords":["crew and passengers","gather place","embarkation post"]},
+  {"id":76,"category":"General terms","category_zh":"一般術語","term":"List","term_zh":"傾斜／橫傾","meaning":"here: Inclination of the vessel to port side or starboard side","meaning_zh":"此處指船舶向左舷或右舷發生的靜態角度橫傾","keywords":["inclination","port side","starboard side","heel"]},
+  {"id":77,"category":"General terms","category_zh":"一般術語","term":"Located","term_zh":"已定位（航警術語）","meaning":"In navigational warnings: Position of object confirmed","meaning_zh":"航行警告中指目標物體的確切座標位置已被證實確認","keywords":["position confirmed","navigational warnings"]},
+  {"id":78,"category":"General terms","category_zh":"一般術語","term":"Make water (to)","term_zh":"進水","meaning":"Seawater flowing into the vessel due to hull damage, or hatches awash and not properly closed","meaning_zh":"因船體受損，或因艙蓋遭浪湧拍打且未妥善關閉，海水持續湧入船艙","keywords":["seawater ingress","hull damage","hatches unclosed"]},
+  {"id":79,"category":"General terms","category_zh":"一般術語","term":"MMSI","term_zh":"水上行動業務識別碼","meaning":"Maritime Mobile Service Identity number","meaning_zh":"全球海上無線電與衛星通信中使用的9位數船舶識別號碼","keywords":["identity number","radio calling","GMDSS"]},
+  {"id":80,"category":"General terms","category_zh":"一般術語","term":"Moor (to)","term_zh":"繫泊／錨泊","meaning":"To secure a vessel in a particular place by means of wires or ropes made fast to the shore, to anchors, or to anchored mooring buoys, or to ride with both anchors down","meaning_zh":"使用纜繩鋼索固定至碼頭岸上、固定浮筒、或拋下雙錨固定船位","keywords":["secure vessel","fasten lines","anchors","mooring buoys"]},
+  {"id":81,"category":"General terms","category_zh":"一般術語","term":"MRCC","term_zh":"海事搜救協調中心","meaning":"Maritime Rescue Co-ordination Centre: Land-based authority responsible for promoting efficient organization of maritime search and rescue and for co-ordinating the conduct of search and rescue operations within a search and rescue region","meaning_zh":"岸上主管機構，負責在其責任搜救區域內推動組織架構並協調指揮海上搜救行動","keywords":["Rescue Co-ordination","SAR operations","shore authority"]},
+  {"id":82,"category":"General terms","category_zh":"一般術語","term":"Muster (to)","term_zh":"集合點名／召集","meaning":"To assemble crew, passengers or both in a special place for purposes of checking","meaning_zh":"將全體船員、乘客召集於特定地點以進行人員清點核對","keywords":["assemble","crew and passengers","checking","roll call"]},
+  {"id":83,"category":"General terms","category_zh":"一般術語","term":"Muster list","term_zh":"應變部署表","meaning":"List of crew, passengers and all on board and their functions in a distress or drill","meaning_zh":"載明全船人員名冊及其在遇險情況或演習中所分配職責的清單","keywords":["emergency roles","drill duties","crew list"]},
+  {"id":84,"category":"General terms","category_zh":"一般術語","term":"Not under command","term_zh":"失去操縱能力（NUC）","meaning":"(abbr. NUC) A vessel which through exceptional circumstances is unable to manoeuvre as required by the COLREGS","meaning_zh":"船舶因特殊不可抗力事故，無法依據《國際海上避碰規則》（COLREGS）要求進行操縱避讓","keywords":["NUC","COLREGS","unable to manoeuvre"]},
+  {"id":85,"category":"General terms","category_zh":"一般術語","term":"Obstruction","term_zh":"障礙物","meaning":"An object such as a wreck, net, etc., which blocks a fairway, route, etc.","meaning_zh":"阻礙航道或安全航線的沈船、漁網等物體","keywords":["blocks fairway","wreck","net hazard"]},
+  {"id":86,"category":"General terms","category_zh":"一般術語","term":"Off air","term_zh":"通訊中斷／停播","meaning":"When the transmissions of a radio station etc., have broken down, been switched off or suspended","meaning_zh":"無線電台等訊號發射中斷、關閉或暫停服務","keywords":["transmission suspended","radio breakdown","no signal"]},
+  {"id":87,"category":"General terms","category_zh":"一般術語","term":"Off station (of buoys)","term_zh":"偏離標位（浮標移位）","meaning":"Not in charted position","meaning_zh":"浮標不在海圖所標記的既定位置上","keywords":["not charted position","buoy shifted","adrift buoy"]},
+  {"id":88,"category":"General terms","category_zh":"一般術語","term":"Oil clearance","term_zh":"溢油清除（水面吸油）","meaning":"Oil skimming from the surface of the water","meaning_zh":"使用收油機或吸附設備清除水面漂浮的油污","keywords":["oil skimming","water surface","pollution cleanup"]},
+  {"id":89,"category":"General terms","category_zh":"一般術語","term":"Operational","term_zh":"處於可用狀態／運作正常","meaning":"Ready for immediate use","meaning_zh":"準備就緒，可立即投入使用","keywords":["ready for use","functioning","active"]},
+  {"id":90,"category":"General terms","category_zh":"一般術語","term":"Ordnance exercise","term_zh":"軍事演習／射擊演練","meaning":"Naval firing practice","meaning_zh":"海軍實彈射擊實習或砲火演練","keywords":["naval firing","military practice","exercise area"]},
+  {"id":91,"category":"General terms","category_zh":"一般術語","term":"OSC","term_zh":"現場指揮官","meaning":"On-Scene Co-ordinator: A person designed to co-ordinate search and rescue operations within a specified area","meaning_zh":"現場搜救指揮協調官：獲指派於特定區域內協調所有搜救力量的人員","keywords":["On-Scene Co-ordinator","SAR leadership","designated search"]},
+  {"id":92,"category":"General terms","category_zh":"一般術語","term":"Overflow","term_zh":"溢艙／滿溢","meaning":"Accidental escape of oil from a tank which is full because pumping was not stopped in time","meaning_zh":"因未及時停止油泵輸送，導致滿艙油料意外溢出","keywords":["tank escape","pumping not stopped","oil spill"]},
+  {"id":93,"category":"General terms","category_zh":"一般術語","term":"Polluter","term_zh":"污染源（排污船隻）","meaning":"A vessel emitting harmful substances into the air or spilling oil into the sea","meaning_zh":"向大氣排放有害物質或將油料洩漏溢入海中的船舶","keywords":["emitting harmful substances","spilling oil","vessel pollution"]},
+  {"id":94,"category":"General terms","category_zh":"一般術語","term":"Preventers","term_zh":"防止側擺索（吊桿保護索）","meaning":"Ropes or wires attached to derricks to prevent them from swinging during cargo handling operations","meaning_zh":"固定於起重吊桿上的鋼索或繩索，防止裝卸貨物期間吊桿發生橫向晃動","keywords":["derrick wires","prevent swinging","cargo handling"]},
+  {"id":95,"category":"General terms","category_zh":"一般術語","term":"Proceed (to)","term_zh":"開往／繼續航行","meaning":"To sail or head for a certain position or to continue with the voyage","meaning_zh":"航向某指定位置或繼續執行後續航程","keywords":["sail forward","head for","continue voyage"]},
+  {"id":96,"category":"General terms","category_zh":"一般術語","term":"PA-system","term_zh":"公共廣播系統","meaning":"Public address system: Loudspeakers in the vessel's cabins, mess rooms, etc., and on deck through which important information can be broadcast from a central point, mostly from the navigation bridge","meaning_zh":"安裝於船艙、餐廳及甲板的擴音廣播喇叭系統，多由駕駛台統一播發重要通告","keywords":["public address","loudspeakers","bridge broadcast"]},
+  {"id":97,"category":"General terms","category_zh":"一般術語","term":"Recover (to)","term_zh":"救起／救助（落水人員）","meaning":"Here: To pick up shipwrecked persons","meaning_zh":"此處指自海中打撈、營救遭遇海難的生還者","keywords":["pick up","shipwrecked persons","rescue survivor"]},
+  {"id":98,"category":"General terms","category_zh":"一般術語","term":"Refloat (to)","term_zh":"脫淺／重新起浮","meaning":"To pull a vessel off after grounding; to set afloat again","meaning_zh":"船舶擱淺後將其拖出淺灘，使其重新漂浮於水面","keywords":["pull off","grounding recovery","set afloat"]},
+  {"id":99,"category":"General terms","category_zh":"一般術語","term":"Rendez-vous","term_zh":"約定會合點／會合","meaning":"An appointment between vessels normally made on radio to meet in a certain area or position","meaning_zh":"船隻之間通常透過無線電約定，在特定海域或座標碰頭會合","keywords":["appointment","radio agreement","meet at position"]},
+  {"id":100,"category":"General terms","category_zh":"一般術語","term":"Reported","term_zh":"據報（未經證實）","meaning":"in navigational warnings: Position of object unconfirmed","meaning_zh":"在航行警告中表示該物體的位置尚未得到官方最終核實確認","keywords":["unconfirmed position","navigational warnings"]},
+  {"id":101,"category":"General terms","category_zh":"一般術語","term":"Restricted area","term_zh":"限制區域／限制出入區","meaning":"A deck, space, area, etc., in vessels, where for safety reasons, entry is only permitted for authorized crew members","meaning_zh":"船上基於安全考量僅准許獲授權之特定船員進入的甲板或空間","keywords":["safety access","authorized crew only","security area"]},
+  {"id":102,"category":"General terms","category_zh":"一般術語","term":"Resume (to)","term_zh":"恢復（航行／搜救）","meaning":"here: To re-start a voyage, service or search","meaning_zh":"此處指重新開始受中斷的航程、運航班次或搜救任務","keywords":["re-start","continue search","resume voyage"]},
+  {"id":103,"category":"General terms","category_zh":"一般術語","term":"Retreat signal","term_zh":"撤退信號","meaning":"Sound, visual or other signal to a team ordering it to return to its base","meaning_zh":"發給應變小組命令其全員撤回基準點的聲響或視覺指令","keywords":["recall team","return to base","sound or visual signal"]},
+  {"id":104,"category":"General terms","category_zh":"一般術語","term":"Rig move","term_zh":"鑽油平台移位","meaning":"The movement of an oil rig, drilling platform, etc., from one position to another","meaning_zh":"鑽油平台自原作業座標轉移至新位置的移動作業","keywords":["oil rig","drilling platform","position shift"]},
+  {"id":105,"category":"General terms","category_zh":"一般術語","term":"Roll call","term_zh":"點名","meaning":"The act of checking who of the passengers and crew members are present, e.g. at assembly stations, by reading aloud a list of their names","meaning_zh":"在集合站依名冊逐一唱名，以點算確認在場乘客及船員人數的行為","keywords":["checking present","read aloud names","assembly verification"]},
+  {"id":106,"category":"General terms","category_zh":"一般術語","term":"Safe speed","term_zh":"安全航速","meaning":"That speed of a vessel allowing the maximum possible time for effective action to be taken to avoid a collision and to be stopped within an appropriate distance","meaning_zh":"使船舶有充裕時間採取適當有效避碰行動，並能在適合當時環境的距離內停住船隻的航速","keywords":["avoid collision","stopped within distance","effective action","COLREGS"]},
+  {"id":107,"category":"General terms","category_zh":"一般術語","term":"Safety load","term_zh":"安全載重負荷","meaning":"The maximum permissible load of a deck, etc.","meaning_zh":"甲板等船體結構所允許承受的最大荷載限制","keywords":["maximum load","deck permissible","structural limit"]},
+  {"id":108,"category":"General terms","category_zh":"一般術語","term":"Safe working pressure","term_zh":"安全工作壓力","meaning":"The maximum permissible pressure in cargo hoses","meaning_zh":"裝卸貨管路軟管所允許承受之最高安全內部壓力","keywords":["maximum pressure","cargo hoses","permissible limit"]},
+  {"id":109,"category":"General terms","category_zh":"一般術語","term":"SAR","term_zh":"搜尋與救援（搜救）","meaning":"Search and Rescue","meaning_zh":"在海上對遇險受困的人員或載具實施的搜索與救援工作","keywords":["Search and Rescue","emergency response","life saving"]},
+  {"id":110,"category":"General terms","category_zh":"一般術語","term":"Scene","term_zh":"現場（事故水域）","meaning":"The area or location where the event, e.g. an accident has happened","meaning_zh":"事故或災難事件發生的現場或所在海域","keywords":["incident area","accident location"]},
+  {"id":111,"category":"General terms","category_zh":"一般術語","term":"Search pattern","term_zh":"搜尋樣式（搜尋圖案）","meaning":"A pattern according to which vessels and/or aircraft may conduct co-ordinated search (the IMOSAR offers seven search patterns)","meaning_zh":"船舶或航機協同展開系統化搜索時所依循的路徑圖樣（IMOSAR規範7種搜尋模式）","keywords":["co-ordinated search","IMOSAR patterns","aircraft and vessels"]},
+  {"id":112,"category":"General terms","category_zh":"一般術語","term":"Search speed","term_zh":"搜尋航速","meaning":"The speed of searching vessels directed by the OSC","meaning_zh":"由現場搜救協調官（OSC）指定的參與搜尋船舶之航行速度","keywords":["searching vessels","OSC directed","search operation speed"]},
+  {"id":113,"category":"General terms","category_zh":"一般術語","term":"Seemark","term_zh":"航標（海標）","meaning":"An elevated object on land or sea serving as a guide","meaning_zh":"陸上或海面高聳突出、供船舶引導航向的助航標誌物","keywords":["navigational guide","elevated object","sea mark"]},
+  {"id":114,"category":"General terms","category_zh":"一般術語","term":"Segregation(of goods)","term_zh":"貨物隔離","meaning":"Separation of goods which for different reasons must not be stowed together","meaning_zh":"基於化學或物理性質考量，將不得混放之貨物彼此隔離分開存放","keywords":["separation of goods","stowage restriction","dangerous cargo"]},
+  {"id":115,"category":"General terms","category_zh":"一般術語","term":"Shackle","term_zh":"節（錨鏈長度單位）","meaning":"Standard length (15 fathoms) of an anchor cable","meaning_zh":"錨鏈標準長度單位（等於15潯／約27.4公尺）","keywords":["anchor cable unit","15 fathoms","chain length"]},
+  {"id":116,"category":"General terms","category_zh":"一般術語","term":"Shifting cargo","term_zh":"貨物移動（流動／移位）","meaning":"Transverse movement of cargo, especially bulk, caused by rolling or a heavy list","meaning_zh":"由於船體搖擺橫搖或嚴重橫傾，造成艙內貨物（尤其是散貨）發生橫向位移","keywords":["transverse movement","bulk cargo","rolling or list"]},
+  {"id":117,"category":"General terms","category_zh":"一般術語","term":"Slings","term_zh":"吊索／吊帶","meaning":"Ropes, nets, and any other means for handling general cargoes","meaning_zh":"用於吊裝裝卸雜貨的繩索、網兜等起重工具","keywords":["cargo handling","general cargo","nets and ropes"]},
+  {"id":118,"category":"General terms","category_zh":"一般術語","term":"Speed of advance","term_zh":"風暴中心移動速度","meaning":"The speed at which a storm centre moves","meaning_zh":"熱帶氣旋或風暴中心向前推進的速度","keywords":["storm centre","weather movement","cyclone track"]},
+  {"id":119,"category":"General terms","category_zh":"一般術語","term":"Spill (to)","term_zh":"溢漏／外洩","meaning":"The accidental escape of oil, etc., from a vessel, container, etc., into the sea","meaning_zh":"油料或有害液體從船體、容器等意外流出溢入海洋","keywords":["accidental escape","oil spill","into sea"]},
+  {"id":120,"category":"General terms","category_zh":"一般術語","term":"Spill control gear","term_zh":"溢油應變器材","meaning":"Special equipment for fighting accidental oil spills at early stages","meaning_zh":"在溢油事故初期用於控制、攔截與清理外洩油污的專用應急設備","keywords":["oil spill kit","pollution equipment","early stage control"]},
+  {"id":121,"category":"General terms","category_zh":"一般術語","term":"Spreader","term_zh":"防扭木板（引水梯防撚板）","meaning":"here: Step of a pilot ladder which prevents the ladder from twisting","meaning_zh":"此處指軟梯（引水梯）上較長的梯級踏板，用於防止梯子在懸掛時扭轉捲曲","keywords":["pilot ladder step","prevents twisting","safety ladder"]},
+  {"id":122,"category":"General terms","category_zh":"一般術語","term":"Stand by (to)","term_zh":"待命／戒備","meaning":"To be in readiness or prepared to execute an order; to be readily available","meaning_zh":"準備就緒，隨時待命執行指令","keywords":["in readiness","prepared for order","available"]},
+  {"id":123,"category":"General terms","category_zh":"一般術語","term":"Stand clear (to)","term_zh":"駛離／保持安全距離","meaning":"here: To keep a boat away from the vessel","meaning_zh":"此處指使小艇與大船保持開闊距離，避免靠近碰觸危險","keywords":["keep away","boat distance","clear of ship"]},
+  {"id":124,"category":"General terms","category_zh":"一般術語","term":"Standing orders","term_zh":"常規命令（船長常規指令）","meaning":"Orders of the Master to the officer of the watch which s/he must comply with","meaning_zh":"船長對當值值班駕駛員下達、必須嚴格遵守執行的長期常規指令","keywords":["Master orders","officer of the watch","compliance"]},
+  {"id":125,"category":"General terms","category_zh":"一般術語","term":"Stand on (to)","term_zh":"保持航向與航速（直航）","meaning":"To maintain course and speed","meaning_zh":"依據避碰規則直航船義務，維持原定航向及航速航行","keywords":["maintain course","maintain speed","stand-on vessel"]},
+  {"id":126,"category":"General terms","category_zh":"一般術語","term":"Station","term_zh":"崗位／職位站位","meaning":"The allotted place or the duties of each person on board","meaning_zh":"分配給船上各成員的特定職責或值守崗位地點","keywords":["allotted place","crew duties","assigned post"]},
+  {"id":127,"category":"General terms","category_zh":"一般術語","term":"Stripping","term_zh":"掃艙／抽乾殘油殘水","meaning":"Draining tanks of the remaining cargo, water, etc.","meaning_zh":"將艙底剩餘的極少量殘留液貨或殘水徹底排乾抽盡","keywords":["draining tanks","remaining cargo","residue pumping"]},
+  {"id":128,"category":"General terms","category_zh":"一般術語","term":"Survivor","term_zh":"生還者／倖存者","meaning":"A person who continues to live in spite of being in an extremely dangerous situation, e.g. a shipping disaster.","meaning_zh":"在遭遇海難等極度危險嚴峻境遇中得以存活的人員","keywords":["continues to live","shipping disaster","rescuee"]},
+  {"id":129,"category":"General terms","category_zh":"一般術語","term":"Take off (to)","term_zh":"起飛","meaning":"A helicopter lifts off from a vessel's deck","meaning_zh":"直升機從船舶甲板升空起飛","keywords":["helicopter lifts off","vessel deck","departure"]},
+  {"id":130,"category":"General terms","category_zh":"一般術語","term":"Target","term_zh":"雷達目標／目標物標","meaning":"The echo generated e.g. by a vessel on a radar screen","meaning_zh":"雷達螢幕上顯示的由他船或物體反射形成的回波物標","keywords":["radar echo","tracked vessel","radar screen"]},
+  {"id":131,"category":"General terms","category_zh":"一般術語","term":"Tension winch","term_zh":"恆張力絞車","meaning":"A winch which applies tension to mooring lines to keep them tight","meaning_zh":"可主動對繫泊纜索施加恆定張力以維持其緊繃狀態的絞車","keywords":["applies tension","mooring lines","keep tight"]},
+  {"id":132,"category":"General terms","category_zh":"一般術語","term":"TEU","term_zh":"標準貨櫃單位（20呎標準櫃）","meaning":"Twenty Foot Equivalent Unit (standard container dimension)","meaning_zh":"20英尺標準貨櫃換算單位","keywords":["Twenty Foot Equivalent","standard container","box capacity"]},
+  {"id":133,"category":"General terms","category_zh":"一般術語","term":"Track","term_zh":"航跡／預定航跡線","meaning":"The path followed, or to be followed, between one position and another","meaning_zh":"船舶已航經或計劃在兩點之間航行的海面軌跡路徑","keywords":["path followed","navigation track","planned route"]},
+  {"id":134,"category":"General terms","category_zh":"一般術語","term":"Transit","term_zh":"通過／通航","meaning":"here: The passage of a vessel through a canal, fairway, etc.","meaning_zh":"此處指船舶穿越航道、運河或特定水域的通航航行過程","keywords":["passage","canal","fairway","crossing"]},
+  {"id":135,"category":"General terms","category_zh":"一般術語","term":"Transit speed","term_zh":"通航速度／通過航速","meaning":"Speed of a vessel required for the passage through a canal, fairway, etc.","meaning_zh":"船舶通過運河或航道水域時所規定或要求的航行航速","keywords":["required speed","canal passage","fairway transit"]},
+  {"id":136,"category":"General terms","category_zh":"一般術語","term":"Transshipment (of cargo)","term_zh":"轉船／過駁轉運","meaning":"here: The transfer of goods from one vessel to another outside harbours","meaning_zh":"此處指在港口外開闊水域中將貨物從一艘船駁運轉載至另一艘船","keywords":["transfer of goods","vessel to vessel","outside harbour"]},
+  {"id":137,"category":"General terms","category_zh":"一般術語","term":"Underway","term_zh":"在航","meaning":"A vessel which is not at anchor, or made fast to the shore, or aground","meaning_zh":"指船舶未拋錨、未繫泊於岸邊、且未發生擱淺的航行狀態","keywords":["not at anchor","not made fast","not aground","COLREGS"]},
+  {"id":138,"category":"General terms","category_zh":"一般術語","term":"Union purchase","term_zh":"雙桿聯合作業（聯桿吊運法）","meaning":"A common method of cargo handling by combining two derricks, one of which is fixed over the quay, the other over the hatchway","meaning_zh":"結合兩根起重吊桿的常見貨物裝卸法；一桿固定於碼頭上方，另一桿固定於貨艙口上方","keywords":["cargo handling","two derricks","quay and hatchway"]},
+  {"id":139,"category":"General terms","category_zh":"一般術語","term":"Unlit","term_zh":"滅燈（熄滅）","meaning":"When the light characteristics of a buoy or a lighthouse are inoperative","meaning_zh":"當浮標或燈塔的燈光識別特徵失去功能、熄滅時的狀態","keywords":["light inoperative","buoy unlit","lighthouse dark"]},
+  {"id":140,"category":"General terms","category_zh":"一般術語","term":"UTC","term_zh":"世界協調時間","meaning":"Universal Time Co-ordinated (ex GMT)","meaning_zh":"世界協調時間（前身為格林威治標準時間 GMT）","keywords":["Universal Time Co-ordinated","standard time","GMT"]},
+  {"id":141,"category":"General terms","category_zh":"一般術語","term":"Variable (of winds)","term_zh":"無定風向（風向不定）","meaning":"When a wind is permanently changing the direction from which it blows","meaning_zh":"風吹來的方向持續處於頻繁轉變、不穩定的狀態","keywords":["changing direction","unstable wind","shifting wind"]},
+  {"id":142,"category":"General terms","category_zh":"一般術語","term":"Veering (of winds)","term_zh":"風向順轉（順時針轉變）","meaning":"Shifting of wind direction in a manner, in time; opposite of backing","meaning_zh":"風向隨時間呈順時針方向改變；與逆轉（backing）相反","keywords":["clockwise shift","wind direction","opposite of backing"]},
+  {"id":143,"category":"General terms","category_zh":"一般術語","term":"Veer out (to)(of anchors)","term_zh":"鬆出錨鏈","meaning":"To let out a greater length of cable","meaning_zh":"鬆放並放出更長的錨鏈長度","keywords":["let out cable","more anchor chain","lengthen cable"]},
+  {"id":144,"category":"General terms","category_zh":"一般術語","term":"VHF","term_zh":"特高頻無線電","meaning":"Very High Frequency (30-300 MHz)","meaning_zh":"特高頻甚高頻無線電頻段（30至300 MHz）","keywords":["Very High Frequency","marine radio","30-300 MHz"]},
+  {"id":145,"category":"General terms","category_zh":"一般術語","term":"Walk out (to) (of anchors)","term_zh":"倒出錨鏈（動力鬆錨）","meaning":"To reverse the action of a windlass so as to ease the cable","meaning_zh":"反轉起錨機利用動力齒輪平穩緩慢鬆出錨鏈","keywords":["reverse windlass","ease cable","gear walk out"]},
+  {"id":146,"category":"General terms","category_zh":"一般術語","term":"Way point","term_zh":"航路點（轉向點）","meaning":"A position a vessel has to pass or at which she has to alter course according to her voyage plan","meaning_zh":"根據航行計劃船舶必須通過、或在其位置改變航向的指定座標點","keywords":["voyage plan","alter course","pass position"]},
+  {"id":147,"category":"General terms","category_zh":"一般術語","term":"Windward","term_zh":"上風側","meaning":"The general direction from which the wind blows; opposite of leeward","meaning_zh":"風吹來的大致方向（迎風面）；與下風方向（leeward）相反","keywords":["wind blows from","upwind","opposite of leeward"]},
+  {"id":148,"category":"General terms","category_zh":"一般術語","term":"Wreck","term_zh":"沉船／遇難殘骸","meaning":"A vessel which has been destroyed or sunk or abandoned at sea","meaning_zh":"在海上遭摧毀、沉沒或遭棄置的船舶殘骸","keywords":["destroyed vessel","sunk at sea","abandoned wreck"]},
+  {"id":149,"category":"VTS special terms","category_zh":"船舶交通服務專用術語","term":"Fairway","term_zh":"航道（可航水道）","meaning":"Navigable part of a waterway","meaning_zh":"水道中適合船舶通航的深水部分","keywords":["navigable water","channel","waterway"]},
+  {"id":150,"category":"VTS special terms","category_zh":"船舶交通服務專用術語","term":"Fairway speed","term_zh":"航道規定航速","meaning":"Mandatory speed in a fairway","meaning_zh":"在特定航道內強制執行的法定航行速度","keywords":["mandatory speed","fairway limit","speed regulation"]},
+  {"id":151,"category":"VTS special terms","category_zh":"船舶交通服務專用術語","term":"ITZ","term_zh":"沿岸通航區","meaning":"Inshore Traffic Zone (of a TSS): A routing measure comprising a designated area between the landward boundary of a TSS and the adjacent coast","meaning_zh":"分道通航制（TSS）之沿岸通航區：位於通航分道近陸側界線與相鄰海岸之間的指定水域","keywords":["Inshore Traffic Zone","TSS","landward boundary","coast"]},
+  {"id":152,"category":"VTS special terms","category_zh":"船舶交通服務專用術語","term":"Manoeuvring speed","term_zh":"操縱速度（微速／慢速）","meaning":"A vessel's reduced rate of speed in restricted waters such as fairways or harbours","meaning_zh":"船舶在港口、狹窄航道等受限水域內採用的較低操縱航速","keywords":["reduced speed","restricted waters","harbours or fairways"]},
+  {"id":153,"category":"VTS special terms","category_zh":"船舶交通服務專用術語","term":"Receiving point","term_zh":"強制程序受理點","meaning":"A mark or place at which a vessel comes under obligatory entry, transit, or escort procedure","meaning_zh":"船舶開始受到強制性進港、過境通航或伴航程序管制的標誌物或地點","keywords":["obligatory procedure","transit or escort","entry mark"]},
+  {"id":154,"category":"VTS special terms","category_zh":"船舶交通服務專用術語","term":"Reference line","term_zh":"基準參考線","meaning":"A fictive line displayed on the radar screens in VTS Centres and/or electronic sea-charts separating the fairway for inbound and outbound vessels so that they can safely pass each other","meaning_zh":"在VTS中心雷達螢幕或電子海圖上顯示的虛擬基準線，用以區隔進港與出港航道使船舶安全會讓","keywords":["fictive line","VTS radar","inbound and outbound","safe passing"]},
+  {"id":155,"category":"VTS special terms","category_zh":"船舶交通服務專用術語","term":"Reporting point","term_zh":"報告點","meaning":"A mark or position at which a vessel is required to report to the local VTS-Station to establish its position","meaning_zh":"船舶必須向當地VTS中心報告以確認並建立船位之標誌或地理座標位置","keywords":["report position","VTS-Station","mandatory reporting"]},
+  {"id":156,"category":"VTS special terms","category_zh":"船舶交通服務專用術語","term":"Separation zone / line","term_zh":"分隔區／分隔線","meaning":"A zone or line separating the traffic lanes in which vessels are proceeding in opposite or nearly opposite directions; or separating a traffic lane from the adjacent sea area; or separating traffic lanes designated for particular classes of vessels proceeding in the same direction","meaning_zh":"分隔不同相反通航分道、區隔航道與相鄰海域、或分開特定船級同向航道之區域或界線","keywords":["separating lanes","opposite directions","buffer zone"]},
+  {"id":157,"category":"VTS special terms","category_zh":"船舶交通服務專用術語","term":"Traffic clearance","term_zh":"通航許可／通行放行許可","meaning":"VTS authorization for a vessel to proceed under conditions specified","meaning_zh":"VTS主管機關授權船舶在指定條件下通航前進之核准許可","keywords":["VTS authorization","specified conditions","permission to proceed"]},
+  {"id":158,"category":"VTS special terms","category_zh":"船舶交通服務專用術語","term":"Traffic lane","term_zh":"通航分道","meaning":"An area within defined limits in which one-way traffic is established","meaning_zh":"在特定邊界範圍內建立單向航行的規定航行水域","keywords":["one-way traffic","defined limits","traffic route"]},
+  {"id":159,"category":"VTS special terms","category_zh":"船舶交通服務專用術語","term":"TSS","term_zh":"分道通航制","meaning":"Traffic Separation Scheme: A routing measure aimed at the separation of opposing streams of traffic by appropriate means and by the establishment of traffic lanes","meaning_zh":"定線制措施，透過建立專用通航分道等適當方法，分離相反流向之船舶交通流","keywords":["Traffic Separation Scheme","routing measure","separation of traffic"]},
+  {"id":160,"category":"VTS special terms","category_zh":"船舶交通服務專用術語","term":"VTS","term_zh":"船舶交通服務","meaning":"Vessel Traffic Services: Services, designed to improve safety and efficiency of vessel traffic and to protect the environment","meaning_zh":"旨在提高船舶交通安全與營運效率、並保護海洋環境之交通服務與監控體系","keywords":["Vessel Traffic Services","safety and efficiency","environmental protection"]},
+  {"id":161,"category":"VTS special terms","category_zh":"船舶交通服務專用術語","term":"VTS-area","term_zh":"VTS管轄海域","meaning":"Area controlled by a VTS-Centre or VTS-Station","meaning_zh":"由VTS中心或VTS台站實施交通管制與監控之法定水域","keywords":["controlled area","VTS-Centre","coverage zone"]}
+]`;
+
+    const data = JSON.parse(rawData);
+
+    // ✅ 新增：動態化主題分類器 (為每條資料貼上更容易記憶的標籤)
+    const themesList = [
+        { id: 1, name: "Day 1: 應急與搜救 (Emergency & SAR)" },
+        { id: 2, name: "Day 2: 航海與氣象 (Navigation & Weather)" },
+        { id: 3, name: "Day 3: 船舶設備與結構 (Ship Ops & Equipment)" },
+        { id: 4, name: "Day 4: 錨泊與繫泊 (Anchoring & Mooring)" },
+        { id: 5, name: "Day 5: 貨物作業與防污 (Cargo & Pollution)" },
+        { id: 6, name: "Day 6: VTS 專用術語 (VTS Special Terms)" },
+        { id: 7, name: "Day 7: 綜合管理與通訊 (Misc & Communications)" }
+    ];
+
+    function assignThemes() {
+        data.forEach(item => {
+            const str = (item.term + " " + item.meaning + " " + item.category).toLowerCase();
+            if (item.category === 'VTS special terms') {
+                item.themeId = 6;
+            } else if (/abandon|distress|emergency|sar|casualty|damage|capsizing|rescue|lifeboat|muster|mrcc|osc|epirb|gmdss|dsc|survivor|escape|fire|alarm|evacuate/.test(str)) {
+                item.themeId = 1;
+            } else if (/anchor|cable|moor|shackle|winch|berth|dragging|dredging|let go|walk out|veer out/.test(str)) {
+                item.themeId = 4;
+            } else if (/cargo|spill|oil|cow|teu|polluter|stow|bob-cat|hold|jettison|pollution|clearance|hose|union purchase|sling/.test(str)) {
+                item.themeId = 5;
+            } else if (/wind|ice|sea|current|storm|drifting|buoy|tide|leeward|windward|variable|veering|backing|weather|visibility|adrift|datum/.test(str)) {
+                item.themeId = 2;
+            } else if (/course|speed|heading|draft|radar|gps|track|waypoint|destination|proceed|cpa|tcpa|collision|manoeuvre|underway|stand on/.test(str)) {
+                item.themeId = 2;
+            } else if (/ladder|equipment|hoist|derrick|deck|hatch|bridge|superstructure|mast|propeller|engine/.test(str)) {
+                item.themeId = 3;
+            } else {
+                item.themeId = 7;
+            }
+        });
+    }
+    assignThemes();
+
+    // 歷史紀錄 (10題防重複)
+    let mcqHistory = [];
+    let inputHistory = [];
+
+    function getRandomItem(historyArr, filterCategory = 'All') {
+        let pool = data;
+        if (filterCategory !== 'All') {
+            pool = pool.filter(item => item.category === filterCategory);
+        }
+        
+        let available = pool.filter(item => !historyArr.includes(item.id));
+        if (available.length === 0) {
+            historyArr.length = 0;
+            available = pool;
+        }
+
+        const selected = available[Math.floor(Math.random() * available.length)];
+        historyArr.push(selected.id);
+        if (historyArr.length > 10) historyArr.shift();
+        
+        return selected;
+    }
+
+    function switchTab(tabId, btn) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        if (btn) btn.classList.add('active');
+        
+        if (tabId === 'all') renderAllDetails();
+        if (tabId === 'plan') {
+            render7DayPlanButtons();
+            showDayPlan(1);
+        }
+        if (tabId === 'category') renderThemeButtons();
+    }
+
+    // --- 1. MCQ ---
+    let currentMcqCorrect = null;
+    function nextMCQ() {
+        document.getElementById('mcq-feedback').innerHTML = '';
+        const category = document.getElementById('mcq-category').value;
+        const mode = document.getElementById('mcq-mode').value;
+        
+        const correctItem = getRandomItem(mcqHistory, category);
+        currentMcqCorrect = correctItem;
+        
+        let pool = category === 'All' ? data : data.filter(i => i.category === category);
+        let options = [correctItem];
+        
+        while (options.length < 4 && options.length < pool.length) {
+            let rand = pool[Math.floor(Math.random() * pool.length)];
+            if (!options.find(o => o.id === rand.id)) {
+                options.push(rand);
+            }
+        }
+        
+        options.sort(() => Math.random() - 0.5);
+        const qBox = document.getElementById('mcq-question');
+        const optBox = document.getElementById('mcq-options');
+        optBox.innerHTML = '';
+        
+        if (mode === 'ask-term') {
+            qBox.innerHTML = `<span style="font-size:0.9rem; color:#888;">[${themesList.find(t=>t.id===correctItem.themeId).name}]</span><br><br>請問以下含義對應哪個術語？<br><br>"${correctItem.meaning}"<br><span style="color:#6c757d; font-size:1.15rem;">(${correctItem.meaning_zh})</span>`;
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<strong>${opt.term}</strong><br><small style="color:#555;">${opt.term_zh}</small>`;
+                btn.onclick = () => checkMCQ(btn, opt.id, correctItem.id);
+                optBox.appendChild(btn);
+            });
+        } else {
+            qBox.innerHTML = `<span style="font-size:0.9rem; color:#888;">[${themesList.find(t=>t.id===correctItem.themeId).name}]</span><br><br>請問此術語的含義是？<br><br><span style="color:var(--primary); font-size:1.5rem;">${correctItem.term}</span><br><span style="color:#6c757d; font-size:1.15rem;">(${correctItem.term_zh})</span>`;
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `<strong>${opt.meaning}</strong><br><small style="color:#555;">${opt.meaning_zh}</small>`;
+                btn.onclick = () => checkMCQ(btn, opt.id, correctItem.id);
+                optBox.appendChild(btn);
+            });
+        }
+    }
+
+    function checkMCQ(btn, selectedId, correctId) {
+        document.querySelectorAll('.option-btn').forEach(b => b.style.pointerEvents = 'none');
+        const feedback = document.getElementById('mcq-feedback');
+        if (selectedId === correctId) {
+            btn.classList.add('correct');
+            feedback.innerHTML = '✅ 答對了！';
+            feedback.style.color = 'var(--success)';
+        } else {
+            btn.classList.add('wrong');
+            feedback.innerHTML = `❌ 錯誤。<br><br>正確解答為：<br><strong>${currentMcqCorrect.term}</strong> (${currentMcqCorrect.term_zh})<br>${currentMcqCorrect.meaning}<br>(${currentMcqCorrect.meaning_zh})`;
+            feedback.style.color = 'var(--danger)';
+        }
+    }
+
+    // --- 2. Keyword Input ---
+    let currentInputItem = null;
+    function nextInput() {
+        document.getElementById('input-answer').value = '';
+        document.getElementById('input-feedback').innerHTML = '';
+        document.getElementById('input-solution').style.display = 'none';
+        document.getElementById('input-kw-hint').style.display = 'block';
+        document.getElementById('input-controls').style.display = 'flex';
+        
+        currentInputItem = getRandomItem(inputHistory);
+        const qBox = document.getElementById('input-question');
+        qBox.innerHTML = `請用英文簡述含義：<br><br><span style="color:var(--primary); font-size:1.5rem;">${currentInputItem.term}</span><br><span style="color:#6c757d; font-size:1.15rem;">(${currentInputItem.term_zh})</span>`;
+        
+        const required = Math.max(1, Math.ceil(currentInputItem.keywords.length / 2));
+        document.getElementById('input-kw-count').innerText = `${required}`;
+        document.getElementById('input-answer').focus();
+    }
+
+    function checkInput() {
+        if (!currentInputItem) return;
+        const userInput = document.getElementById('input-answer').value.toLowerCase();
+        let matchCount = 0;
+        let matchedKws = [];
+        
+        currentInputItem.keywords.forEach(kw => {
+            if (userInput.includes(kw.toLowerCase())) {
+                matchCount++;
+                matchedKws.push(kw);
+            }
+        });
+        
+        const required = Math.max(1, Math.ceil(currentInputItem.keywords.length / 2));
+        const feedback = document.getElementById('input-feedback');
+        const solutionBox = document.getElementById('input-solution');
+        
+        if (matchCount >= required) {
+            feedback.innerHTML = `✅ 完美命中！<br>找到的關鍵字 (${matchedKws.length}/${required}): [${matchedKws.join(', ')}]`;
+            feedback.style.color = 'var(--success)';
+        } else {
+            feedback.innerHTML = `❌ 關鍵字不足。<br>僅命中: ${matchCount}/${required}。請再試一次或看下方解答。`;
+            feedback.style.color = 'var(--danger)';
+        }
+        
+        solutionBox.style.display = 'block';
+        solutionBox.innerHTML = `
+            <strong style="color:var(--primary);">📜 標準英文定義：</strong><br>${currentInputItem.meaning}<br><br>
+            <strong style="color:var(--primary);">📝 中文釋義：</strong><br>${currentInputItem.meaning_zh}<br><br>
+            <strong style="color:var(--primary);">🔑 系統認定的關鍵字：</strong><br>
+            ${currentInputItem.keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('')}
+        `;
+    }
+
+    // --- 3. 7-Day Thematic Plan ---
+    function render7DayPlanButtons() {
+        const buttonsDiv = document.getElementById('day-buttons');
+        let html = '';
+        themesList.forEach(t => {
+            html += `<button class="btn" onclick="showDayPlan(${t.id}, this)">${t.name}</button>`;
+        });
+        buttonsDiv.innerHTML = html;
+    }
+
+    function showDayPlan(themeId, btnObj) {
+        if (btnObj) {
+            document.querySelectorAll('#day-buttons button').forEach(b => b.classList.remove('btn-active'));
+            btnObj.classList.add('btn-active');
+        } else {
+            // Default select Day 1
+            setTimeout(() => {
+                const firstBtn = document.querySelector('#day-buttons button');
+                if (firstBtn) firstBtn.classList.add('btn-active');
+            }, 10);
+        }
+
+        const list = document.getElementById('plan-list');
+        const dayData = data.filter(d => d.themeId === themeId);
+        
+        let html = `<div class="theme-header">${themesList.find(t=>t.id===themeId).name} (共 ${dayData.length} 詞)</div>`;
+        dayData.forEach(item => {
+            html += buildCard(item);
+        });
+        list.innerHTML = html;
+    }
+
+    // --- 4. By Theme (Category) ---
+    function renderThemeButtons() {
+        const buttonsDiv = document.getElementById('theme-buttons');
+        let html = `<button class="btn btn-secondary" onclick="showTheme('All', this)">顯示全部 (Show All)</button>`;
+        themesList.forEach(t => {
+            html += `<button class="btn" onclick="showTheme(${t.id}, this)">${t.name}</button>`;
+        });
+        buttonsDiv.innerHTML = html;
+        showTheme('All');
+    }
+
+    function showTheme(themeId, btnObj) {
+        if (btnObj) {
+            document.querySelectorAll('#theme-buttons button').forEach(b => b.classList.remove('btn-active'));
+            btnObj.classList.add('btn-active');
+        } else {
+            setTimeout(() => {
+                const firstBtn = document.querySelector('#theme-buttons button');
+                if (firstBtn) firstBtn.classList.add('btn-active');
+            }, 10);
+        }
+
+        const list = document.getElementById('category-list');
+        let html = '';
+        
+        if (themeId === 'All') {
+            themesList.forEach(t => {
+                const themeData = data.filter(d => d.themeId === t.id);
+                html += `<div class="theme-header">${t.name} (共 ${themeData.length} 詞)</div>`;
+                themeData.forEach(item => html += buildCard(item));
+            });
+        } else {
+            const themeData = data.filter(d => d.themeId === themeId);
+            html += `<div class="theme-header">${themesList.find(t=>t.id===themeId).name} (共 ${themeData.length} 詞)</div>`;
+            themeData.forEach(item => html += buildCard(item));
+        }
+        list.innerHTML = html;
+    }
+
+    // --- 5. All Details (Search) ---
+    function renderAllDetails() {
+        const query = document.getElementById('search-bar') ? document.getElementById('search-bar').value.toLowerCase().trim() : '';
+        const list = document.getElementById('all-list');
+        
+        const filtered = data.filter(item => 
+            item.term.toLowerCase().includes(query) || 
+            item.meaning.toLowerCase().includes(query) ||
+            item.term_zh.includes(query) ||
+            item.meaning_zh.includes(query) ||
+            item.keywords.some(k => k.toLowerCase().includes(query))
+        );
+        
+        let html = `<p style="font-weight:bold; color:var(--primary);">🔍 找到 ${filtered.length} 筆資料</p>`;
+        filtered.forEach(item => {
+            html += buildCard(item);
+        });
+        list.innerHTML = html;
+    }
+
+    // 統一卡片 UI 產生器
+    function buildCard(item) {
+        return `
+        <div class="data-card">
+            <h3>#${item.id} ${item.term} <br><span style="font-size:1.1rem; color:#666; font-weight:normal;">${item.term_zh}</span></h3>
+            <p><strong>EN:</strong> ${item.meaning}</p>
+            <p><strong>中:</strong> ${item.meaning_zh}</p>
+            <p><strong>Key:</strong> <br>${item.keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('')}</p>
+        </div>`;
+    }
+</script>
+</body>
+>>>>>>> 9c757d4c80c648df7e8d7f976ac7c865b52acafc
 </html>

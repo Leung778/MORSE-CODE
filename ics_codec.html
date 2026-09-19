@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>IMO ICS 海事電文編碼與解碼練習</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #1a1e24;
+            color: #dcdcdc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Courier New", monospace;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            font-size: 1.2rem;
+            color: #4da3ff;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+        p.desc {
+            font-size: 0.85rem;
+            color: #8fa0b3;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 680px;
+            background: #232931;
+            border: 1px solid #39424e;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        button {
+            padding: 9px 14px;
+            background-color: #2e7d32;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: opacity 0.15s;
+        }
+        button:hover {
+            opacity: 0.85;
+        }
+        button.action-btn {
+            background-color: #007acc;
+        }
+        button.sample-btn {
+            background-color: #4b5563;
+        }
+        button.clear-btn {
+            background-color: #c62828;
+        }
+        label {
+            display: block;
+            margin: 8px 0 4px;
+            font-size: 0.85rem;
+            color: #a4b1cd;
+            font-weight: bold;
+        }
+        textarea {
+            width: 100%;
+            height: 140px;
+            background-color: #121519;
+            border: 1px solid #3c4654;
+            color: #5af78e;
+            padding: 10px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            border-radius: 6px;
+            resize: vertical;
+        }
+        textarea:focus {
+            outline: 1px solid #4da3ff;
+        }
+        .output-box {
+            margin-top: 12px;
+            padding: 12px;
+            background: #121519;
+            border: 1px dashed #3c4654;
+            border-radius: 6px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: 0.9rem;
+            color: #ffeb3b;
+            line-height: 1.5;
+        }
+        .reference-table {
+            margin-top: 16px;
+            border-top: 1px solid #39424e;
+            padding-top: 12px;
+            font-size: 0.8rem;
+            color: #8fa0b3;
+        }
+        .ref-item {
+            margin-bottom: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>IMO ICS 電文編譯練習器 (Pub 102)</h1>
+    <p class="desc">支援標準信號群組、補語格式及醫療/搜救特定電文對應</p>
+
+    <div class="container">
+        <div class="toolbar">
+            <button class="sample-btn" onclick="loadSampleText()">載入明文練習範本 (5 句)</button>
+            <button class="sample-btn" onclick="loadSampleCode()">載入電文練習範本 (5 句)</button>
+            <button class="clear-btn" onclick="clearAll()">清空</button>
+        </div>
+
+        <label for="inputArea">輸入區（支援多句標準英文明文 或 ICS 信號組）：</label>
+        <textarea id="inputArea" placeholder="請在此輸入英文語句進行 Encode，或輸入信號代碼群進行 Decode..."></textarea>
+
+        <div class="toolbar" style="margin-top: 10px;">
+            <button class="action-btn" onclick="executeEncode()">執行編碼 (Encode)</button>
+            <button class="action-btn" onclick="executeDecode()">執行解碼 (Decode)</button>
+        </div>
+
+        <label>編譯結果：</label>
+        <div id="outputBox" class="output-box">尚未執行編譯。</div>
+
+        <div class="reference-table">
+            <strong>常用補語規則 (Complements)：</strong><br>
+            <div class="ref-item">• Z + 4碼: UTC時間 (例: Z1430 = 1430 UTC)</div>
+            <div class="ref-item">• L + 4碼: 緯度 (例: L2218 = 22°18'N) | G + 4/5碼: 經度 (例: G11410 = 114°10'E)</div>
+            <div class="ref-item">• C + 3碼: 航向 (例: C090 = 航向 090°) | S + 數值: 節速 (例: S15 = 15 節)</div>
+            <div class="ref-item">• A + 3碼: 方位 (例: A240 = 方位 240°) | R + 數值: 海浬距離 (例: R08 = 8 浬)</div>
+        </div>
+    </div>
+
+    <script>
+        // 核心題庫與對照資料 (嚴格遵循 IMO Pub 102)
+        const ICS_DICTIONARY = [
+            // 單字母與緊急通訊
+            { code: "NC", text: "I AM IN DISTRESS AND REQUIRE IMMEDIATE ASSISTANCE" },
+            { code: "A",  text: "I HAVE A DIVER DOWN; KEEP WELL CLEAR AT SLOW SPEED" },
+            { code: "B",  text: "I AM TAKING IN, OR DISCHARGING, OR CARRYING DANGEROUS GOODS" },
+            { code: "C",  text: "AFFIRMATIVE (YES)" },
+            { code: "D",  text: "I AM MANOEUVRING WITH DIFFICULTY; KEEP CLEAR OF ME" },
+            { code: "E",  text: "I AM ALTERING MY COURSE TO STARBOARD" },
+            { code: "F",  text: "I AM DISABLED; COMMUNICATE WITH ME" },
+            { code: "G",  text: "I REQUIRE A PILOT" },
+            { code: "H",  text: "I HAVE A PILOT ON BOARD" },
+            { code: "I",  text: "I AM ALTERING MY COURSE TO PORT" },
+            { code: "J",  text: "I AM ON FIRE AND HAVE DANGEROUS CARGO ON BOARD; KEEP WELL CLEAR OF ME" },
+            { code: "K",  text: "I WISH TO COMMUNICATE WITH YOU" },
+            { code: "L",  text: "YOU SHOULD STOP YOUR VESSEL INSTANTLY" },
+            { code: "M",  text: "MY VESSEL IS STOPPED AND MAKING NO WAY THROUGH THE WATER" },
+            { code: "N",  text: "NEGATIVE (NO)" },
+            { code: "O",  text: "MAN OVERBOARD" },
+            { code: "P",  text: "ALL PERSONS SHOULD REPORT ON BOARD; VESSEL ABOUT TO PROCEED TO SEA" },
+            { code: "Q",  text: "MY VESSEL IS HEALTHY AND I REQUEST FREE PRATIQUE" },
+            { code: "S",  text: "MY ENGINES ARE GOING ASTERN" },
+            { code: "T",  text: "KEEP CLEAR OF ME; I AM ENGAGED IN PAIR TRAWLING" },
+            { code: "U",  text: "YOU ARE RUNNING INTO DANGER" },
+            { code: "V",  text: "I REQUIRE ASSISTANCE" },
+            { code: "W",  text: "I REQUIRE MEDICAL ASSISTANCE" },
+            { code: "X",  text: "STOP CARRYING OUT YOUR INTENTIONS AND WATCH FOR MY SIGNALS" },
+            { code: "Y",  text: "I AM DRAGGING MY ANCHOR" },
+            { code: "Z",  text: "I REQUIRE A TUG" },
+
+            // 航海操作、避碰與狀態
+            { code: "CB", text: "I REQUIRE IMMEDIATE ASSISTANCE" },
+            { code: "DX", text: "I AM SINKING" },
+            { code: "IT", text: "I AM ON FIRE" },
+            { code: "HW", text: "I HAVE BEEN IN COLLISION WITH A VESSEL" },
+            { code: "AL", text: "I HAVE A DOCTOR ON BOARD" },
+            { code: "AM", text: "HAVE YOU A DOCTOR" },
+            { code: "BR", text: "I REQUIRE A HELICOPTER" },
+            { code: "CD", text: "I REQUIRE ASSISTANCE IN THE NATURE OF PUMPING EQUIPMENT" },
+            { code: "DV", text: "I AM DRIFTING" },
+            { code: "GW", text: "MAN OVERBOARD. PLEASE TAKE ACTION TO PICK HIM UP" },
+            { code: "LO", text: "LIGHT VESSEL IS OUT OF POSITION" },
+            { code: "PD", text: "YOUR NAVIGATION LIGHTS ARE NOT VISIBLE" },
+            { code: "PP", text: "KEEP AWAY FROM ME" },
+            { code: "RY", text: "YOU SHOULD PROCEED AT SLOW SPEED WHEN PASSING ME" },
+            { code: "UW", text: "I WISH YOU A PLEASANT VOYAGE" },
+            { code: "YU", text: "I AM GOING TO COMMUNICATE WITH YOUR STATION BY MEANS OF THE INTERNATIONAL CODE OF SIGNALS" },
+            { code: "ZL", text: "YOUR SIGNAL HAS BEEN RECEIVED BUT NOT UNDERSTOOD" },
+
+            // 搜救與破冰作業 (SAR & Icebreaker)
+            { code: "RJB", text: "I AM CONTROLLING SAR ACTION" },
+            { code: "RKN", text: "ALL SURVIVAL CRAFT LOCATED. NO SURVIVORS" },
+            { code: "RKS", text: "INTEND CONTINUING SEARCH" },
+            { code: "RKU", text: "INCIDENT IS NOW CLOSED" },
+            { code: "WM",  text: "ICE BREAKER SUPPORT IS NOW COMMENCING" },
+            { code: "WO",  text: "ICE BREAKER SUPPORT IS FINISHED" },
+
+            // 醫療分部 (Medical Signals)
+            { code: "MAA", text: "I REQUEST URGENT MEDICAL ADVICE" },
+            { code: "MCB", text: "PATIENT PULSE IS WEAK" },
+            { code: "MCV", text: "PATIENT FOUND UNCONSCIOUS" },
+            { code: "MGS", text: "PATIENT IS SUFFERING FROM SNAKE BITE" },
+            { code: "MLE", text: "PATIENT HAS HAD MUCH ALCOHOL" },
+            { code: "MTD", text: "TEMPERATURE TAKEN BY MOUTH IS" }
+        ];
+
+        // 5 個完整句子的範例段落 (包含遇險、船位、航速航向、傷病救助及搜救聯絡)
+        const SAMPLE_TEXT = 
+`NC. I AM IN DISTRESS AND REQUIRE IMMEDIATE ASSISTANCE.
+L2218 G11410. LATITUDE 22 18 NORTH, LONGITUDE 114 10 EAST.
+C090 S04. COURSE 090 DEGREES, SPEED 04 KNOTS.
+MAA. I REQUEST URGENT MEDICAL ADVICE.
+BR. I REQUIRE A HELICOPTER.
+RJB. I AM CONTROLLING SAR ACTION.`;
+
+        const SAMPLE_CODE = `NC L2218 G11410 C090 S04 MAA BR RJB`;
+
+        function loadSampleText() {
+            document.getElementById("inputArea").value = SAMPLE_TEXT;
+        }
+
+        function loadSampleCode() {
+            document.getElementById("inputArea").value = SAMPLE_CODE;
+        }
+
+        function clearAll() {
+            document.getElementById("inputArea").value = "";
+            document.getElementById("outputBox").innerText = "尚未執行編譯。";
+        }
+
+        // 解碼功能 (Decode: 信號代碼 -> 明文)
+        function decodeICS(inputCode) {
+            // 清理輸入字元並拆成群組 tokens
+            const tokens = inputCode.trim().split(/[\s,;.]+/).filter(t => t.length > 0);
+            if (tokens.length === 0) return "【錯誤】未輸入任何可供解碼的代碼。";
+
+            let results = [];
+
+            for (let token of tokens) {
+                token = token.toUpperCase();
+                let matched = false;
+
+                // 1. 補語信號解析 (Complements: L, G, C, S, A, R, Z, T, D)
+                const compMatch = token.match(/^([LGCSARTZD])(\d+)$/);
+                if (compMatch) {
+                    const prefix = compMatch[1];
+                    const val = compMatch[2];
+                    switch (prefix) {
+                        case 'L':
+                            results.push(`[${token}] 緯度: ${val.substring(0,2)}°${val.substring(2)}' N/S`);
+                            matched = true;
+                            break;
+                        case 'G':
+                            results.push(`[${token}] 經度: ${val.substring(0,val.length-2)}°${val.substring(val.length-2)}' E/W`);
+                            matched = true;
+                            break;
+                        case 'C':
+                            results.push(`[${token}] 航向: ${val}°`);
+                            matched = true;
+                            break;
+                        case 'S':
+                            results.push(`[${token}] 航速: ${val} 節 (Knots)`);
+                            matched = true;
+                            break;
+                        case 'A':
+                            results.push(`[${token}] 方位: ${val}°`);
+                            matched = true;
+                            break;
+                        case 'R':
+                            results.push(`[${token}] 距離: ${val} 浬 (Nautical Miles)`);
+                            matched = true;
+                            break;
+                        case 'Z':
+                            results.push(`[${token}] UTC時間: ${val} GMT`);
+                            matched = true;
+                            break;
+                        case 'T':
+                            results.push(`[${token}] 當地時間: ${val} Local`);
+                            matched = true;
+                            break;
+                    }
+                }
+
+                // 2. 查字典對照
+                if (!matched) {
+                    const found = ICS_DICTIONARY.find(item => item.code === token);
+                    if (found) {
+                        results.push(`[${token}] ${found.text}`);
+                    } else {
+                        results.push(`[${token}] 【未知代碼或專用識別名】`);
+                    }
+                }
+            }
+
+            return results.join("\n");
+        }
+
+        // 編碼功能 (Encode: 明文 -> 信號代碼)
+        function encodeICS(inputText) {
+            if (!inputText.trim()) return "【錯誤】請輸入至少 5 句英文句子。";
+
+            // 將輸入文本按句分割 (換行或句號)
+            const rawSentences = inputText.split(/[\n.]+/).map(s => s.trim()).filter(s => s.length > 0);
+            let encodedTokens = [];
+            let logDetails = [];
+
+            for (let sent of rawSentences) {
+                const upperSent = sent.toUpperCase();
+                let matched = false;
+
+                // 1. 優先檢查補語數據結構 (正則匹配 緯度、經度、航向、航速等)
+                const latMatch = upperSent.match(/LATITUDE\s*(\d{2})\s*(\d{2})/);
+                const lonMatch = upperSent.match(/LONGITUDE\s*(\d{2,3})\s*(\d{2})/);
+                const crsMatch = upperSent.match(/COURSE\s*(\d{3})/);
+                const spdMatch = upperSent.match(/SPEED\s*(\d{1,2})/);
+
+                if (latMatch) {
+                    const code = `L${latMatch[1]}${latMatch[2]}`;
+                    encodedTokens.push(code);
+                    logDetails.push(`• 句子: "${sent}"\n  -> 編碼: ${code}`);
+                    matched = true;
+                }
+                if (lonMatch) {
+                    const code = `G${lonMatch[1]}${lonMatch[2]}`;
+                    encodedTokens.push(code);
+                    logDetails.push(`• 句子: "${sent}"\n  -> 編碼: ${code}`);
+                    matched = true;
+                }
+                if (crsMatch) {
+                    const code = `C${crsMatch[1]}`;
+                    encodedTokens.push(code);
+                    logDetails.push(`• 句子: "${sent}"\n  -> 編碼: ${code}`);
+                    matched = true;
+                }
+                if (spdMatch) {
+                    const code = `S${spdMatch[1]}`;
+                    encodedTokens.push(code);
+                    logDetails.push(`• 句子: "${sent}"\n  -> 編碼: ${code}`);
+                    matched = true;
+                }
+
+                // 2. 關鍵字比對字典
+                if (!matched) {
+                    let bestMatch = null;
+                    for (let item of ICS_DICTIONARY) {
+                        if (upperSent.includes(item.text) || item.text.includes(upperSent)) {
+                            bestMatch = item;
+                            break;
+                        }
+                    }
+
+                    if (bestMatch) {
+                        encodedTokens.push(bestMatch.code);
+                        logDetails.push(`• 句子: "${sent}"\n  -> 編碼: ${bestMatch.code} (${bestMatch.text})`);
+                    } else {
+                        logDetails.push(`• 句子: "${sent}"\n  -> [未找到精確 ICS 代碼，需使用明文字母拼寫]`);
+                    }
+                }
+            }
+
+            return `【標準信號電文串 (ICS Message Group)】\n` + 
+                   encodedTokens.join(" ") + 
+                   `\n\n--------------------------------------------\n` +
+                   `【編譯拆解日誌】 (共辨識 ${encodedTokens.length} 個群組/句子):\n` + 
+                   logDetails.join("\n");
+        }
+
+        function executeEncode() {
+            const val = document.getElementById("inputArea").value;
+            document.getElementById("outputBox").innerText = encodeICS(val);
+        }
+
+        function executeDecode() {
+            const val = document.getElementById("inputArea").value;
+            document.getElementById("outputBox").innerText = decodeICS(val);
+        }
+    </script>
+</body>
+</html>
