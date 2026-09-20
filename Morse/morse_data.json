@@ -1,0 +1,348 @@
+{
+  "single_letter_signals_and_distress_signal_pictograms": {
+    "section_1": {
+      "title": "11 Single-Letter Signals",
+      "table": [
+        {"signal": "A with three numerals", "meaning": "Azimuth or bearing"},
+        {"signal": "C with three numerals", "meaning": "Course"},
+        {"signal": "D with two, four, six numerals", "meaning": "Date"},
+        {"signal": "G with four or five numerals", "meaning": "LONGITUDE (the last two numerals denote minutes and the rest degrees)"},
+        {"signal": "K with one numeral", "meaning": "I wish to communicate with you by...*"},
+        {"signal": "L with four numerals", "meaning": "LATITUDE (the first two denote degrees and the rest minutes)"},
+        {"signal": "R with one or more numerals", "meaning": "DISTANCE in nautical miles"},
+        {"signal": "S with one or more numerals", "meaning": "SPEED in knots"},
+        {"signal": "T with four numerals", "meaning": "LOCAL TIME (the first two denote hours and the rest minutes)"},
+        {"signal": "V with one or more numerals", "meaning": "SPEED in kilometers per hour"},
+        {"signal": "Z with four numerals", "meaning": "UTC (the first two denote hours and the rest minutes)"},
+        {"signal": "Z with one numeral", "meaning": "To CALL or ADDRESS shore visual signal stations (Numerals to be approved by local port authority)"}
+      ]
+    },
+    "section_2": {
+      "title": "2 types of abbreviations in seaspeak",
+      "items": [
+        "a) The initial letters are pronounced separately eg. ETA, VHF, UTC",
+        "b) The initial letters are pronounced as if they formed a word eg. RoRo, IALA, SATCOM"
+      ]
+    },
+    "section_3": {
+      "title": "DISTRESS SIGNAL",
+      "grid_items": [
+        "Red star shells",
+        "Fog Horn",
+        "Flame on Vessel",
+        "Gun fired continuously at interval of 1 min",
+        "Orange Background Black Ball & Square",
+        "SOS",
+        "Mayday by radio",
+        "Parachute red flame",
+        "Dye Marker",
+        "Code Flags",
+        "Squared flag & ball",
+        "Wave Arms",
+        "Radio-Telegraph Alarm",
+        "Radio-Telephone Alarm",
+        "Emergency Position Indicating Radio Beacon",
+        "Smoke"
+      ]
+    }
+  },
+  "table_3_nature_of_distress_in_code": {
+    "title": "Table 3 Nature of distress in code from the International Code of Signals",
+    "table": [
+      {"code_letters": "AE", "words_to_be_transmitted": "Alfa Echo", "text_of_signal": "I must abandon my vessel."},
+      {"code_letters": "BF", "words_to_be_transmitted": "Bravo Foxtrot", "text_of_signal": "Aircraft is ditched in position indicated and requires immediate assistance."},
+      {"code_letters": "CB", "words_to_be_transmitted": "Charlie Bravo", "text_of_signal": "I require immediate assistance."},
+      {"code_letters": "CB6", "words_to_be_transmitted": "Charlie Bravo Soxisix", "text_of_signal": "I require immediate assistance; I am on fire."},
+      {"code_letters": "DX", "words_to_be_transmitted": "Delta X-ray", "text_of_signal": "I am sinking."},
+      {"code_letters": "HW", "words_to_be_transmitted": "Hotel Whiskey", "text_of_signal": "I have collided with surface craft."}
+    ],
+    "sub_section": {
+      "title": "Answer to ship in distress",
+      "table": [
+        {"code_letters": "CP", "words_to_be_transmitted": "Charlie Papa", "text_of_signal": "I am proceeding to your assistance."},
+        {"code_letters": "ED", "words_to_be_transmitted": "Echo Delta", "text_of_signal": "Your distress signals are understood."},
+        {"code_letters": "EL", "words_to_be_transmitted": "Echo Lima", "text_of_signal": "Repeat the distress position."}
+      ]
+    },
+    "note": "NOTE: A more comprehensive list of signals may be found in other sections of this book."
+  },
+  "annex_iv_distress_signals": {
+    "title": "ANNEX IV Distress signals",
+    "section_1": {
+      "description": "1. The following signals, used or exhibited either together or separately, indicate distress and need of assistance:",
+      "items": [
+        "1. (a) a gun or other explosive signal fired at intervals of about a minute;",
+        "2. (b) a continuous sounding with any fog-signalling apparatus;",
+        "3. (c) rockets or shells, throwing red stars fired one at a time at short intervals;",
+        "4. (d) a signal made by radiotelegraphy or by any other signalling method consisting of the group ...---... (SOS) in the Morse Code;",
+        "5. (e) a signal sent by radiotelephony consisting of the spoken word \"Mayday\";",
+        "6. (f) the International Code Signal of distress indicated by N.C.;",
+        "7. (g) a signal consisting of a square flag having above or below it a ball or anything resembling a ball;",
+        "8. (h) flames on the vessel (as from a burning tar barrel, oil barrel, etc.);",
+        "9. (i) a rocket parachute flare or a hand flare showing a red light;",
+        "10. (j) a smoke signal giving off orange-coloured smoke;",
+        "11. (k) slowly and repeatedly raising and lowering arms outstretched to each side;",
+        "12. (l) the radiotelegraph alarm signal;",
+        "13. (m) the radiotelephone alarm signal;",
+        "14. (n) signals transmitted by emergency position-indicating radio beacons.",
+        "15. (o) approved signals transmitted by radiocommunication systems, including survival craft radar transponders."
+      ]
+    },
+    "section_2": "2. The use or exhibition of any of the foregoing signals except for the purpose of indicating distress and need of assistance and the use of other signals which may be confused with any of the above signals is prohibited.",
+    "section_3": {
+      "description": "3. Attention is drawn to the relevant sections of the International Code of Signals, the Merchant Ship Search and Rescue Manual and the following signals:",
+      "items": [
+        "16. (a) a piece of orange-coloured canvas with either a black square and circle or other appropriate symbol (for identification from the air);",
+        "17. (b) a dye marker."
+      ]
+    },
+    "handwritten_note": "2 additional: reflection of light by a mirror, light by a search light"
+  },
+  "vhf_distress_urgency_safety_transmissions": {
+    "transmission_1": [
+      "Mayday Mayday Mayday",
+      "This is \"Meyer\",\"Meyer\",\"Meyer\"",
+      "Call sign 5MVR",
+      "Mayday",
+      "\"Meyer\"",
+      "Position 40°15'N,132°25'E",
+      "My ship aground and flooding",
+      "Require immediate assistance",
+      "Over"
+    ],
+    "transmission_2": [
+      "Pan-Pan Pan-Pan Pan-Pan",
+      "All station,all station,all station",
+      "This is \"Meyer\"",
+      "Call sign 5MVR",
+      "Position 40°15'N,132°25'E",
+      "I have problems with engines",
+      "I require tug assistance",
+      "Over"
+    ],
+    "transmission_3": [
+      "Securite Securite Securite",
+      "All ships,all ships,all ships",
+      "This is \"Meyer\"",
+      "Call sign 5MVR",
+      "Dangerous wreck in position",
+      "2nm south of \"Tsing Chau\"",
+      "Over"
+    ]
+  },
+  "procedure_signals_for_transmission": {
+    "header": "Morse symbols - Phonetic tables - Procedure signals",
+    "section_title": "4 Signals for use where appropriate in all forms of transmission",
+    "table": [
+      {"signal": "AA", "meaning": "\"All after...\" (used after the \"Repeat signal\" (RPT)) means \"Repeat all after...\""},
+      {"signal": "AB", "meaning": "\"All before...\" (used after the \"Repeat signal\" (RPT)) means \"Repeat all before...\""},
+      {"signal": "AR", "meaning": "Ending signal or End of transmission or signal."},
+      {"signal": "AS", "meaning": "Waiting signal or period."},
+      {"signal": "BN", "meaning": "\"All between...and...\" (used after the \"Repeat signal\" (RPT)) means \"Repeat all between...and...\"."},
+      {"signal": "C", "meaning": "Affirmative - YES or \"The significance of the previous group should be read in the affirmative\"."},
+      {"signal": "CS", "meaning": "\"What is the name or identity signal of your vessel (or station)?\"."},
+      {"signal": "DE", "meaning": "\"From...\" (used to precede the name or identity signal of the calling station)."},
+      {"signal": "K", "meaning": "\"I wish to communicate with you\" or \"Invitation to transmit\"."},
+      {"signal": "NO", "meaning": "Negative - NO or \"The significance of the previous group should be read in the negative\". When used in voice transmission, the pronunciation should be \"NO\"."},
+      {"signal": "OK", "meaning": "Acknowledging a correct repetition or \"It is correct\"."},
+      {"signal": "RQ", "meaning": "Interrogative or \"The significance of the previous group should be read as a question\"."},
+      {"signal": "R", "meaning": "\"Received\" or \"I have received your last signal\"."},
+      {"signal": "RPT", "meaning": "Repeat signal \"I repeat\" or \"Repeat what you have sent\" or \"Repeat what you have received.\""},
+      {"signal": "WA", "meaning": "\"Word or group after...\" (used after the \"Repeat signal\" (RPT)) means \"Repeat word or group after...\"."},
+      {"signal": "WB", "meaning": "\"Word or group before...\" (used after the \"Repeat signal\" (RPT)) means \"Repeat word or group before...\"."}
+    ],
+    "notes": [
+      "1 The procedure signals C, N or NO and RQ cannot be used in conjunction with single-letter signals.",
+      "2 Signals on COMMUNICATIONS appear on pages 116-119.",
+      "3 When these signals are used by voice transmission the letters should be pronounced in accordance with the letter-spelling table, with the exception of NO which in voice transmission should be pronounced as \"NO\"."
+    ]
+  },
+  "message_markers_and_definitions": {
+    "title": "Message Markers",
+    "markers": [
+      {"type": "\"Instruction\"", "example": "Do not cross the fairway"},
+      {"type": "\"Intention\"", "example": "I will reduce my speed"},
+      {"type": "\"Information\"", "example": "MV Noname will overtake to the West of you."},
+      {"type": "\"Warning\"", "example": "Obstruction in the fairway"},
+      {"type": "\"Question\"", "example": "your present maximum draft?"},
+      {"type": "\"Answer\"", "example": "My present maximum draft is seven meters."},
+      {"type": "\"Advice\"", "example": "Stand by on VHF channel six nine"},
+      {"type": "\"Request\"", "example": "I require two tugs."}
+    ],
+    "definitions": [
+      "Mayday : to be used to announce a distress message.",
+      "Pan-Pan : to be used to announce a urgency message.",
+      "Securite : to be used to announce a safety message."
+    ]
+  },
+  "chapter_xii_single_letter_signals_with_complements": {
+    "chapter": "Chapter XII",
+    "title": "Single-letter signals with complements",
+    "subtitle": "May be made by any method of signalling",
+    "table": [
+      {"signal": "A with three numerals", "meaning": "AZIMUTH or BEARING"},
+      {"signal": "C with three numerals", "meaning": "COURSE"},
+      {"signal": "D with two, four or six numerals", "meaning": "DATE"},
+      {"signal": "G with four or five numerals", "meaning": "LONGITUDE (the last two numerals denote minutes and the rest degrees)"},
+      {"signal": "K with one numeral", "meaning": "I wish to COMMUNICATE with you by... (Complements Table 1*)"},
+      {"signal": "L with four numerals", "meaning": "LATITUDE (the first two denote degrees and the rest minutes)"},
+      {"signal": "R with one or more numerals", "meaning": "DISTANCE in nautical miles"},
+      {"signal": "S with one or more numerals", "meaning": "SPEED in knots"},
+      {"signal": "T with four numerals", "meaning": "LOCAL TIME (the first two denote hours and the rest minutes)"},
+      {"signal": "V with one or more numerals", "meaning": "SPEED in kilometres per hour"},
+      {"signal": "Z with one numeral", "meaning": "To CALL or ADDRESS shore visual signal stations (Numeral to be approved by local port authority)"},
+      {"signal": "Z with four numerals", "meaning": "UTC (the first two denote hours and the rest minutes)"}
+    ]
+  },
+  "international_code_of_signals_meanings_a_to_z": {
+    "title": "International Code of Signals",
+    "table": [
+      {"meaning": "AZIMUTH or BEARING", "signal": "A with three numerals"},
+      {"meaning": "CALL or ADDRESS shore visual signal stations", "signal": "Z with one numeral"},
+      {"meaning": "COMMUNICATE, I wish to communicate with you by... (Complements Table 1*)", "signal": "K with one numeral"},
+      {"meaning": "COURSE", "signal": "C with three numerals"},
+      {"meaning": "DATE", "signal": "D with two, four or six numerals"},
+      {"meaning": "DISTANCE in nautical miles", "signal": "R with one or more numerals"},
+      {"meaning": "LATITUDE (the first two denote degrees and the rest minutes)", "signal": "L with four numerals"},
+      {"meaning": "LONGITUDE (the last two denote minutes and the rest degrees)", "signal": "G with four or five numerals"},
+      {"meaning": "LOCAL TIME (the first two denote hours and the rest minutes)", "signal": "T with four numerals"},
+      {"meaning": "SPEED in kilometres per hour", "signal": "V with one or more numerals"},
+      {"meaning": "SPEED in knots", "signal": "S with one or more numerals"},
+      {"meaning": "UTC (the first two denote hours and the rest minutes)", "signal": "Z with four numerals"}
+    ]
+  },
+  "chapter_xi_single_letter_signals_a_to_p": {
+    "chapter": "Chapter XI",
+    "title": "Single-letter signals",
+    "subtitle": "May be made by any method of signalling. For those marked * see Note 1.",
+    "list": [
+      {"signal": "A", "meaning": "I have a diver down; keep well clear at slow speed."},
+      {"signal": "*B", "meaning": "I am taking in, or discharging, or carrying dangerous goods."},
+      {"signal": "*C", "meaning": "Yes (affirmative or \"The significance of the previous group should be read in the affirmative\")."},
+      {"signal": "*D", "meaning": "Keep clear of me; I am manoeuvring with difficulty."},
+      {"signal": "*E", "meaning": "I am altering my course to starboard."},
+      {"signal": "F", "meaning": "I am disabled; communicate with me."},
+      {"signal": "*G", "meaning": "I require a pilot. When made by fishing vessels operating in close proximity on the fishing grounds it means: \"I am hauling nets\"."},
+      {"signal": "*H", "meaning": "I have a pilot on board."},
+      {"signal": "*I", "meaning": "I am altering my course to port."},
+      {"signal": "J", "meaning": "Keep well clear of me. I am on fire and have dangerous cargo on board, or I am leaking dangerous cargo."},
+      {"signal": "K", "meaning": "I wish to communicate with you."},
+      {"signal": "L", "meaning": "You should stop your vessel instantly."},
+      {"signal": "M", "meaning": "My vessel is stopped and making no way through the water."},
+      {"signal": "N", "meaning": "No (negative or \"The significance of the previous group should be read in the negative\"). This signal may be given only visually or by sound. For voice or radio transmission the signal should be \"NO\"."},
+      {"signal": "O", "meaning": "Man overboard."},
+      {"signal": "P", "meaning": "In harbour. All persons should report on board as the vessel is about to proceed to sea. At sea. It may also be used as a sound signal to mean: \"I require a pilot\". At sea. It may be used by fishing vessels to mean: \"My nets have come fast upon an obstruction\"."}
+    ]
+  },
+  "international_code_of_signals_q_to_z": {
+    "title": "International Code of Signals",
+    "list": [
+      {"signal": "Q", "meaning": "My vessel is \"healthy\" and I request free pratique."},
+      {"signal": "*S", "meaning": "I am operating astern propulsion."},
+      {"signal": "*T", "meaning": "Keep clear of me; I am engaged in pair trawling."},
+      {"signal": "U", "meaning": "You are running into danger."},
+      {"signal": "V", "meaning": "I require assistance."},
+      {"signal": "W", "meaning": "I require medical assistance."},
+      {"signal": "X", "meaning": "Stop carrying out your intentions and watch for my signals."},
+      {"signal": "Y", "meaning": "I am dragging my anchor."},
+      {"signal": "*Z", "meaning": "I require a tug. When made by fishing vessels operating in close proximity on the fishing grounds it means: \"I am shooting nets\"."}
+    ],
+    "notes": [
+      "1 Signals of letters marked * when made by sound may only be made in compliance with the requirements of the International Regulations for Preventing Collisions at Sea, 1972, Rules 34 and 35 accepting that sound signals G and Z may continue to be used by fishing vessels fishing in close proximity to other fishing vessels.",
+      "2 Signals K and S have special meanings as landing signals for small boats with crews or persons in distress. See appendix 3."
+    ]
+  },
+  "appendix_1_distress_signals_part_1": {
+    "title": "Appendix 1 Distress signals",
+    "subtitle": "(Prescribed by the International Regulations for Preventing Collisions at Sea, 1972)",
+    "section_1": {
+      "description": "1 The following signals, used or exhibited either together or separately, indicate distress and need of assistance.",
+      "items": [
+        "(a) a gun or other explosive signal fired at intervals of about a minute;",
+        "(b) a continuous sounding with any fog-signalling apparatus;",
+        "(c) rockets or shells, throwing red stars fired one at a time at short intervals;",
+        "(d) a signal made by radiotelegraphy or by any other signalling method consisting of the group ...---... (SOS) in the Morse Code;",
+        "(e) a signal sent by radiotelephony consisting of the spoken word \"Mayday\";",
+        "(f) the International Code Signal of distress indicated by NC;",
+        "(g) a signal consisting of a square flag having above or below it a ball or anything resembling a ball;",
+        "(h) flames on the vessel (as from a burning tar barrel, oil barrel, etc.);",
+        "(i) a rocket parachute flare or a hand flare showing a red light;",
+        "(j) a smoke signal giving off orange-coloured smoke;",
+        "(k) slowly and repeatedly raising and lowering arms outstretched to each side;",
+        "(l) the radiotelegraph alarm signal;*",
+        "(m) the radiotelephone alarm signal;†",
+        "(n) signals transmitted by emergency position-indicating radio beacons;‡",
+        "(o) approved signals transmitted by radiocommunications systems."
+      ]
+    },
+    "section_2": "2 The use or exhibition of any of the foregoing signals except for the purpose of indicating distress and need of assistance and the use of other signals which may be confused with any of the above signals is prohibited.",
+    "footnotes": [
+      "* A series of twelve four-second dashes with intervals of one second.",
+      "† Two audio tones transmitted alternately at a frequency of 2200 Hz and 1300 Hz for a duration of 30 seconds to one minute.",
+      "‡ Either the signal described in † above or a series of single tones at a frequency of 1300 Hz."
+    ]
+  },
+  "appendix_1_distress_signals_part_2": {
+    "header": "Distress signals",
+    "section_3": {
+      "description": "3 Attention is drawn to the relevant section of the International Aeronautical and Maritime Search and Rescue Manual (IAMSAR Manual) Volume III - Mobile Facilities and the following signals:",
+      "items": [
+        ".1 a piece of orange-coloured canvas with either a black square and circle or other appropriate symbol (for identification from the air);",
+        ".2 a dye marker."
+      ]
+    }
+  },
+  "international_code_of_signals_full_chart": {
+    "title": "INTERNATIONAL CODE OF SIGNALS[cite: 13]",
+    "letters": [
+      {"letter": "Alfa", "morse": ".-", "meaning": "I HAVE A DIVER DOWN; KEEP WELL CLEAR AT SLOW SPEED[cite: 13]"},
+      {"letter": "Bravo", "morse": "-...", "meaning": "I AM TAKING IN, OR DISCHARGING, OR CARRYING DANGEROUS GOODS[cite: 13]"},
+      {"letter": "Charlie", "morse": "-.-.", "meaning": "YES (AFFIRMATIVE OR 'THE SIGNIFICANCE OF THE PREVIOUS GROUP SHOULD BE READ IN THE AFFIRMATIVE')[cite: 13]"},
+      {"letter": "Delta", "morse": "-..", "meaning": "KEEP CLEAR OF ME; I AM MANOEUVRING WITH DIFFICULTY[cite: 13]"},
+      {"letter": "Echo", "morse": ".", "meaning": "I AM ALTERING MY COURSE TO STARBOARD[cite: 13]"},
+      {"letter": "Foxtrot", "morse": "..-.", "meaning": "I AM DISABLED; COMMUNICATE WITH ME[cite: 13]"},
+      {"letter": "Golf", "morse": "--.", "meaning": "I REQUIRE A PILOT. WHEN MADE BY FISHING VESSELS OPERATING IN CLOSE PROXIMITY ON FISHING GROUNDS IT MEANS: 'I AM HAULING NETS'[cite: 13]"},
+      {"letter": "Hotel", "morse": "....", "meaning": "I HAVE A PILOT ON BOARD[cite: 13]"},
+      {"letter": "India", "morse": "..", "meaning": "I AM ALTERING MY COURSE TO PORT[cite: 13]"},
+      {"letter": "Juliett", "morse": ".---", "meaning": "I AM ON FIRE AND HAVE A DANGEROUS CARGO ON BOARD; KEEP WELL CLEAR OF ME[cite: 13]"},
+      {"letter": "Kilo", "morse": "-.-", "meaning": "I WISH TO COMMUNICATE WITH YOU[cite: 13]"},
+      {"letter": "Lima", "morse": ".-..", "meaning": "YOU SHOULD STOP YOUR VESSEL INSTANTLY[cite: 13]"},
+      {"letter": "Mike", "morse": "--", "meaning": "MY VESSEL IS STOPPED AND MAKING NO WAY THROUGH THE WATER[cite: 13]"},
+      {"letter": "November", "morse": "-.", "meaning": "NO (NEGATIVE OR 'THE SIGNIFICANCE OF THE PREVIOUS GROUP SHOULD BE READ IN THE NEGATIVE')[cite: 13]"},
+      {"letter": "Oscar", "morse": "---", "meaning": "MAN OVERBOARD[cite: 13]"},
+      {"letter": "Papa", "morse": ".--.", "meaning": "IN HARBOUR: ALL PERSONS SHOULD REPORT ON BOARD AS VESSEL IS ABOUT TO PROCEED TO SEA. AT SEA: IT MAY BE USED BY FISHING VESSELS TO MEAN: 'MY NETS HAVE COME FAST UPON AN OBSTRUCTION'[cite: 13]"},
+      {"letter": "Quebec", "morse": "--.-", "meaning": "MY VESSEL IS HEALTHY AND I REQUEST FREE PRATIQUE[cite: 13]"},
+      {"letter": "Romeo", "morse": ".-.", "meaning": "(NO SINGLE LETTER MEANING)[cite: 13]"},
+      {"letter": "Sierra", "morse": "...", "meaning": "I AM OPERATING ASTERN PROPULSION[cite: 13]"},
+      {"letter": "Tango", "morse": "-", "meaning": "KEEP CLEAR OF ME; I AM ENGAGED IN PAIR TRAWLING[cite: 13]"},
+      {"letter": "Uniform", "morse": "..-", "meaning": "YOU ARE RUNNING INTO DANGER[cite: 13]"},
+      {"letter": "Victor", "morse": "...-", "meaning": "I REQUIRE ASSISTANCE[cite: 13]"},
+      {"letter": "Whiskey", "morse": ".--", "meaning": "I REQUIRE MEDICAL ASSISTANCE[cite: 13]"},
+      {"letter": "X-ray", "morse": "-..-", "meaning": "STOP CARRYING OUT YOUR INTENTIONS AND WATCH FOR MY SIGNALS[cite: 13]"},
+      {"letter": "Yankee", "morse": "-.--", "meaning": "I AM DRAGGING MY ANCHOR[cite: 13]"},
+      {"letter": "Zulu", "morse": "--..", "meaning": "I REQUIRE A TUG. WHEN MADE BY FISHING VESSELS OPERATING IN CLOSE PROXIMITY ON FISHING GROUNDS IT MEANS: 'I AM SHOOTING NETS'[cite: 13]"}
+    ],
+    "pennants": [
+      {"name": "1ST SUBSTITUTE", "meaning": "USED TO REPEAT THE FIRST FLAG OR PENNANT IN THE SAME HOIST[cite: 13]"},
+      {"name": "2ND SUBSTITUTE", "meaning": "USED TO REPEAT THE SECOND FLAG OR PENNANT IN THE SAME HOIST[cite: 13]"},
+      {"name": "3RD SUBSTITUTE", "meaning": "USED TO REPEAT THE THIRD FLAG OR PENNANT IN THE SAME HOIST[cite: 13]"},
+      {"name": "CODE AND ANSWER", "meaning": "USED TO ACKNOWLEDGE A SIGNAL[cite: 13]"}
+    ],
+    "numbers": {
+      "context": "USED ON ALL OCCASIONS WHEN IT IS REQUIRED TO REPRESENT NUMBERS IN FLAG SIGNALLING[cite: 13]",
+      "items": [
+        {"digit": "1", "name": "ONE", "morse": ".----[cite: 13]"},
+        {"digit": "2", "name": "TWO", "morse": "..---[cite: 13]"},
+        {"digit": "3", "name": "THREE", "morse": "...--[cite: 13]"},
+        {"digit": "4", "name": "FOUR", "morse": "....-[cite: 13]"},
+        {"digit": "5", "name": "FIVE", "morse": ".....[cite: 13]"},
+        {"digit": "6", "name": "SIX", "morse": "-....[cite: 13]"},
+        {"digit": "7", "name": "SEVEN", "morse": "--...[cite: 13]"},
+        {"digit": "8", "name": "EIGHT", "morse": "---..[cite: 13]"},
+        {"digit": "9", "name": "NINE", "morse": "----.[cite: 13]"},
+        {"digit": "0", "name": "ZERO", "morse": "-----[cite: 13]"}
+      ]
+    },
+    "note": "NOTE SINGLE LETTER SIGNALS MAY BE MADE BY ANY METHOD OF SIGNALLING. THE LETTERS B, C, D, E, G, H, I, M, S, T, Z AND FIGURE 5 WHEN MADE BY A SOUND MUST COMPLY WITH INTERNATIONAL REGULATIONS FOR PREVENTING COLLISIONS AT SEA. RULES 34 AND 35. SIGNALS 'K' AND 'S' HAVE SPECIAL MEANINGS AS LANDING SIGNALS FOR SMALL BOATS WITH PERSONS IN DISTRESS[cite: 13]"
+  }
+}

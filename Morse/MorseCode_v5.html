@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maritime Flag & Signal Study Tool</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --secondary: #0ea5e9;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --border: #cbd5e1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    header {
+      background-color: var(--primary);
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+
+    header h1 { font-size: 1.8rem; margin-bottom: 5px; }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background-color: #f1f5f9;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 14px;
+      text-align: center;
+      background: none;
+      border: none;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: 0.2s;
+      min-width: 120px;
+      font-size: 1rem;
+    }
+
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background-color: #fff;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 25px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .tab-content.active { display: block; }
+
+    /* Flags Grid */
+    .flag-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 15px;
+    }
+
+    .flag-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      background: #fff;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .flag-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .flag-svg-box {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #64748b;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+      width: 70px;
+      height: 50px;
+      background: #e2e8f0;
+    }
+
+    .flag-letter { font-size: 1.1rem; font-weight: 700; margin-top: 5px; }
+    .flag-morse { font-family: monospace; font-size: 1.2rem; color: var(--primary); letter-spacing: 2px; }
+
+    /* Form Elements */
+    .field-group { margin-bottom: 15px; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; }
+    textarea, input[type="text"], select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    .btn-row { display: flex; gap: 10px; margin-top: 10px; }
+    button.action-btn {
+      padding: 10px 18px;
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button.action-btn:hover { opacity: 0.9; }
+
+    /* Quiz */
+    .quiz-box {
+      text-align: center;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background-color: #fafafa;
+    }
+    .score-board {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      color: #475569;
+      margin-bottom: 15px;
+      font-weight: 600;
+      padding: 6px 14px;
+      background: #f1f5f9;
+      border-radius: 6px;
+    }
+    .quiz-target { margin: 20px auto; display: flex; justify-content: center; min-height: 100px; }
+    #quizAnswer { width: 200px; margin: 0 auto 15px auto; font-size: 1.5rem; text-align: center; font-weight: bold; }
+    .quiz-feedback { margin-top: 15px; font-weight: bold; font-size: 1.1rem; min-height: 28px; }
+
+    /* Study Center Modules */
+    .study-module {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 25px;
+      overflow: hidden;
+    }
+    .study-header {
+      background: var(--primary);
+      color: white;
+      padding: 12px 20px;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    .study-body { padding: 20px; }
+    
+    .study-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+    }
+    .study-table th, .study-table td {
+      border: 1px solid var(--border);
+      padding: 10px;
+      text-align: left;
+    }
+    .study-table th { background-color: #f1f5f9; font-weight: 600; }
+    .study-table tr:nth-child(even) { background-color: #fafafa; }
+    .study-table code { color: var(--primary); font-weight: bold; font-size: 1.1em; }
+
+    .vhf-block {
+      background: #1e293b;
+      color: #10b981;
+      font-family: monospace;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+      line-height: 1.5;
+    }
+
+    ul.study-list { margin-left: 20px; margin-bottom: 15px; }
+    ul.study-list li { margin-bottom: 8px; line-height: 1.4; }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Maritime Signal Flags & Study Center</h1>
+    <p>Visual chart, audio translator, interactive practice, and comprehensive study guide</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn" onclick="switchTab('lookup')">Flag Lookup</button>
+    <button class="tab-btn" onclick="switchTab('translator')">Translator</button>
+    <button class="tab-btn" onclick="switchTab('revision')">Study Center</button>
+    <button class="tab-btn active" onclick="switchTab('quiz')">Flag Quiz</button>
+  </nav>
+
+  <!-- TAB 1: Chart & Lookup -->
+  <section id="lookup" class="tab-content">
+    <h3 style="margin-bottom: 15px; color: #475569;">Alphabet Flags (A-Z)</h3>
+    <div class="flag-grid" id="flagGridLetters"></div>
+    <h3 style="margin: 25px 0 15px 0; color: #475569;">Number Flags (0-9)</h3>
+    <div class="flag-grid" id="flagGridNumbers"></div>
+  </section>
+
+  <!-- TAB 2: Translator -->
+  <section id="translator" class="tab-content">
+    <div class="field-group">
+      <label for="textInput">Alphanumeric Text (A-Z, 0-9):</label>
+      <textarea id="textInput" rows="3" placeholder="Type letters and numbers here..."></textarea>
+      <div class="btn-row">
+        <button class="action-btn" onclick="convertTextToMorse()">Convert to Morse</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label for="morseInput">Morse Code (Use dots '.', dashes '-', space between characters, '/' for word spaces):</label>
+      <textarea id="morseInput" rows="3" placeholder="... --- ..."></textarea>
+      <div class="btn-row">
+        <button class="action-btn" onclick="convertMorseToText()">Convert to Text</button>
+        <button class="action-btn" style="background:var(--secondary);" onclick="playMorseSound()">Play Sound</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 3: Study Center -->
+  <section id="revision" class="tab-content">
+    <p style="margin-bottom: 20px; color: #64748b; font-size: 1.1rem;">
+      Review the comprehensive guide below covering International Codes, Distress Signals, and Communication Procedures.
+    </p>
+    <div id="studyContentContainer"></div>
+  </section>
+
+  <!-- TAB 4: Quiz -->
+  <section id="quiz" class="tab-content active">
+    <div class="quiz-box">
+      <div class="score-board">
+        <span>Correct: <span id="scoreCorrect" style="color:#16a34a;">0</span></span>
+        <span>Attempted: <span id="scoreTotal">0</span></span>
+      </div>
+
+      <div class="quiz-options-bar">
+        <label for="quizTargetType" style="display:inline; margin-right: 8px;">Question Type:</label>
+        <select id="quizTargetType" onchange="nextQuestion()" style="width: auto; display:inline-block;">
+          <option value="letter">Flag &rarr; Type Character (A-Z, 0-9)</option>
+          <option value="morse">Flag &rarr; Type Morse Code (.-)</option>
+        </select>
+      </div>
+
+      <h3 id="quizInstruction">Look at the flag and type the answer:</h3>
+      <div class="quiz-target" id="quizDisplay"></div>
+
+      <div class="quiz-input-container">
+        <input type="text" id="quizAnswer" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+        <div class="btn-row" style="justify-content:center;">
+          <button class="action-btn" onclick="submitQuiz()">Submit</button>
+          <button class="action-btn" style="background:#64748b;" onclick="nextQuestion()">Skip / Next</button>
+        </div>
+      </div>
+
+      <div class="quiz-feedback" id="quizFeedback"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+  // =========================================================
+  // HELPER FUNCTION: BYPASSING THE CITE FILTER
+  // =========================================================
+  function cleanText(text) {
+    if (!text) return "";
+    // We break the regex string into two parts so the chat parser 
+    // does not delete it automatically!
+    const part1 = "\\[" + "cite:";     const part2 = " \\d+\\]";
+    const regexPattern = new RegExp(part1 + part2, "g");
+    
+    return text.replace(regexPattern, '').trim();
+  }
+
+  // =========================================================
+  // JSON DATA EMBEDDED DIRECTLY IN THE FILE
+  // =========================================================
+  const morse_data = {
+    "single_letter_signals_and_distress_signal_pictograms": {
+      "section_1": {
+        "title": "11 Single-Letter Signals",
+        "table": [
+          {"signal": "A with three numerals", "meaning": "Azimuth or bearing"},
+          {"signal": "C with three numerals", "meaning": "Course"},
+          {"signal": "D with two, four, six numerals", "meaning": "Date"},
+          {"signal": "G with four or five numerals", "meaning": "LONGITUDE (the last two numerals denote minutes and the rest degrees)"},
+          {"signal": "K with one numeral", "meaning": "I wish to communicate with you by...*"},
+          {"signal": "L with four numerals", "meaning": "LATITUDE (the first two denote degrees and the rest minutes)"},
+          {"signal": "R with one or more numerals", "meaning": "DISTANCE in nautical miles"},
+          {"signal": "S with one or more numerals", "meaning": "SPEED in knots"},
+          {"signal": "T with four numerals", "meaning": "LOCAL TIME (the first two denote hours and the rest minutes)"},
+          {"signal": "V with one or more numerals", "meaning": "SPEED in kilometers per hour"},
+          {"signal": "Z with four numerals", "meaning": "UTC (the first two denote hours and the rest minutes)"},
+          {"signal": "Z with one numeral", "meaning": "To CALL or ADDRESS shore visual signal stations (Numerals to be approved by local port authority)"}
+        ]
+      },
+      "section_2": {
+        "title": "2 types of abbreviations in seaspeak",
+        "items": [
+          "a) The initial letters are pronounced separately eg. ETA, VHF, UTC",
+          "b) The initial letters are pronounced as if they formed a word eg. RoRo, IALA, SATCOM"
+        ]
+      },
+      "section_3": {
+        "title": "DISTRESS SIGNAL",
+        "grid_items": [
+          "Red star shells", "Fog Horn", "Flame on Vessel", "Gun fired continuously at interval of 1 min",
+          "Orange Background Black Ball & Square", "SOS", "Mayday by radio", "Parachute red flame",
+          "Dye Marker", "Code Flags", "Squared flag & ball", "Wave Arms",
+          "Radio-Telegraph Alarm", "Radio-Telephone Alarm", "Emergency Position Indicating Radio Beacon", "Smoke"
+        ]
+      }
+    },
+    "table_3_nature_of_distress_in_code": {
+      "title": "Table 3 Nature of distress in code from the International Code of Signals",
+      "table": [
+        {"code_letters": "AE", "words_to_be_transmitted": "Alfa Echo", "text_of_signal": "I must abandon my vessel."},
+        {"code_letters": "BF", "words_to_be_transmitted": "Bravo Foxtrot", "text_of_signal": "Aircraft is ditched in position indicated and requires immediate assistance."},
+        {"code_letters": "CB", "words_to_be_transmitted": "Charlie Bravo", "text_of_signal": "I require immediate assistance."},
+        {"code_letters": "CB6", "words_to_be_transmitted": "Charlie Bravo Soxisix", "text_of_signal": "I require immediate assistance; I am on fire."},
+        {"code_letters": "DX", "words_to_be_transmitted": "Delta X-ray", "text_of_signal": "I am sinking."},
+        {"code_letters": "HW", "words_to_be_transmitted": "Hotel Whiskey", "text_of_signal": "I have collided with surface craft."}
+      ],
+      "sub_section": {
+        "title": "Answer to ship in distress",
+        "table": [
+          {"code_letters": "CP", "words_to_be_transmitted": "Charlie Papa", "text_of_signal": "I am proceeding to your assistance."},
+          {"code_letters": "ED", "words_to_be_transmitted": "Echo Delta", "text_of_signal": "Your distress signals are understood."},
+          {"code_letters": "EL", "words_to_be_transmitted": "Echo Lima", "text_of_signal": "Repeat the distress position."}
+        ]
+      }
+    },
+    "annex_iv_distress_signals": {
+      "title": "ANNEX IV Distress signals",
+      "section_1": {
+        "description": "1. The following signals, used or exhibited either together or separately, indicate distress and need of assistance:",
+        "items": [
+          "1. (a) a gun or other explosive signal fired at intervals of about a minute;",
+          "2. (b) a continuous sounding with any fog-signalling apparatus;",
+          "3. (c) rockets or shells, throwing red stars fired one at a time at short intervals;",
+          "4. (d) a signal made by radiotelegraphy or by any other signalling method consisting of the group ...---... (SOS) in the Morse Code;",
+          "5. (e) a signal sent by radiotelephony consisting of the spoken word \"Mayday\";",
+          "6. (f) the International Code Signal of distress indicated by N.C.;",
+          "7. (g) a signal consisting of a square flag having above or below it a ball or anything resembling a ball;",
+          "8. (h) flames on the vessel (as from a burning tar barrel, oil barrel, etc.);",
+          "9. (i) a rocket parachute flare or a hand flare showing a red light;",
+          "10. (j) a smoke signal giving off orange-coloured smoke;",
+          "11. (k) slowly and repeatedly raising and lowering arms outstretched to each side;",
+          "12. (l) the radiotelegraph alarm signal;",
+          "13. (m) the radiotelephone alarm signal;",
+          "14. (n) signals transmitted by emergency position-indicating radio beacons.",
+          "15. (o) approved signals transmitted by radiocommunication systems, including survival craft radar transponders."
+        ]
+      },
+      "section_3": {
+        "description": "3. Attention is drawn to the relevant sections of the International Code of Signals, the Merchant Ship Search and Rescue Manual and the following signals:",
+        "items": [
+          "16. (a) a piece of orange-coloured canvas with either a black square and circle or other appropriate symbol (for identification from the air);",
+          "17. (b) a dye marker."
+        ]
+      }
+    },
+    "vhf_distress_urgency_safety_transmissions": {
+      "transmission_1": [
+        "Mayday Mayday Mayday", "This is \"Meyer\",\"Meyer\",\"Meyer\"", "Call sign 5MVR", "Mayday", "\"Meyer\"", "Position 40°15'N,132°25'E", "My ship aground and flooding", "Require immediate assistance", "Over"
+      ],
+      "transmission_2": [
+        "Pan-Pan Pan-Pan Pan-Pan", "All station,all station,all station", "This is \"Meyer\"", "Call sign 5MVR", "Position 40°15'N,132°25'E", "I have problems with engines", "I require tug assistance", "Over"
+      ],
+      "transmission_3": [
+        "Securite Securite Securite", "All ships,all ships,all ships", "This is \"Meyer\"", "Call sign 5MVR", "Dangerous wreck in position", "2nm south of \"Tsing Chau\"", "Over"
+      ]
+    },
+    "procedure_signals_for_transmission": {
+      "header": "Morse symbols - Phonetic tables - Procedure signals",
+      "table": [
+        {"signal": "AA", "meaning": "\"All after...\" (used after the \"Repeat signal\" (RPT)) means \"Repeat all after...\""},
+        {"signal": "AB", "meaning": "\"All before...\" (used after the \"Repeat signal\" (RPT)) means \"Repeat all before...\""},
+        {"signal": "AR", "meaning": "Ending signal or End of transmission or signal."},
+        {"signal": "AS", "meaning": "Waiting signal or period."},
+        {"signal": "BN", "meaning": "\"All between...and...\" (used after the \"Repeat signal\" (RPT)) means \"Repeat all between...and...\"."},
+        {"signal": "C", "meaning": "Affirmative - YES or \"The significance of the previous group should be read in the affirmative\"."},
+        {"signal": "CS", "meaning": "\"What is the name or identity signal of your vessel (or station)?\"."},
+        {"signal": "DE", "meaning": "\"From...\" (used to precede the name or identity signal of the calling station)."},
+        {"signal": "K", "meaning": "\"I wish to communicate with you\" or \"Invitation to transmit\"."},
+        {"signal": "NO", "meaning": "Negative - NO or \"The significance of the previous group should be read in the negative\". When used in voice transmission, the pronunciation should be \"NO\"."},
+        {"signal": "OK", "meaning": "Acknowledging a correct repetition or \"It is correct\"."},
+        {"signal": "RQ", "meaning": "Interrogative or \"The significance of the previous group should be read as a question\"."},
+        {"signal": "R", "meaning": "\"Received\" or \"I have received your last signal\"."},
+        {"signal": "RPT", "meaning": "Repeat signal \"I repeat\" or \"Repeat what you have sent\" or \"Repeat what you have received.\""},
+        {"signal": "WA", "meaning": "\"Word or group after...\" (used after the \"Repeat signal\" (RPT)) means \"Repeat word or group after...\"."},
+        {"signal": "WB", "meaning": "\"Word or group before...\" (used after the \"Repeat signal\" (RPT)) means \"Repeat word or group before...\"."}
+      ]
+    },
+    "message_markers_and_definitions": {
+      "title": "Message Markers",
+      "markers": [
+        {"type": "\"Instruction\"", "example": "Do not cross the fairway"},
+        {"type": "\"Intention\"", "example": "I will reduce my speed"},
+        {"type": "\"Information\"", "example": "MV Noname will overtake to the West of you."},
+        {"type": "\"Warning\"", "example": "Obstruction in the fairway"},
+        {"type": "\"Question\"", "example": "your present maximum draft?"},
+        {"type": "\"Answer\"", "example": "My present maximum draft is seven meters."},
+        {"type": "\"Advice\"", "example": "Stand by on VHF channel six nine"},
+        {"type": "\"Request\"", "example": "I require two tugs."}
+      ],
+      "definitions": [
+        "Mayday : to be used to announce a distress message.",
+        "Pan-Pan : to be used to announce a urgency message.",
+        "Securite : to be used to announce a safety message."
+      ]
+    },
+    "international_code_of_signals_full_chart": {
+      "title": "INTERNATIONAL CODE OF SIGNALS",
+      "letters": [
+        {"letter": "Alfa", "morse": ".-", "meaning": "I HAVE A DIVER DOWN; KEEP WELL CLEAR AT SLOW SPEED"},
+        {"letter": "Bravo", "morse": "-...", "meaning": "I AM TAKING IN, OR DISCHARGING, OR CARRYING DANGEROUS GOODS"},
+        {"letter": "Charlie", "morse": "-.-.", "meaning": "YES (AFFIRMATIVE OR 'THE SIGNIFICANCE OF THE PREVIOUS GROUP SHOULD BE READ IN THE AFFIRMATIVE')"},
+        {"letter": "Delta", "morse": "-..", "meaning": "KEEP CLEAR OF ME; I AM MANOEUVRING WITH DIFFICULTY"},
+        {"letter": "Echo", "morse": ".", "meaning": "I AM ALTERING MY COURSE TO STARBOARD"},
+        {"letter": "Foxtrot", "morse": "..-.", "meaning": "I AM DISABLED; COMMUNICATE WITH ME"},
+        {"letter": "Golf", "morse": "--.", "meaning": "I REQUIRE A PILOT. WHEN MADE BY FISHING VESSELS OPERATING IN CLOSE PROXIMITY ON FISHING GROUNDS IT MEANS: 'I AM HAULING NETS'"},
+        {"letter": "Hotel", "morse": "....", "meaning": "I HAVE A PILOT ON BOARD"},
+        {"letter": "India", "morse": "..", "meaning": "I AM ALTERING MY COURSE TO PORT"},
+        {"letter": "Juliett", "morse": ".---", "meaning": "I AM ON FIRE AND HAVE A DANGEROUS CARGO ON BOARD; KEEP WELL CLEAR OF ME"},
+        {"letter": "Kilo", "morse": "-.-", "meaning": "I WISH TO COMMUNICATE WITH YOU"},
+        {"letter": "Lima", "morse": ".-..", "meaning": "YOU SHOULD STOP YOUR VESSEL INSTANTLY"},
+        {"letter": "Mike", "morse": "--", "meaning": "MY VESSEL IS STOPPED AND MAKING NO WAY THROUGH THE WATER"},
+        {"letter": "November", "morse": "-.", "meaning": "NO (NEGATIVE OR 'THE SIGNIFICANCE OF THE PREVIOUS GROUP SHOULD BE READ IN THE NEGATIVE')"},
+        {"letter": "Oscar", "morse": "---", "meaning": "MAN OVERBOARD"},
+        {"letter": "Papa", "morse": ".--.", "meaning": "IN HARBOUR: ALL PERSONS SHOULD REPORT ON BOARD AS VESSEL IS ABOUT TO PROCEED TO SEA. AT SEA: IT MAY BE USED BY FISHING VESSELS TO MEAN: 'MY NETS HAVE COME FAST UPON AN OBSTRUCTION'"},
+        {"letter": "Quebec", "morse": "--.-", "meaning": "MY VESSEL IS HEALTHY AND I REQUEST FREE PRATIQUE"},
+        {"letter": "Romeo", "morse": ".-.", "meaning": "(NO SINGLE LETTER MEANING)"},
+        {"letter": "Sierra", "morse": "...", "meaning": "I AM OPERATING ASTERN PROPULSION"},
+        {"letter": "Tango", "morse": "-", "meaning": "KEEP CLEAR OF ME; I AM ENGAGED IN PAIR TRAWLING"},
+        {"letter": "Uniform", "morse": "..-", "meaning": "YOU ARE RUNNING INTO DANGER"},
+        {"letter": "Victor", "morse": "...-", "meaning": "I REQUIRE ASSISTANCE"},
+        {"letter": "Whiskey", "morse": ".--", "meaning": "I REQUIRE MEDICAL ASSISTANCE"},
+        {"letter": "X-ray", "morse": "-..-", "meaning": "STOP CARRYING OUT YOUR INTENTIONS AND WATCH FOR MY SIGNALS"},
+        {"letter": "Yankee", "morse": "-.--", "meaning": "I AM DRAGGING MY ANCHOR"},
+        {"letter": "Zulu", "morse": "--..", "meaning": "I REQUIRE A TUG. WHEN MADE BY FISHING VESSELS OPERATING IN CLOSE PROXIMITY ON FISHING GROUNDS IT MEANS: 'I AM SHOOTING NETS'"}
+      ]
+    }
+  };
+
+  // =========================================================
+  // BUILD STUDY CENTER DYNAMICALLY
+  // =========================================================
+  function buildStudyCenter() {
+    const container = document.getElementById('studyContentContainer');
+    let html = '';
+
+    // 1. International Code of Signals (A-Z)
+    const ic = morse_data.international_code_of_signals_full_chart;
+    html += `
+      <div class="study-module">
+        <div class="study-header">International Code of Signals (A-Z)</div>
+        <div class="study-body">
+          <table class="study-table">
+            <thead><tr><th>Letter</th><th>Morse</th><th>Meaning</th></tr></thead>
+            <tbody>
+              ${ic.letters.map(item => `
+                <tr>
+                  <td><strong>${cleanText(item.letter)}</strong></td>
+                  <td><code>${cleanText(item.morse)}</code></td>
+                  <td>${cleanText(item.meaning)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    // 2. Distress Signals (Annex IV & Table 3)
+    const distress = morse_data.annex_iv_distress_signals;
+    const table3 = morse_data.table_3_nature_of_distress_in_code;
+    html += `
+      <div class="study-module">
+        <div class="study-header">Distress Signals (Annex IV & Code Table 3)</div>
+        <div class="study-body">
+          <p><strong>${cleanText(distress.section_1.description)}</strong></p>
+          <ul class="study-list">
+            ${distress.section_1.items.map(i => `<li>${cleanText(i)}</li>`).join('')}
+          </ul>
+          
+          <h4 style="margin:20px 0 10px;">Table 3: Nature of Distress in Code</h4>
+          <table class="study-table">
+            <thead><tr><th>Code</th><th>Spoken</th><th>Meaning</th></tr></thead>
+            <tbody>
+              ${table3.table.map(item => `
+                <tr>
+                  <td><strong>${cleanText(item.code_letters)}</strong></td>
+                  <td>${cleanText(item.words_to_be_transmitted)}</td>
+                  <td>${cleanText(item.text_of_signal)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    // 3. VHF Transmissions
+    const vhf = morse_data.vhf_distress_urgency_safety_transmissions;
+    html += `
+      <div class="study-module">
+        <div class="study-header">VHF Distress, Urgency & Safety Transmissions</div>
+        <div class="study-body">
+          <div class="vhf-block">${vhf.transmission_1.map(t=>cleanText(t)).join('<br>')}</div>
+          <div class="vhf-block">${vhf.transmission_2.map(t=>cleanText(t)).join('<br>')}</div>
+          <div class="vhf-block">${vhf.transmission_3.map(t=>cleanText(t)).join('<br>')}</div>
+        </div>
+      </div>
+    `;
+
+    // 4. Communication & Message Markers
+    const proc = morse_data.procedure_signals_for_transmission;
+    const markers = morse_data.message_markers_and_definitions;
+    html += `
+      <div class="study-module">
+        <div class="study-header">Communications & Procedure Signals</div>
+        <div class="study-body">
+          <h4 style="margin-bottom:10px;">Message Markers</h4>
+          <table class="study-table">
+            <thead><tr><th>Type</th><th>Example</th></tr></thead>
+            <tbody>
+              ${markers.markers.map(m => `
+                <tr><td><strong>${cleanText(m.type)}</strong></td><td>${cleanText(m.example)}</td></tr>
+              `).join('')}
+            </tbody>
+          </table>
+
+          <h4 style="margin:20px 0 10px;">Procedure Signals</h4>
+          <table class="study-table">
+            <thead><tr><th>Signal</th><th>Meaning</th></tr></thead>
+            <tbody>
+              ${proc.table.map(p => `
+                <tr><td><strong>${cleanText(p.signal)}</strong></td><td>${cleanText(p.meaning)}</td></tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    container.innerHTML = html;
+  }
+
+  // =========================================================
+  // LOGIC FOR SVG FLAGS, QUIZ, AND AUDIO TRANSLATOR
+  // =========================================================
+  const MARITIME_MORSE = {
+    'A': '.-',   'B': '-...', 'C': '-.-.', 'D': '-..',  'E': '.',    'F': '..-.',
+    'G': '--.',  'H': '....', 'I': '..',   'J': '.---', 'K': '-.-',  'L': '.-..',
+    'M': '--',   'N': '-.',   'O': '---',  'P': '.--.', 'Q': '--.-', 'R': '.-.',
+    'S': '...',  'T': '-',    'U': '..-',  'V': '...-', 'W': '.--',  'X': '-..-',
+    'Y': '-.--', 'Z': '--..',
+    '1': '.----', '2': '..---', '3': '...--', '4': '....-', '5': '.....',
+    '6': '-....', '7': '--...', '8': '---..', '9': '----.', '0': '-----'
+  };
+
+  const REVERSE_MORSE = {};
+  for (const [char, code] of Object.entries(MARITIME_MORSE)) {
+    REVERSE_MORSE[code] = char;
+  }
+
+  const lettersArray = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  const numbersArray = '0123456789'.split('');
+  const allCharacters = [...lettersArray, ...numbersArray];
+
+  // SVG Generation Tool 
+  function makeSVG(char, w, h) {
+    const raw = {
+      'A': `<polygon points="0,0 60,0 45,20 60,40 0,40" fill="#ffffff"/><polygon points="30,0 60,0 45,20 60,40 30,40" fill="#0033a0"/>`,
+      'B': `<polygon points="0,0 60,0 45,20 60,40 0,40" fill="#da291c"/>`,
+      'C': `<rect width="60" height="8" fill="#0033a0"/><rect y="8" width="60" height="8" fill="#ffffff"/><rect y="16" width="60" height="8" fill="#da291c"/><rect y="24" width="60" height="8" fill="#ffffff"/><rect y="32" width="60" height="8" fill="#0033a0"/>`,
+      'D': `<rect width="60" height="10" fill="#ffd100"/><rect y="10" width="60" height="20" fill="#0033a0"/><rect y="30" width="60" height="10" fill="#ffd100"/>`,
+      'E': `<rect width="60" height="20" fill="#0033a0"/><rect y="20" width="60" height="20" fill="#da291c"/>`,
+      'F': `<rect width="60" height="40" fill="#ffffff"/><polygon points="30,5 55,20 30,35 5,20" fill="#da291c"/>`,
+      'G': `<rect width="10" height="40" fill="#ffd100"/><rect x="10" width="10" height="40" fill="#0033a0"/><rect x="20" width="10" height="40" fill="#ffd100"/><rect x="30" width="10" height="40" fill="#0033a0"/><rect x="40" width="10" height="40" fill="#ffd100"/><rect x="50" width="10" height="40" fill="#0033a0"/>`,
+      'H': `<rect width="30" height="40" fill="#ffffff"/><rect x="30" width="30" height="40" fill="#da291c"/>`,
+      'I': `<rect width="60" height="40" fill="#ffd100"/><circle cx="30" cy="20" r="10" fill="#000000"/>`,
+      'J': `<rect width="60" height="13.3" fill="#0033a0"/><rect y="13.3" width="60" height="13.3" fill="#ffffff"/><rect y="26.6" width="60" height="13.4" fill="#0033a0"/>`,
+      'K': `<rect width="30" height="40" fill="#ffd100"/><rect x="30" width="30" height="40" fill="#0033a0"/>`,
+      'L': `<rect width="30" height="20" fill="#ffd100"/><rect x="30" width="30" height="20" fill="#000000"/><rect y="20" width="30" height="20" fill="#000000"/><rect x="30" y="20" width="30" height="20" fill="#ffd100"/>`,
+      'M': `<rect width="60" height="40" fill="#0033a0"/><line x1="0" y1="0" x2="60" y2="40" stroke="#ffffff" stroke-width="8"/><line x1="60" y1="0" x2="0" y2="40" stroke="#ffffff" stroke-width="8"/>`,
+      'N': `<rect width="60" height="40" fill="#ffffff"/><rect width="15" height="10" fill="#0033a0"/><rect x="30" width="15" height="10" fill="#0033a0"/><rect x="15" y="10" width="15" height="10" fill="#0033a0"/><rect x="45" y="10" width="15" height="10" fill="#0033a0"/><rect y="20" width="15" height="10" fill="#0033a0"/><rect x="30" y="20" width="15" height="10" fill="#0033a0"/><rect x="15" y="30" width="15" height="10" fill="#0033a0"/><rect x="45" y="30" width="15" height="10" fill="#0033a0"/>`,
+      'O': `<polygon points="0,0 60,40 0,40" fill="#da291c"/><polygon points="0,0 60,0 60,40" fill="#ffd100"/>`,
+      'P': `<rect width="60" height="40" fill="#0033a0"/><rect x="20" y="12" width="20" height="16" fill="#ffffff"/>`,
+      'Q': `<rect width="60" height="40" fill="#ffd100"/>`,
+      'R': `<rect width="60" height="40" fill="#da291c"/><rect x="25" width="10" height="40" fill="#ffd100"/><rect y="15" width="60" height="10" fill="#ffd100"/>`,
+      'S': `<rect width="60" height="40" fill="#ffffff"/><rect x="20" y="12" width="20" height="16" fill="#0033a0"/>`,
+      'T': `<rect width="20" height="40" fill="#da291c"/><rect x="20" width="20" height="40" fill="#ffffff"/><rect x="40" width="20" height="40" fill="#0033a0"/>`,
+      'U': `<rect width="30" height="20" fill="#da291c"/><rect x="30" width="30" height="20" fill="#ffffff"/><rect y="20" width="30" height="20" fill="#ffffff"/><rect x="30" y="20" width="30" height="20" fill="#da291c"/>`,
+      'V': `<rect width="60" height="40" fill="#ffffff"/><line x1="0" y1="0" x2="60" y2="40" stroke="#da291c" stroke-width="8"/><line x1="60" y1="0" x2="0" y2="40" stroke="#da291c" stroke-width="8"/>`,
+      'W': `<rect width="60" height="40" fill="#0033a0"/><rect x="10" y="7" width="40" height="26" fill="#ffffff"/><rect x="20" y="14" width="20" height="12" fill="#da291c"/>`,
+      'X': `<rect width="60" height="40" fill="#ffffff"/><rect x="25" width="10" height="40" fill="#0033a0"/><rect y="15" width="60" height="10" fill="#0033a0"/>`,
+      'Y': `<rect width="60" height="40" fill="#da291c"/><polygon points="0,0 20,0 0,20" fill="#ffd100"/><polygon points="40,0 60,0 0,40" fill="#ffd100"/><polygon points="60,20 60,40 40,40" fill="#ffd100"/><polygon points="20,40 0,40 0,40" fill="#ffd100"/><polygon points="20,0 60,0 0,40 0,20" fill="#ffd100"/>`,
+      'Z': `<polygon points="0,0 60,0 30,20" fill="#ffd100"/><polygon points="60,0 60,40 30,20" fill="#000000"/><polygon points="0,40 60,40 30,20" fill="#da291c"/><polygon points="0,0 0,40 30,20" fill="#0033a0"/>`,
+      '1': `<polygon points="0,0 60,15 60,25 0,40" fill="#ffffff"/><circle cx="20" cy="20" r="6" fill="#da291c"/>`,
+      '2': `<polygon points="0,0 60,15 60,25 0,40" fill="#0033a0"/><circle cx="20" cy="20" r="6" fill="#ffffff"/>`,
+      '3': `<polygon points="0,0 20,5 20,35 0,40" fill="#da291c"/><polygon points="20,5 40,10 40,30 20,35" fill="#ffffff"/><polygon points="40,10 60,15 60,25 40,30" fill="#0033a0"/>`,
+      '4': `<polygon points="0,0 60,15 60,25 0,40" fill="#da291c"/><line x1="16" y1="5" x2="16" y2="35" stroke="#ffffff" stroke-width="4"/><line x1="0" y1="20" x2="30" y2="20" stroke="#ffffff" stroke-width="4"/>`,
+      '5': `<polygon points="0,0 30,7.5 30,32.5 0,40" fill="#ffd100"/><polygon points="30,7.5 60,15 60,25 30,32.5" fill="#0033a0"/>`,
+      '6': `<polygon points="0,0 60,15 60,20 0,20" fill="#000000"/><polygon points="0,20 60,20 60,25 0,40" fill="#ffffff"/>`,
+      '7': `<polygon points="0,0 60,15 60,20 0,20" fill="#ffd100"/><polygon points="0,20 60,20 60,25 0,40" fill="#da291c"/>`,
+      '8': `<polygon points="0,0 60,15 60,25 0,40" fill="#ffffff"/><line x1="16" y1="5" x2="16" y2="35" stroke="#da291c" stroke-width="4"/><line x1="0" y1="20" x2="30" y2="20" stroke="#da291c" stroke-width="4"/>`,
+      '9': `<polygon points="0,0 25,6 25,20 0,20" fill="#ffffff"/><polygon points="25,6 60,15 60,20 25,20" fill="#000000"/><polygon points="0,20 25,20 25,34 0,40" fill="#000000"/><polygon points="25,20 60,20 60,25 25,34" fill="#ffffff"/>`,
+      '0': `<polygon points="0,0 20,5 20,35 0,40" fill="#ffd100"/><polygon points="20,5 40,10 40,30 20,35" fill="#da291c"/><polygon points="40,10 60,15 60,25 40,30" fill="#ffd100"/>`
+    };
+
+    return `<div class="flag-svg-box"><svg viewBox="0 0 60 40" width="${w}" height="${h}" style="display:block;">${raw[char] || ''}</svg></div>`;
+  }
+
+  function switchTab(id) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    const clickedBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(id));
+    if (clickedBtn) clickedBtn.classList.add('active');
+    document.getElementById(id).classList.add('active');
+  }
+
+  function buildGrid(arrayData, gridId) {
+    const grid = document.getElementById(gridId);
+    arrayData.forEach(char => {
+      const card = document.createElement('div');
+      card.className = 'flag-card';
+      card.innerHTML = `
+        ${makeSVG(char, 60, 40)}
+        <div class="flag-letter">${char}</div>
+        <div class="flag-morse">${MARITIME_MORSE[char]}</div>
+      `;
+      card.title = `Click to play sound for ${char}`;
+      card.onclick = () => playSequence(MARITIME_MORSE[char]);
+      grid.appendChild(card);
+    });
+  }
+
+  // Initialization
+  window.addEventListener('DOMContentLoaded', () => {
+    buildGrid(lettersArray, 'flagGridLetters');
+    buildGrid(numbersArray, 'flagGridNumbers');
+    buildStudyCenter();
+  });
+
+  // Text / Morse Conversion
+  function convertTextToMorse() {
+    const text = document.getElementById('textInput').value.toUpperCase();
+    const morse = text.split('').map(ch => {
+      if (MARITIME_MORSE[ch]) return MARITIME_MORSE[ch];
+      if (ch === ' ') return '/';
+      return '';
+    }).filter(Boolean).join(' ');
+    document.getElementById('morseInput').value = morse;
+  }
+
+  function convertMorseToText() {
+    const morse = document.getElementById('morseInput').value.trim().split(/\s+/);
+    const text = morse.map(code => {
+      if (code === '/') return ' ';
+      return REVERSE_MORSE[code] || '?';
+    }).join('');
+    document.getElementById('textInput').value = text;
+  }
+
+  // Web Audio Sound Engine
+  let audioCtx = null;
+  function getAudioContext() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
+
+  function playTone(freq, duration, delay) {
+    const ctx = getAudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    const startTime = ctx.currentTime + delay;
+    const stopTime = startTime + duration;
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(0.25, startTime + 0.005);
+    gain.gain.setValueAtTime(0.25, stopTime - 0.005);
+    gain.gain.linearRampToValueAtTime(0, stopTime);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(startTime);
+    osc.stop(stopTime);
+  }
+
+  function playSequence(morseStr) {
+    const dot = 0.08;
+    let offset = 0.05;
+    for (let char of morseStr) {
+      if (char === '.') {
+        playTone(600, dot, offset);
+        offset += dot * 2;
+      } else if (char === '-') {
+        playTone(600, dot * 3, offset);
+        offset += dot * 4;
+      } else if (char === ' ') {
+        offset += dot * 2;
+      }
+    }
+  }
+
+  function playMorseSound() {
+    playSequence(document.getElementById('morseInput').value);
+  }
+
+  // Quiz Engine
+  let currentTarget = '';
+  let score = 0;
+  let total = 0;
+  let answered = false;
+
+  function nextQuestion() {
+    answered = false;
+    document.getElementById('quizFeedback').textContent = '';
+    currentTarget = allCharacters[Math.floor(Math.random() * allCharacters.length)];
+
+    const targetType = document.getElementById('quizTargetType').value;
+    const input = document.getElementById('quizAnswer');
+    const instruction = document.getElementById('quizInstruction');
+    
+    document.getElementById('quizDisplay').innerHTML = makeSVG(currentTarget, 140, 93);
+
+    if (targetType === 'letter') {
+      instruction.textContent = "Type the Character (A-Z or 0-9) for this flag:";
+      input.placeholder = "e.g. A or 1";
+      input.maxLength = 1;
+    } else {
+      instruction.textContent = "Type the Morse Code (. and -) for this flag:";
+      input.placeholder = "e.g. .-";
+      input.maxLength = 6;
+    }
+
+    input.value = '';
+    input.focus();
+  }
+
+  function submitQuiz() {
+    if (answered) return;
+    answered = true;
+    total++;
+
+    const targetType = document.getElementById('quizTargetType').value;
+    const input = document.getElementById('quizAnswer');
+    const userVal = input.value.trim().toUpperCase();
+    const feedback = document.getElementById('quizFeedback');
+
+    const expectedAnswer = (targetType === 'letter') ? currentTarget : MARITIME_MORSE[currentTarget];
+    const isCorrect = (userVal === expectedAnswer);
+
+    if (isCorrect) {
+      score++;
+      feedback.style.color = '#16a34a';
+      feedback.textContent = `Correct! Character ${currentTarget} is ${MARITIME_MORSE[currentTarget]}`;
+      playSequence(MARITIME_MORSE[currentTarget]);
+    } else {
+      feedback.style.color = '#dc2626';
+      feedback.textContent = `Incorrect. Answer: Character ${currentTarget} (${MARITIME_MORSE[currentTarget]})`;
+    }
+
+    updateScore();
+  }
+
+  function updateScore() {
+    document.getElementById('scoreCorrect').textContent = score;
+    document.getElementById('scoreTotal').textContent = total;
+  }
+
+  document.getElementById('quizAnswer').addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') submitQuiz();
+  });
+
+  // Init Quiz
+  nextQuestion();
+</script>
+
+</body>
+</html>
