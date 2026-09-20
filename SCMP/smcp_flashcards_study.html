@@ -12,6 +12,7 @@
       --success-color: #16a34a;
       --warning-color: #ea580c;
       --daily-color: #8b5cf6;
+      --plan-color: #0284c7;
       --border-dash: #94a3b8;
       --card-bg: #ffffff;
       --bg-color: #f1f5f9;
@@ -27,20 +28,18 @@
     .control-panel h1 { font-size: 1.5rem; color: var(--primary-color); margin-bottom: 8px; }
     .control-panel p { font-size: 0.9rem; color: #475569; margin-bottom: 16px; line-height: 1.5; }
 
-    /* 下拉選單 */
     .filter-dropdown { width: 100%; max-width: 400px; padding: 12px; font-size: 1rem; font-weight: 600; color: #0f172a; background-color: #f8fafc; border: 2px solid var(--accent-color); border-radius: 8px; cursor: pointer; margin-bottom: 15px; }
     
-    /* 按鈕群組 */
     .btn-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 15px; }
-    .btn { flex: 1 1 calc(50% - 10px); min-width: 140px; padding: 12px; font-size: 0.95rem; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; transition: 0.2s; color: white; }
+    .btn { flex: 1 1 calc(33% - 10px); min-width: 140px; padding: 12px; font-size: 0.95rem; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; transition: 0.2s; color: white; }
     @media (min-width: 768px) { .btn { flex: 0 1 auto; } } 
     
     .btn-daily { background-color: var(--daily-color); }
     .btn-study { background-color: var(--accent-color); }
+    .btn-plan { background-color: var(--plan-color); }
     .btn-stats { background-color: #0d9488; }
     .btn-print { background-color: #475569; }
     
-    /* 資料檔案管理區 */
     .data-management { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; border-top: 2px dashed #e2e8f0; padding-top: 15px; margin-top: 10px; background: #f8fafc; padding: 15px; border-radius: 8px;}
     .data-management-title { width: 100%; font-size: 0.9rem; font-weight: bold; color: #475569; margin-bottom: 5px; }
     .btn-sm { padding: 10px 16px; font-size: 0.9rem; font-weight: 700; border-radius: 6px; border: none; cursor: pointer; color: white; transition: 0.2s;}
@@ -82,6 +81,8 @@
     .box-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; background: #e2e8f0; color: #475569;}
     .box-0 { background: #fee2e2; color: #991b1b; } 
     .box-5 { background: #dcfce7; color: #166534; }
+    .date-overdue { color: var(--danger-color); font-weight: bold; }
+    .date-today { color: var(--warning-color); font-weight: bold; }
 
     /* =========================================
        4. 雙題衝刺模式
@@ -145,30 +146,30 @@
 
   <div class="control-panel no-print">
     <h1>SMCP 航海術語：SRS 與衝刺系統</h1>
-    <p>
-      <strong>📅 日常復習</strong>：系統篩選今日到期卡片，答對累積長期記憶 (延後下次復習)。<br>
-      <strong>🚀 單科衝刺</strong>：考前無視日期強刷指定分類，不干擾長期進度，最弱的題目優先考。
+    <p style="text-align: left; display: inline-block;">
+      <strong>📅 日常復習</strong>：包含「今日」及「昨天以前未看完」的題目。<br>
+      <strong>🚀 單科衝刺</strong>：考前強刷指定分類，最弱的題目優先考。<br>
+      <strong>📆 7天打散</strong>：將當前分類隨機分配到未來 1~7 天，減輕單日壓力。
     </p>
     
-    <div id="loadingMsg">🔄 正在載入 JSON 題庫資料...<br><small style="font-weight:normal; color:#64748b;">(請確保使用 Local Server 開啟以跨越瀏覽器安全限制)</small></div>
+    <div id="loadingMsg">🔄 正在載入 JSON 題庫資料...</div>
 
     <select id="categorySelect" class="filter-dropdown" onchange="handleFilterChange(this)" style="display:none;"></select>
 
     <div class="btn-group" id="mainBtns" style="display:none;">
       <button class="btn btn-daily" onclick="startStudySession('daily')">📅 日常復習</button>
       <button class="btn btn-study" onclick="startStudySession('sprint')">🚀 單科衝刺</button>
-      <button class="btn btn-stats" onclick="toggleMode('stats')">📊 學習統計表</button>
+      <button class="btn btn-plan" onclick="schedule7Days()">📆 7天打散</button>
+      <button class="btn btn-stats" onclick="toggleMode('stats')">📊 學習統計</button>
       <button class="btn btn-print" onclick="toggleMode('grid')">📄 總覽/列印</button>
     </div>
 
     <!-- JSON 實體檔案管理區 -->
     <div class="data-management" id="dataMgmtBtns" style="display:none;">
-      <div class="data-management-title">📁 JSON 進度檔案同步與備份</div>
+      <div class="data-management-title">📁 手機端建議定期下載 JSON 備份</div>
       <button class="btn-sm btn-export" onclick="exportProgressJSON()">📥 下載進度檔 (.json)</button>
-      
       <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importProgressJSON(event)">
       <button class="btn-sm btn-import" onclick="document.getElementById('importFile').click()">📂 讀入進度檔 (.json)</button>
-      
       <button class="btn-sm btn-reset" onclick="resetProgress()">⚠️ 清空紀錄</button>
     </div>
   </div>
@@ -270,7 +271,6 @@
     let cardData = [];
     let currentFilter = "All";
     
-    // 統一從 localStorage 取出進度模型
     let userData = JSON.parse(localStorage.getItem('smcp_progress')) || {};
     
     const intervals = [0, 1, 3, 7, 14, 30]; 
@@ -302,6 +302,7 @@
     // --- 資料載入 ---
     async function loadData() {
       try {
+        // 從本機讀取 JSON 題庫 (需要 Local Server)
         const response = await fetch('smcp_data.json');
         if (!response.ok) throw new Error('無法讀取檔案');
         cardData = await response.json();
@@ -314,7 +315,7 @@
         buildFilterDropdown();
         toggleMode('grid'); 
       } catch (error) {
-        document.getElementById('loadingMsg').innerHTML = '❌ 錯誤：無法讀取 smcp_data.json。<br><span style="font-size:0.9rem; font-weight:normal; color:#475569;">1. 請確認已建立 smcp_data.json 檔案。<br>2. 由於瀏覽器安全沙盒限制，HTML 無法直接雙擊開啟並讀取本地檔案。請使用 VS Code 的 Live Server 擴充功能或 Python Local Server 開啟。</span>';
+        document.getElementById('loadingMsg').innerHTML = '❌ 錯誤：無法讀取 smcp_data.json。<br><span style="font-size:0.9rem; font-weight:normal; color:#475569;">1. 請確認已建立 smcp_data.json 檔案。<br>2. 由於跨來源安全限制，請用 SPCK Editor 的預覽功能或電腦版的 Live Server 開啟。</span>';
         console.error(error);
       }
     }
@@ -357,7 +358,31 @@
       }
     }
 
-    // --- 統計表模式 (字串高速渲染) ---
+    // --- 7天打散計畫功能 ---
+    function schedule7Days() {
+      let pool = currentFilter === "All" ? cardData : cardData.filter(c => c.group === currentFilter);
+      if (pool.length === 0) {
+        alert("目前沒有可分配的卡片！");
+        return;
+      }
+      
+      const filterName = currentFilter === 'All' ? '全部' : currentFilter;
+      if(confirm(`確定要將「${filterName}」的 ${pool.length} 張卡片，隨機平均打散分配到未來的 1~7 天內嗎？\n(這些卡片原本的到期日將被覆寫)`)) {
+        pool.forEach(c => {
+          const randomDays = Math.floor(Math.random() * 7) + 1; // 隨機 1~7 天
+          const d = getCardDataModel(c.id);
+          d.next_review_date = addDays(getTodayStr(), randomDays);
+        });
+        localStorage.setItem('smcp_progress', JSON.stringify(userData));
+        alert(`✅ 分配完成！已將 ${pool.length} 張卡片分散至未來 7 天。\n您可以到「📊 學習統計表」查看最新的排程。`);
+        
+        if (document.getElementById("statsContainer").style.display !== "none") {
+          renderStats();
+        }
+      }
+    }
+
+    // --- 統計表模式 (加上逾期視覺提示) ---
     function renderStats() {
       const tbody = document.getElementById("statsTableBody");
       let filtered = currentFilter === "All" ? cardData : cardData.filter(c => c.group === currentFilter);
@@ -380,8 +405,19 @@
 
       statsList.forEach(item => {
         let weightClass = item.priority >= 150 ? "weight-high" : (item.priority <= 25 ? "weight-low" : "");
-        let dateColor = item.next_review_date <= today ? "var(--danger-color)" : "#475569";
-        let dateWeight = item.next_review_date <= today ? "bold" : "normal";
+        
+        // 判斷日期狀態：逾期(紅色)、今日(橙色)、未來(灰色)
+        let dateText = item.next_review_date;
+        let dateClass = "";
+        if (item.next_review_date < today) {
+          dateClass = "date-overdue";
+          dateText += " (逾期未看 🚨)";
+        } else if (item.next_review_date === today) {
+          dateClass = "date-today";
+          dateText += " (今日 📌)";
+        } else {
+          dateClass = "date-future";
+        }
         
         htmlContent += `
           <tr>
@@ -389,7 +425,7 @@
             <td>${item.group}</td>
             <td><strong>${item.term}</strong></td>
             <td><span class="box-badge box-${item.box}">Box ${item.box}</span></td>
-            <td style="color:${dateColor}; font-weight:${dateWeight}">${item.next_review_date}</td>
+            <td class="${dateClass}">${dateText}</td>
             <td class="${weightClass}">${item.priority}</td>
           </tr>
         `;
@@ -397,7 +433,7 @@
       tbody.innerHTML = htmlContent;
     }
 
-    // --- 列表/列印模式 (字串高速渲染) ---
+    // --- 列表/列印模式 ---
     function renderGrid() {
       const container = document.getElementById("cardContainer");
       let filtered = currentFilter === "All" ? cardData : cardData.filter(c => c.group === currentFilter);
@@ -425,7 +461,7 @@
       
       const badge = document.getElementById('modeBadge');
       if(mode === 'daily') {
-        badge.textContent = "📅 日常復習 (限今日到期)";
+        badge.textContent = "📅 日常復習 (包含逾期未看 & 今日到期)";
         badge.style.background = "var(--daily-color)";
       } else {
         badge.textContent = `🚀 衝刺模式 (${currentFilter})`;
@@ -453,8 +489,10 @@
       const today = getTodayStr();
       let pool = cardData;
       
+      // 依據模式篩選題庫
       if (currentStudyMode === 'daily') {
         if(currentFilter !== "All") pool = pool.filter(c => c.group === currentFilter);
+        // 重點： <= today 代表「今天」跟「過去沒讀完的日子」都會一併抓出來考！
         pool = pool.filter(c => getCardDataModel(c.id).next_review_date <= today);
       } else {
         if(currentFilter !== "All") pool = pool.filter(c => c.group === currentFilter);
@@ -574,7 +612,7 @@
           sessionCompletedIds.add(id);
         } else {
           d.box = 0;
-          d.next_review_date = getTodayStr();
+          d.next_review_date = getTodayStr(); // 答錯即設定為今天到期
           d.priority += penaltyScore;
         }
       } else if (currentStudyMode === 'sprint') {
@@ -594,7 +632,7 @@
 
     // --- JSON 檔案實體讀取 / 寫入機制 ---
     function exportProgressJSON() {
-      const dataStr = JSON.stringify(userData, null, 2); // 格式化 JSON 使其易於閱讀
+      const dataStr = JSON.stringify(userData, null, 2); 
       const blob = new Blob([dataStr], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -620,7 +658,7 @@
         }
       };
       reader.readAsText(file);
-      event.target.value = ''; // 允許重複上傳相同名稱的檔案
+      event.target.value = ''; 
     }
 
     function resetProgress() {
