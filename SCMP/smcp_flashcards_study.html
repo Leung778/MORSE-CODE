@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMCP 航海術語：SRS 間隔重複與衝刺系統</title>
+  <style>
+    :root {
+      --primary-color: #0b2545;
+      --accent-color: #1d4ed8;
+      --danger-color: #dc2626;
+      --success-color: #16a34a;
+      --warning-color: #ea580c;
+      --daily-color: #8b5cf6;
+      --border-dash: #94a3b8;
+      --card-bg: #ffffff;
+      --bg-color: #f1f5f9;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif; }
+    body { background-color: var(--bg-color); color: #0f172a; padding: 15px; }
+
+    /* =========================================
+       1. 共用控制面板 (Control Panel)
+       ========================================= */
+    .control-panel { max-width: 1000px; margin: 0 auto 20px auto; text-align: center; background: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .control-panel h1 { font-size: 1.5rem; color: var(--primary-color); margin-bottom: 8px; }
+    .control-panel p { font-size: 0.9rem; color: #475569; margin-bottom: 16px; line-height: 1.5; }
+
+    /* 下拉選單 */
+    .filter-dropdown { width: 100%; max-width: 400px; padding: 12px; font-size: 1rem; font-weight: 600; color: #0f172a; background-color: #f8fafc; border: 2px solid var(--accent-color); border-radius: 8px; cursor: pointer; margin-bottom: 15px; }
+    
+    /* 按鈕群組 */
+    .btn-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 15px; }
+    .btn { flex: 1 1 calc(50% - 10px); min-width: 140px; padding: 12px; font-size: 0.95rem; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; transition: 0.2s; color: white; }
+    @media (min-width: 768px) { .btn { flex: 0 1 auto; } } 
+    
+    .btn-daily { background-color: var(--daily-color); }
+    .btn-study { background-color: var(--accent-color); }
+    .btn-stats { background-color: #0d9488; }
+    .btn-print { background-color: #475569; }
+    
+    /* 資料檔案管理區 */
+    .data-management { display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap; border-top: 2px dashed #e2e8f0; padding-top: 15px; margin-top: 10px; background: #f8fafc; padding: 15px; border-radius: 8px;}
+    .data-management-title { width: 100%; font-size: 0.9rem; font-weight: bold; color: #475569; margin-bottom: 5px; }
+    .btn-sm { padding: 10px 16px; font-size: 0.9rem; font-weight: 700; border-radius: 6px; border: none; cursor: pointer; color: white; transition: 0.2s;}
+    .btn-export { background-color: #059669; }
+    .btn-export:hover { background-color: #047857; }
+    .btn-import { background-color: #d97706; color: white;}
+    .btn-import:hover { background-color: #b45309; }
+    .btn-reset { background-color: #ef4444; }
+
+    /* =========================================
+       2. 列表模式 (螢幕響應式網格)
+       ========================================= */
+    #cardContainer { display: none; }
+    .cards-wrapper { display: grid; grid-template-columns: 1fr; gap: 15px; max-width: 1200px; margin: 0 auto; }
+    @media (min-width: 600px) { .cards-wrapper { grid-template-columns: repeat(2, 1fr); } } 
+    @media (min-width: 992px) { .cards-wrapper { grid-template-columns: repeat(3, 1fr); } } 
+    @media (min-width: 1200px){ .cards-wrapper { grid-template-columns: repeat(4, 1fr); } } 
+
+    .card { background-color: var(--card-bg); border: 1px solid #cbd5e1; border-radius: 10px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .card-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 8px; }
+    .card-id { font-size: 0.8rem; font-weight: 800; color: #64748b; }
+    .card-category { font-size: 0.75rem; font-weight: 600; color: #0284c7; background: #f0f9ff; padding: 2px 8px; border-radius: 6px; }
+    .term { font-size: 1.15rem; font-weight: 800; color: var(--primary-color); line-height: 1.2; margin-bottom: 6px; }
+    .meaning-en { font-size: 0.9rem; font-weight: 500; color: #1e293b; line-height: 1.4; margin-bottom: 8px; }
+    .meaning-zh { font-size: 0.85rem; color: #334155; background: #f8fafc; border-left: 3px solid var(--accent-color); padding: 6px 10px; line-height: 1.4; border-radius: 4px; }
+    .meaning-item { display: block; margin-bottom: 2px; }
+
+    /* =========================================
+       3. 統計表模式
+       ========================================= */
+    #statsContainer { display: none; max-width: 1000px; margin: 0 auto 40px auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid #e2e8f0; }
+    .stats-table { width: 100%; border-collapse: collapse; min-width: 700px; }
+    .stats-table th, .stats-table td { border-bottom: 1px solid #e2e8f0; padding: 12px; text-align: left; font-size: 0.9rem; }
+    .stats-table th { background: #f8fafc; color: #0f172a; font-weight: 700; position: sticky; top: 0; }
+    .stats-table tr:hover { background: #f1f5f9; }
+    .weight-high { color: var(--danger-color); font-weight: 800; }
+    .weight-low { color: var(--success-color); }
+    .box-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; background: #e2e8f0; color: #475569;}
+    .box-0 { background: #fee2e2; color: #991b1b; } 
+    .box-5 { background: #dcfce7; color: #166534; }
+
+    /* =========================================
+       4. 雙題衝刺模式
+       ========================================= */
+    #studyContainer { display: none; flex-direction: column; align-items: center; max-width: 1000px; margin: 0 auto 40px auto; }
+    .mode-badge { display: inline-block; background: var(--warning-color); color: white; padding: 6px 16px; border-radius: 20px; font-weight: bold; margin-bottom: 20px; font-size: 1rem; }
+    
+    .dual-cards-layout { display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; }
+    @media (min-width: 768px) { .dual-cards-layout { grid-template-columns: 1fr 1fr; } } 
+    
+    .study-card { background: #fff; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); padding: 25px; text-align: center; position: relative; display: flex; flex-direction: column; border: 3px solid transparent; transition: border-color 0.2s;}
+    .study-stats { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #64748b; font-weight: 600; margin-bottom: 15px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;}
+    .study-term { font-size: 1.8rem; color: var(--primary-color); font-weight: 800; margin-bottom: 15px; }
+    
+    .study-answer-area { display: none; margin-top: 15px; text-align: left; flex-grow: 1;}
+    .study-en { font-size: 1.05rem; color: #1e293b; font-weight: 600; margin-bottom: 12px; line-height: 1.5; }
+    .study-zh { font-size: 1rem; color: #334155; background: #f8fafc; border-left: 4px solid var(--accent-color); padding: 12px; line-height: 1.5; border-radius: 4px;}
+    
+    .card-grade-btns { display: none; gap: 10px; margin-top: 25px; justify-content: center; }
+    .grade-btn { flex: 1; padding: 14px; font-size: 1.05rem; font-weight: 700; border: 2px solid #cbd5e1; background: #fff; color: #475569; border-radius: 8px; cursor: pointer; transition: 0.2s;}
+    .grade-btn.selected-yes { background: #dcfce7; border-color: var(--success-color); color: var(--success-color); }
+    .grade-btn.selected-no { background: #fee2e2; border-color: var(--danger-color); color: var(--danger-color); }
+
+    .study-controls { width: 100%; margin-top: 30px; text-align: center; }
+    .action-btn-large { width: 100%; max-width: 400px; padding: 16px; font-size: 1.2rem; font-weight: 700; color: #fff; background: var(--accent-color); border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 6px rgba(29, 78, 216, 0.3);}
+    .action-btn-large:disabled { background: #94a3b8; cursor: not-allowed; box-shadow: none;}
+    
+    /* 比較機制 */
+    #compareControls { display: none; background: #fff3cd; border: 2px solid #fbbf24; border-radius: 12px; padding: 20px; width: 100%; max-width: 600px; margin: 20px auto 0 auto; text-align: center; }
+    #compareControls h3 { color: #b45309; margin-bottom: 15px; font-size: 1.1rem;}
+    .compare-btns { display: flex; flex-direction: column; gap: 10px; }
+    @media (min-width: 600px) { .compare-btns { flex-direction: row; } }
+    .compare-btn { flex: 1; padding: 14px; font-size: 1.05rem; font-weight: 700; color: #fff; background: var(--warning-color); border: none; border-radius: 8px; cursor: pointer; }
+
+    #finishedScreen { display: none; background: #dcfce7; border: 2px solid #16a34a; border-radius: 12px; padding: 40px 20px; width: 100%; max-width: 600px; margin: 0 auto; text-align: center; color: #166534; }
+    .priority-badge { background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; }
+    #loadingMsg { color: var(--accent-color); font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; }
+
+    /* =========================================
+       5. 獨立列印模式
+       ========================================= */
+    @media print {
+      body { background: transparent; padding: 0; }
+      .control-panel, #studyContainer, #statsContainer { display: none !important; }
+      #cardContainer { display: flex !important; flex-wrap: wrap; justify-content: center; gap: 0; max-width: 100%; margin: 0; }
+      .card { 
+        width: 90mm !important; 
+        height: 70mm !important; 
+        border: 1px dashed #94a3b8 !important; 
+        border-radius: 0 !important; 
+        box-shadow: none !important;
+        page-break-inside: avoid; 
+        -webkit-print-color-adjust: exact; 
+        print-color-adjust: exact; 
+      }
+      @page { size: A4 portrait; margin: 6mm 8mm; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="control-panel no-print">
+    <h1>SMCP 航海術語：SRS 與衝刺系統</h1>
+    <p>
+      <strong>📅 日常復習</strong>：系統篩選今日到期卡片，答對累積長期記憶 (延後下次復習)。<br>
+      <strong>🚀 單科衝刺</strong>：考前無視日期強刷指定分類，不干擾長期進度，最弱的題目優先考。
+    </p>
+    
+    <div id="loadingMsg">🔄 正在載入 JSON 題庫資料...<br><small style="font-weight:normal; color:#64748b;">(請確保使用 Local Server 開啟以跨越瀏覽器安全限制)</small></div>
+
+    <select id="categorySelect" class="filter-dropdown" onchange="handleFilterChange(this)" style="display:none;"></select>
+
+    <div class="btn-group" id="mainBtns" style="display:none;">
+      <button class="btn btn-daily" onclick="startStudySession('daily')">📅 日常復習</button>
+      <button class="btn btn-study" onclick="startStudySession('sprint')">🚀 單科衝刺</button>
+      <button class="btn btn-stats" onclick="toggleMode('stats')">📊 學習統計表</button>
+      <button class="btn btn-print" onclick="toggleMode('grid')">📄 總覽/列印</button>
+    </div>
+
+    <!-- JSON 實體檔案管理區 -->
+    <div class="data-management" id="dataMgmtBtns" style="display:none;">
+      <div class="data-management-title">📁 JSON 進度檔案同步與備份</div>
+      <button class="btn-sm btn-export" onclick="exportProgressJSON()">📥 下載進度檔 (.json)</button>
+      
+      <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importProgressJSON(event)">
+      <button class="btn-sm btn-import" onclick="document.getElementById('importFile').click()">📂 讀入進度檔 (.json)</button>
+      
+      <button class="btn-sm btn-reset" onclick="resetProgress()">⚠️ 清空紀錄</button>
+    </div>
+  </div>
+
+  <!-- 1. 列表/列印模式 -->
+  <div class="cards-wrapper" id="cardContainer"></div>
+
+  <!-- 2. 統計表模式 -->
+  <div id="statsContainer">
+    <h2 style="margin-bottom: 15px; color: var(--primary-color);">學習紀錄統計表 (依到期日與權重排序)</h2>
+    <div class="table-responsive">
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>類別</th>
+            <th>術語 (Term)</th>
+            <th>熟練度 (Box)</th>
+            <th>下次復習日</th>
+            <th>當前單日權重</th>
+          </tr>
+        </thead>
+        <tbody id="statsTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 3. 雙題衝刺記憶模式 -->
+  <div id="studyContainer">
+    <div id="modeBadge" class="mode-badge">當前模式</div>
+    <div id="cardsLayout" class="dual-cards-layout">
+      <!-- 卡片 A -->
+      <div class="study-card" id="cardA_UI">
+        <div class="study-stats">
+          <span id="studyCategoryA">Category A</span>
+          <div>
+            <span id="studyBoxA" class="box-tag">Box: 0</span>
+            <span id="studyPriorityA" class="priority-badge">權重: 100</span>
+          </div>
+        </div>
+        <div class="study-term" id="studyTermA">Term A</div>
+        <div class="study-answer-area" id="studyAnswerAreaA">
+          <div class="study-en" id="studyEnA">English A</div>
+          <div class="study-zh" id="studyZhA">中文 A</div>
+        </div>
+        <div class="card-grade-btns" id="gradeBtnsA">
+          <button class="grade-btn" id="btnA_yes" onclick="setGrade('A', true)">✅ 記住了</button>
+          <button class="grade-btn" id="btnA_no" onclick="setGrade('A', false)">❌ 忘記了</button>
+        </div>
+      </div>
+
+      <!-- 卡片 B -->
+      <div class="study-card" id="cardB_UI">
+        <div class="study-stats">
+          <span id="studyCategoryB">Category B</span>
+          <div>
+            <span id="studyBoxB" class="box-tag">Box: 0</span>
+            <span id="studyPriorityB" class="priority-badge">權重: 100</span>
+          </div>
+        </div>
+        <div class="study-term" id="studyTermB">Term B</div>
+        <div class="study-answer-area" id="studyAnswerAreaB">
+          <div class="study-en" id="studyEnB">English B</div>
+          <div class="study-zh" id="studyZhB">中文 B</div>
+        </div>
+        <div class="card-grade-btns" id="gradeBtnsB">
+          <button class="grade-btn" id="btnB_yes" onclick="setGrade('B', true)">✅ 記住了</button>
+          <button class="grade-btn" id="btnB_no" onclick="setGrade('B', false)">❌ 忘記了</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 統整操作區 -->
+    <div id="studyControls" class="study-controls">
+      <button id="showAnswersBtn" class="action-btn-large" onclick="showAnswers()">👀 顯示答案</button>
+      <button id="submitNextBtn" class="action-btn-large" style="display:none;" onclick="submitGrades()" disabled>送出並前往下一題 ➡️</button>
+    </div>
+
+    <!-- 比較難度機制 -->
+    <div id="compareControls">
+      <h3>⚠️ 您兩題都忘記了！請比較哪題更難？</h3>
+      <p style="font-size:0.9rem; color:#64748b; margin-bottom:15px;">更難的一題權重將大幅增加(+80)，較易的常規增加(+30)。</p>
+      <div class="compare-btns">
+        <button class="compare-btn" id="btnCompareA" onclick="processComparison('A')">A 更難</button>
+        <button class="compare-btn" id="btnCompareB" onclick="processComparison('B')">B 更難</button>
+      </div>
+    </div>
+    
+    <!-- 完成畫面 -->
+    <div id="finishedScreen">
+      <h2>🎉 任務完成！</h2>
+      <p>本次指定的學習卡片池已經清空！</p>
+      <p style="margin-top: 15px;">您可以選擇其他分類繼續衝刺，或是下載最新的 JSON 進度檔進行備份。</p>
+      <button class="btn-sm btn-export" style="margin-top: 15px; font-size: 1.1rem; padding: 12px 20px;" onclick="exportProgressJSON()">📥 立即下載最新進度檔 (.json)</button>
+    </div>
+  </div>
+
+  <script>
+    let cardData = [];
+    let currentFilter = "All";
+    
+    // 統一從 localStorage 取出進度模型
+    let userData = JSON.parse(localStorage.getItem('smcp_progress')) || {};
+    
+    const intervals = [0, 1, 3, 7, 14, 30]; 
+    let currentStudyMode = 'daily'; 
+    let sessionCompletedIds = new Set(); 
+    let cardA = null;
+    let cardB = null;
+    let gradeA = null;
+    let gradeB = null;
+
+    // --- 日期工具 ---
+    function getTodayStr() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function addDays(dateStr, days) {
+      const d = new Date(dateStr);
+      d.setDate(d.getDate() + days);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function getCardDataModel(id) {
+      if (!userData[id]) {
+        userData[id] = { priority: 100, box: 0, next_review_date: getTodayStr() };
+      }
+      return userData[id];
+    }
+
+    // --- 資料載入 ---
+    async function loadData() {
+      try {
+        const response = await fetch('smcp_data.json');
+        if (!response.ok) throw new Error('無法讀取檔案');
+        cardData = await response.json();
+        
+        document.getElementById('loadingMsg').style.display = 'none';
+        document.getElementById('categorySelect').style.display = 'block';
+        document.getElementById('mainBtns').style.display = 'flex';
+        document.getElementById('dataMgmtBtns').style.display = 'flex';
+
+        buildFilterDropdown();
+        toggleMode('grid'); 
+      } catch (error) {
+        document.getElementById('loadingMsg').innerHTML = '❌ 錯誤：無法讀取 smcp_data.json。<br><span style="font-size:0.9rem; font-weight:normal; color:#475569;">1. 請確認已建立 smcp_data.json 檔案。<br>2. 由於瀏覽器安全沙盒限制，HTML 無法直接雙擊開啟並讀取本地檔案。請使用 VS Code 的 Live Server 擴充功能或 Python Local Server 開啟。</span>';
+        console.error(error);
+      }
+    }
+
+    window.onload = loadData;
+
+    function formatText(text) {
+      let normalized = text.replace(/([0-9][.:])\s*/g, "\n$1 ");
+      return normalized.split("\n").map(l => l.trim()).filter(l => l.length > 0).map(line => `<span class="meaning-item">${line}</span>`).join("");
+    }
+
+    function buildFilterDropdown() {
+      const select = document.getElementById("categorySelect");
+      const uniqueGroups = [...new Set(cardData.map(c => c.group))];
+      select.innerHTML = `<option value="All">全部顯示 (${cardData.length})</option>`;
+      uniqueGroups.forEach(group => {
+        select.innerHTML += `<option value="${group}">${group} (${cardData.filter(c => c.group === group).length})</option>`;
+      });
+    }
+
+    function handleFilterChange(selectElement) {
+      currentFilter = selectElement.value;
+      if (document.getElementById("cardContainer").style.display !== "none") renderGrid();
+      if (document.getElementById("statsContainer").style.display !== "none") renderStats();
+    }
+
+    function toggleMode(mode) {
+      document.getElementById("cardContainer").style.display = "none";
+      document.getElementById("studyContainer").style.display = "none";
+      document.getElementById("statsContainer").style.display = "none";
+
+      if (mode === 'study') {
+        document.getElementById("studyContainer").style.display = "flex";
+      } else if (mode === 'stats') {
+        document.getElementById("statsContainer").style.display = "block";
+        renderStats();
+      } else {
+        document.getElementById("cardContainer").style.display = "grid"; 
+        renderGrid();
+      }
+    }
+
+    // --- 統計表模式 (字串高速渲染) ---
+    function renderStats() {
+      const tbody = document.getElementById("statsTableBody");
+      let filtered = currentFilter === "All" ? cardData : cardData.filter(c => c.group === currentFilter);
+      
+      if (!filtered || filtered.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; padding: 20px;'>目前無資料</td></tr>";
+        return;
+      }
+
+      let statsList = filtered.map(c => {
+        const d = getCardDataModel(c.id);
+        return { ...c, priority: d.priority, box: d.box, next_review_date: d.next_review_date };
+      }).sort((a, b) => {
+        if(a.next_review_date !== b.next_review_date) return a.next_review_date.localeCompare(b.next_review_date);
+        return b.priority - a.priority;
+      });
+
+      const today = getTodayStr();
+      let htmlContent = "";
+
+      statsList.forEach(item => {
+        let weightClass = item.priority >= 150 ? "weight-high" : (item.priority <= 25 ? "weight-low" : "");
+        let dateColor = item.next_review_date <= today ? "var(--danger-color)" : "#475569";
+        let dateWeight = item.next_review_date <= today ? "bold" : "normal";
+        
+        htmlContent += `
+          <tr>
+            <td>#${item.id}</td>
+            <td>${item.group}</td>
+            <td><strong>${item.term}</strong></td>
+            <td><span class="box-badge box-${item.box}">Box ${item.box}</span></td>
+            <td style="color:${dateColor}; font-weight:${dateWeight}">${item.next_review_date}</td>
+            <td class="${weightClass}">${item.priority}</td>
+          </tr>
+        `;
+      });
+      tbody.innerHTML = htmlContent;
+    }
+
+    // --- 列表/列印模式 (字串高速渲染) ---
+    function renderGrid() {
+      const container = document.getElementById("cardContainer");
+      let filtered = currentFilter === "All" ? cardData : cardData.filter(c => c.group === currentFilter);
+      let htmlContent = "";
+
+      filtered.forEach(card => {
+        htmlContent += `
+          <div class="card">
+            <div>
+              <div class="card-top"><span class="card-id">#${card.id}</span><span class="card-category">${card.group}</span></div>
+              <div class="term">${card.term}</div>
+              <div class="meaning-en">${formatText(card.en)}</div>
+            </div>
+            <div class="meaning-zh">${formatText(card.zh)}</div>
+          </div>`;
+      });
+      container.innerHTML = htmlContent;
+    }
+
+    // --- 雙題抽考邏輯 ---
+    function startStudySession(mode) {
+      currentStudyMode = mode;
+      sessionCompletedIds.clear();
+      toggleMode('study');
+      
+      const badge = document.getElementById('modeBadge');
+      if(mode === 'daily') {
+        badge.textContent = "📅 日常復習 (限今日到期)";
+        badge.style.background = "var(--daily-color)";
+      } else {
+        badge.textContent = `🚀 衝刺模式 (${currentFilter})`;
+        badge.style.background = "var(--warning-color)";
+      }
+      
+      document.getElementById('finishedScreen').style.display = "none";
+      document.getElementById('cardsLayout').style.display = "grid";
+      document.getElementById('studyControls').style.display = "block";
+      
+      drawNextTwoCards();
+    }
+
+    function drawNextTwoCards() {
+      gradeA = null; gradeB = null;
+      document.getElementById('compareControls').style.display = 'none';
+      document.getElementById('showAnswersBtn').style.display = 'block';
+      document.getElementById('submitNextBtn').style.display = 'none';
+      document.getElementById('submitNextBtn').disabled = true;
+
+      ['btnA_yes', 'btnA_no', 'btnB_yes', 'btnB_no'].forEach(id => {
+        document.getElementById(id).className = 'grade-btn';
+      });
+
+      const today = getTodayStr();
+      let pool = cardData;
+      
+      if (currentStudyMode === 'daily') {
+        if(currentFilter !== "All") pool = pool.filter(c => c.group === currentFilter);
+        pool = pool.filter(c => getCardDataModel(c.id).next_review_date <= today);
+      } else {
+        if(currentFilter !== "All") pool = pool.filter(c => c.group === currentFilter);
+      }
+
+      pool = pool.filter(c => !sessionCompletedIds.has(c.id));
+
+      if (pool.length === 0) {
+        document.getElementById('cardsLayout').style.display = "none";
+        document.getElementById('studyControls').style.display = "none";
+        document.getElementById('finishedScreen').style.display = "block";
+        return;
+      }
+
+      let weightedPool = pool.map(card => {
+        const d = getCardDataModel(card.id);
+        return { ...card, priority: d.priority, box: d.box };
+      });
+      weightedPool.sort((a, b) => b.priority - a.priority);
+
+      let filteredPool = weightedPool;
+      if (cardA && cardB && weightedPool.length > 2) {
+        filteredPool = weightedPool.filter(c => c.id !== cardA.id && c.id !== cardB.id);
+      }
+
+      const topNSize = Math.min(15, filteredPool.length);
+      const topNCards = filteredPool.slice(0, topNSize);
+      topNCards.sort(() => 0.5 - Math.random());
+      
+      cardA = topNCards[0];
+      cardB = topNCards.length > 1 ? topNCards[1] : null;
+
+      renderCardUI('A', cardA);
+      if (cardB) {
+        document.getElementById("cardB_UI").style.display = "flex";
+        renderCardUI('B', cardB);
+      } else {
+        document.getElementById("cardB_UI").style.display = "none";
+      }
+    }
+
+    function renderCardUI(letter, cardObj) {
+      document.getElementById(`studyCategory${letter}`).textContent = cardObj.group;
+      document.getElementById(`studyPriority${letter}`).textContent = `權重: ${cardObj.priority}`;
+      document.getElementById(`studyBox${letter}`).textContent = `Box ${cardObj.box}`;
+      document.getElementById(`studyBox${letter}`).className = `box-tag box-${cardObj.box}`;
+      document.getElementById(`studyTerm${letter}`).textContent = cardObj.term;
+      document.getElementById(`studyEn${letter}`).innerHTML = formatText(cardObj.en);
+      document.getElementById(`studyZh${letter}`).innerHTML = formatText(cardObj.zh);
+      document.getElementById(`studyAnswerArea${letter}`).style.display = "none";
+      document.getElementById(`gradeBtns${letter}`).style.display = "none";
+      document.getElementById(`card${letter}_UI`).style.borderColor = "transparent";
+    }
+
+    function showAnswers() {
+      document.getElementById("showAnswersBtn").style.display = "none";
+      document.getElementById("submitNextBtn").style.display = "inline-block";
+      document.getElementById("studyAnswerAreaA").style.display = "block";
+      document.getElementById("gradeBtnsA").style.display = "flex";
+      
+      if (cardB) {
+        document.getElementById("studyAnswerAreaB").style.display = "block";
+        document.getElementById("gradeBtnsB").style.display = "flex";
+      } else {
+        gradeB = true; 
+      }
+    }
+
+    function setGrade(cardLetter, isRemembered) {
+      if (cardLetter === 'A') {
+        gradeA = isRemembered;
+        document.getElementById('btnA_yes').className = isRemembered ? 'grade-btn selected-yes' : 'grade-btn';
+        document.getElementById('btnA_no').className = !isRemembered ? 'grade-btn selected-no' : 'grade-btn';
+        document.getElementById("cardA_UI").style.borderColor = isRemembered ? "var(--success-color)" : "var(--danger-color)";
+      } else {
+        gradeB = isRemembered;
+        document.getElementById('btnB_yes').className = isRemembered ? 'grade-btn selected-yes' : 'grade-btn';
+        document.getElementById('btnB_no').className = !isRemembered ? 'grade-btn selected-no' : 'grade-btn';
+        document.getElementById("cardB_UI").style.borderColor = isRemembered ? "var(--success-color)" : "var(--danger-color)";
+      }
+      if (gradeA !== null && gradeB !== null) {
+        document.getElementById('submitNextBtn').disabled = false;
+      }
+    }
+
+    function submitGrades() {
+      if (gradeA === false && gradeB === false) {
+        document.getElementById('submitNextBtn').style.display = 'none';
+        document.getElementById('compareControls').style.display = 'block';
+        document.getElementById('btnCompareA').innerText = `[${cardA.term}] 更難`;
+        document.getElementById('btnCompareB').innerText = `[${cardB.term}] 更難`;
+      } else {
+        processCardResult(cardA.id, gradeA, 50);
+        if(cardB) processCardResult(cardB.id, gradeB, 50);
+        saveAndNext();
+      }
+    }
+
+    function processComparison(harderCard) {
+      if (harderCard === 'A') {
+        processCardResult(cardA.id, false, 80);
+        processCardResult(cardB.id, false, 30);
+      } else {
+        processCardResult(cardA.id, false, 30);
+        processCardResult(cardB.id, false, 80);
+      }
+      saveAndNext();
+    }
+
+    function processCardResult(id, isRemembered, penaltyScore) {
+      const d = getCardDataModel(id);
+      if (currentStudyMode === 'daily') {
+        if (isRemembered) {
+          d.box = Math.min(5, d.box + 1);
+          d.next_review_date = addDays(getTodayStr(), intervals[d.box]);
+          d.priority = 100;
+          sessionCompletedIds.add(id);
+        } else {
+          d.box = 0;
+          d.next_review_date = getTodayStr();
+          d.priority += penaltyScore;
+        }
+      } else if (currentStudyMode === 'sprint') {
+        if (isRemembered) {
+          d.priority = 100; 
+          sessionCompletedIds.add(id);
+        } else {
+          d.priority += penaltyScore;
+        }
+      }
+    }
+
+    function saveAndNext() {
+      localStorage.setItem('smcp_progress', JSON.stringify(userData));
+      drawNextTwoCards();
+    }
+
+    // --- JSON 檔案實體讀取 / 寫入機制 ---
+    function exportProgressJSON() {
+      const dataStr = JSON.stringify(userData, null, 2); // 格式化 JSON 使其易於閱讀
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `smcp_record_${getTodayStr()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importProgressJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          userData = importedData;
+          localStorage.setItem('smcp_progress', JSON.stringify(userData));
+          alert("✅ 成功讀取進度檔並已覆寫當前紀錄！");
+          if (document.getElementById("statsContainer").style.display !== "none") renderStats();
+        } catch (error) { 
+          alert("❌ 檔案格式錯誤，請確認上傳的為系統下載之 JSON 檔。"); 
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = ''; // 允許重複上傳相同名稱的檔案
+    }
+
+    function resetProgress() {
+      if(confirm("確定要清除所有學習記錄嗎？這將會把所有卡片的 Box 與權重歸零。建議操作前先下載進度檔備份。")) {
+        localStorage.removeItem('smcp_progress');
+        userData = {};
+        alert("✅ 紀錄已成功清空！");
+        if (document.getElementById("statsContainer").style.display !== "none") renderStats();
+      }
+    }
+  </script>
+</body>
+</html>
