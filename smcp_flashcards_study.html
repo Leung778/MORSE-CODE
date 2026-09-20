@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMCP 航海術語衝刺記憶卡</title>
+  <style>
+    :root {
+      --primary-color: #0b2545;
+      --accent-color: #1d4ed8;
+      --danger-color: #dc2626;
+      --success-color: #16a34a;
+      --border-dash: #94a3b8;
+      --card-bg: #ffffff;
+      --card-w: 90mm;
+      --card-h: 70mm;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif; }
+    body { background-color: #f1f5f9; color: #0f172a; padding: 15px; }
+
+    /* 控制面板 */
+    .control-panel { max-width: 900px; margin: 0 auto 20px auto; text-align: center; background: #ffffff; padding: 20px 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+    .control-panel h1 { font-size: 1.3rem; color: var(--primary-color); margin-bottom: 8px; }
+    .control-panel p { font-size: 0.9rem; color: #475569; margin-bottom: 16px; }
+
+    .filter-dropdown { width: 100%; max-width: 400px; padding: 10px 16px; font-size: 1rem; font-weight: 600; color: #0f172a; background-color: #f8fafc; border: 2px solid var(--accent-color); border-radius: 8px; cursor: pointer; margin-bottom: 12px; }
+    
+    .btn-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 15px; }
+    .btn { padding: 10px 20px; font-size: 0.95rem; font-weight: 700; border-radius: 8px; border: none; cursor: pointer; transition: 0.2s; color: white; }
+    .btn-study { background-color: var(--accent-color); }
+    .btn-study:hover { background-color: #1e40af; }
+    .btn-print { background-color: #475569; }
+    
+    /* 資料管理按鈕區 */
+    .data-management { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; border-top: 1px solid #e2e8f0; padding-top: 15px; }
+    .btn-sm { padding: 6px 12px; font-size: 0.85rem; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; color: white; }
+    .btn-export { background-color: #059669; }
+    .btn-import { background-color: #d97706; }
+    .btn-reset { background-color: #ef4444; }
+
+    /* 網格模式 (列印用) */
+    .cards-wrapper { display: flex; flex-wrap: wrap; justify-content: center; gap: 0; max-width: 190mm; margin: 0 auto; }
+    .card { width: var(--card-w); height: var(--card-h); background-color: var(--card-bg); border: 1px dashed var(--border-dash); padding: 4mm 5mm; display: flex; flex-direction: column; justify-content: space-between; page-break-inside: avoid; overflow: hidden; }
+    .card-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 2px; margin-bottom: 3px; }
+    .card-id { font-size: 0.75rem; font-weight: 800; color: #64748b; }
+    .card-category { font-size: 0.7rem; font-weight: 600; color: #0284c7; background: #f0f9ff; padding: 1px 6px; border-radius: 4px; }
+    .term { font-size: 1.05rem; font-weight: 800; color: var(--primary-color); line-height: 1.1; margin-bottom: 4px; }
+    .meaning-en { font-size: 0.85rem; font-weight: 500; color: #1e293b; line-height: 1.25; margin-bottom: 4px; }
+    .meaning-zh { font-size: 0.78rem; color: #334155; background: #f8fafc; border-left: 3px solid var(--accent-color); padding: 3px 6px; line-height: 1.25; border-radius: 2px; }
+    .meaning-item { display: block; margin-bottom: 1px; }
+
+    /* 衝刺記憶模式 (Study Mode) */
+    #studyContainer { display: none; flex-direction: column; align-items: center; max-width: 600px; margin: 0 auto 40px auto; }
+    .study-card { width: 100%; background: #fff; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 30px; text-align: center; position: relative; min-height: 350px; display: flex; flex-direction: column; justify-content: center;}
+    .study-stats { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; font-size: 0.85rem; color: #64748b; font-weight: 600; }
+    .study-term { font-size: 2rem; color: var(--primary-color); font-weight: 800; margin-bottom: 15px; }
+    .study-answer-area { display: none; margin-top: 20px; border-top: 2px dashed #e2e8f0; padding-top: 20px; text-align: left; }
+    .study-en { font-size: 1.1rem; color: #1e293b; font-weight: 600; margin-bottom: 12px; line-height: 1.4; }
+    .study-zh { font-size: 1rem; color: #334155; background: #f8fafc; border-left: 4px solid var(--accent-color); padding: 10px; line-height: 1.4; }
+    
+    .action-btn-large { width: 100%; padding: 15px; font-size: 1.1rem; font-weight: 700; color: #fff; background: var(--accent-color); border: none; border-radius: 8px; cursor: pointer; margin-top: 20px; }
+    .feedback-btns { display: none; width: 100%; gap: 15px; margin-top: 20px; }
+    .feedback-btns button { flex: 1; padding: 15px; font-size: 1.1rem; font-weight: 700; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+    .btn-forgot { background: var(--danger-color); }
+    .btn-remembered { background: var(--success-color); }
+    .priority-badge { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; }
+
+    @media print {
+      body { background: transparent; padding: 0; }
+      .control-panel, #studyContainer { display: none !important; }
+      .cards-wrapper { display: flex !important; max-width: 100%; }
+      .card { border: 1px dashed #94a3b8; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      @page { size: A4 portrait; margin: 6mm 8mm; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="control-panel no-print">
+    <h1>SMCP 航海術語衝刺系統</h1>
+    <p>系統會自動將答錯的卡片權重拉高，優先反覆出現，直到你記住為止。</p>
+    
+    <select id="categorySelect" class="filter-dropdown" onchange="handleFilterChange(this)"></select>
+
+    <div class="btn-group">
+      <button class="btn btn-study" onclick="toggleMode('study')">🚀 開始衝刺 (Study Mode)</button>
+      <button class="btn btn-print" onclick="toggleMode('grid')">📄 總覽與列印 (List Mode)</button>
+    </div>
+
+    <!-- 備份與管理區塊 -->
+    <div class="data-management">
+      <button class="btn-sm btn-export" onclick="exportData()">💾 匯出備份</button>
+      <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+      <button class="btn-sm btn-import" onclick="document.getElementById('importFile').click()">📂 匯入進度</button>
+      <button class="btn-sm btn-reset" onclick="resetProgress()">⚠️ 重置進度</button>
+    </div>
+  </div>
+
+  <!-- 列表/列印模式 -->
+  <div class="cards-wrapper" id="cardContainer"></div>
+
+  <!-- 衝刺記憶模式 -->
+  <div id="studyContainer">
+    <div class="study-card" id="studyCard">
+      <div class="study-stats">
+        <span id="studyCategory">Category</span>
+        <span id="studyPriority" class="priority-badge">權重: 100</span>
+      </div>
+      
+      <div class="study-term" id="studyTerm">Abandon vessel</div>
+      
+      <button id="showAnswerBtn" class="action-btn-large" onclick="showAnswer()">顯示答案</button>
+
+      <div class="study-answer-area" id="studyAnswerArea">
+        <div class="study-en" id="studyEn">English Meaning</div>
+        <div class="study-zh" id="studyZh">中文解釋</div>
+      </div>
+
+      <div class="feedback-btns" id="feedbackBtns">
+        <button class="btn-forgot" onclick="submitAnswer(false)">❌ 忘記了 (+50)</button>
+        <button class="btn-remembered" onclick="submitAnswer(true)">✅ 記住了 (÷2)</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ※ 為了版面簡潔，此處僅放部分資料，請將你完整的 150 題貼入此陣列 ※
+    const cardData = [
+      { group: "遇險與搜救", term: "Abandon vessel", en: "To evacuate crew and passengers from a vessel following a distress", zh: "棄船。船隻遇險救唔返嗰陣，下令全體船員同乘客即刻撤離。" },
+      { group: "遇險與搜救", term: "Capsizing", en: "Turning of a vessel upside down while on water", zh: "翻船／傾覆。隻船喺水上面徹底底朝天翻咗轉。" },
+      { group: "遇險與搜救", term: "Casualty", en: "here: Case of death in an accident or shipping disaster", zh: "死傷／罹難者。海難或者事故入面出現嘅死亡個案。" },
+      { group: "遇險與搜救", term: "Datum", en: "1. The most probable position of a search target at a given time\n2. The plane of reference to which all data as to the depth on charts are referenced.", zh: "基準點／海圖基準：\n1. 搜救嗰陣計出目標最可能出現嘅坐標\n2. 海圖量度水深嘅基準面" },
+      { group: "VTS 與港航管制", term: "VTS", en: "Vessel Traffic Services: Services, designed to improve safety and efficiency of vessel traffic and to protect the environment", zh: "船舶交通服務。海事處嘅「航空管制」，監控指引船舶出入港。" },
+      { group: "VTS 與港航管制", term: "TSS", en: "Traffic Separation Scheme: A routing measure aimed at the separation of opposing streams of traffic by appropriate means and by the establishment of traffic lanes", zh: "分道通航制。海面劃分左右行車線嘅分流公路系統，杜絕迎面相撞。" },
+      { group: "航行操縱與避碰", term: "Crash-stop", en: "An emergency reversal operation of the main engine(s) to avoid a collision", zh: "緊急全速倒車。為免相撞，即刻將主機全速倒波煞停隻船嘅應急操作。" },
+      { group: "導航與通訊儀表", term: "GMDSS", en: "Global Maritime Distress and Safety System", zh: "全球海上遇險和安全系統。國際海事統一嘅搜救與應急通訊架構。" }
+    ];
+
+    // 初始化：為資料加上唯一 ID
+    cardData.forEach((card, index) => { card.id = "card_" + String(index + 1).padStart(3, '0'); });
+
+    let currentFilter = "All";
+    let userData = JSON.parse(localStorage.getItem('smcp_progress')) || {};
+    let currentStudyCard = null;
+
+    // 格式化文字 (分行)
+    function formatText(text) {
+      let normalized = text.replace(/([0-9][.:])\s*/g, "\n$1 ");
+      return normalized.split("\n").map(l => l.trim()).filter(l => l.length > 0).map(line => `<span class="meaning-item">${line}</span>`).join("");
+    }
+
+    // --- 系統控制 ---
+    function buildFilterDropdown() {
+      const select = document.getElementById("categorySelect");
+      const uniqueGroups = [...new Set(cardData.map(c => c.group))];
+      select.innerHTML = `<option value="All">全部顯示 (${cardData.length})</option>`;
+      uniqueGroups.forEach(group => {
+        select.innerHTML += `<option value="${group}">${group} (${cardData.filter(c => c.group === group).length})</option>`;
+      });
+    }
+
+    function handleFilterChange(selectElement) {
+      currentFilter = selectElement.value;
+      renderGrid();
+      if (document.getElementById("studyContainer").style.display === "flex") {
+        drawNextCard();
+      }
+    }
+
+    function toggleMode(mode) {
+      if (mode === 'study') {
+        document.getElementById("cardContainer").style.display = "none";
+        document.getElementById("studyContainer").style.display = "flex";
+        drawNextCard();
+      } else {
+        document.getElementById("cardContainer").style.display = "flex";
+        document.getElementById("studyContainer").style.display = "none";
+        renderGrid();
+      }
+    }
+
+    // --- 資料匯出 / 匯入機制 ---
+    function exportData() {
+      const dataStr = JSON.stringify(userData);
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'smcp_progress_backup.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          userData = imported;
+          localStorage.setItem('smcp_progress', JSON.stringify(userData));
+          alert("✅ 進度匯入成功！");
+          if (document.getElementById("studyContainer").style.display === "flex") {
+            drawNextCard();
+          }
+        } catch (error) {
+          alert("❌ 檔案格式錯誤，請選擇正確的 JSON 備份檔。");
+        }
+      };
+      reader.readAsText(file);
+      // 清空 input，允許重複匯入同一個檔案
+      event.target.value = '';
+    }
+
+    function resetProgress() {
+      if(confirm("確定要清除所有學習記錄嗎？所有卡片權重將重置為 100。")) {
+        localStorage.removeItem('smcp_progress');
+        userData = {};
+        alert("已重置！");
+        if (document.getElementById("studyContainer").style.display === "flex") drawNextCard();
+      }
+    }
+
+    // --- 列表/列印模式 ---
+    function renderGrid() {
+      const container = document.getElementById("cardContainer");
+      container.innerHTML = "";
+      let filtered = currentFilter === "All" ? cardData : cardData.filter(c => c.group === currentFilter);
+      
+      filtered.forEach(card => {
+        const idNum = card.id.split("_")[1];
+        container.innerHTML += `
+          <div class="card">
+            <div>
+              <div class="card-top">
+                <span class="card-id">#${idNum}</span>
+                <span class="card-category">${card.group}</span>
+              </div>
+              <div class="term">${card.term}</div>
+              <div class="meaning-en">${formatText(card.en)}</div>
+            </div>
+            <div class="meaning-zh">${formatText(card.zh)}</div>
+          </div>`;
+      });
+    }
+
+    // --- 衝刺記憶模式 (演算法核心) ---
+    function getCardPriority(id) {
+      return userData[id] ? userData[id].priority : 100;
+    }
+
+    function drawNextCard() {
+      let pool = currentFilter === "All" ? cardData : cardData.filter(c => c.group === currentFilter);
+      if (pool.length === 0) return;
+
+      let weightedPool = pool.map(card => ({
+        ...card,
+        priority: getCardPriority(card.id)
+      }));
+
+      // 依照 priority 由高到低排序
+      weightedPool.sort((a, b) => b.priority - a.priority);
+
+      // 排除剛剛才看過的那張
+      if (currentStudyCard && weightedPool.length > 1) {
+        weightedPool = weightedPool.filter(c => c.id !== currentStudyCard.id);
+      }
+
+      // 取 Top N 隨機抽選
+      const topNSize = Math.min(10, weightedPool.length);
+      const topNCards = weightedPool.slice(0, topNSize);
+      currentStudyCard = topNCards[Math.floor(Math.random() * topNCards.length)];
+
+      document.getElementById("studyCategory").textContent = currentStudyCard.group;
+      document.getElementById("studyPriority").textContent = `權重: ${currentStudyCard.priority}`;
+      document.getElementById("studyTerm").textContent = currentStudyCard.term;
+      document.getElementById("studyEn").innerHTML = formatText(currentStudyCard.en);
+      document.getElementById("studyZh").innerHTML = formatText(currentStudyCard.zh);
+      
+      document.getElementById("studyAnswerArea").style.display = "none";
+      document.getElementById("feedbackBtns").style.display = "none";
+      document.getElementById("showAnswerBtn").style.display = "block";
+    }
+
+    function showAnswer() {
+      document.getElementById("showAnswerBtn").style.display = "none";
+      document.getElementById("studyAnswerArea").style.display = "block";
+      document.getElementById("feedbackBtns").style.display = "flex";
+    }
+
+    function submitAnswer(isRemembered) {
+      const id = currentStudyCard.id;
+      if (!userData[id]) userData[id] = { priority: 100 };
+
+      if (isRemembered) {
+        userData[id].priority = Math.max(1, Math.floor(userData[id].priority / 2));
+      } else {
+        userData[id].priority += 50;
+      }
+      
+      localStorage.setItem('smcp_progress', JSON.stringify(userData));
+      drawNextCard();
+    }
+
+    // 初始化
+    buildFilterDropdown();
+    renderGrid();
+  </script>
+</body>
+</html>

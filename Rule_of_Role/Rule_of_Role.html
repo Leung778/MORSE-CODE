@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COLREGs 智能溫書系統 Pro</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --primary-color: #0056b3;
+            --card-bg: #fff;
+            --border-color: #ddd;
+            --translation-color: #666;
+            --btn-forget: #dc3545;
+            --btn-hard: #fd7e14;
+            --btn-good: #28a745;
+            --btn-easy: #007bff;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1e1e1e;
+                --text-color: #e0e0e0;
+                --primary-color: #4da3ff;
+                --card-bg: #2d2d2d;
+                --border-color: #444;
+                --translation-color: #aaa;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            padding: 1rem;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-select {
+            padding: 0.6rem 1rem;
+            font-size: 1rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .rule-card, .situation-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .rule-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .history-badge {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .english-text {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            white-space: pre-wrap;
+        }
+
+        .chinese-text {
+            color: var(--translation-color);
+            font-size: 0.95rem;
+            margin-top: 0;
+            white-space: pre-wrap;
+        }
+
+        /* 閃卡與 SRS 控制區 */
+        .flashcard-answer {
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px dashed var(--border-color);
+        }
+
+        .show-answer .flashcard-answer { display: block; }
+        .show-answer .btn-show { display: none; }
+
+        .srs-controls {
+            display: none;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .show-answer .srs-controls { display: flex; }
+
+        button {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+            flex: 1;
+            min-width: 80px;
+        }
+
+        .btn-show { background-color: var(--primary-color); width: 100%; }
+        .btn-0 { background-color: var(--btn-forget); }
+        .btn-3 { background-color: var(--btn-hard); }
+        .btn-4 { background-color: var(--btn-good); }
+        .btn-5 { background-color: var(--btn-easy); }
+
+        .progress-banner {
+            background-color: var(--card-bg);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .sync-panel {
+            background-color: #e9ecef;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            color: #333;
+        }
+
+        .sync-panel input[type="file"] { margin-top: 1rem; }
+
+        #loading { text-align: center; padding: 2rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 style="margin: 0; font-size: 1.5rem;">COLREGs 智能溫書系統 Pro</h1>
+    </header>
+
+    <nav>
+        <select class="nav-select" id="sectionSelect" onchange="navigate(this.value)">
+            <option value="" disabled selected>請選擇溫習模式或功能...</option>
+            <optgroup label="🔥 智能複習模式 (SRS)">
+                <option value="SRS,Situations">今日必刷：情境題 (Situations)</option>
+                <option value="SRS,Rules">今日必刷：法規背誦 (Rules)</option>
+            </optgroup>
+            <optgroup label="💾 進度管理">
+                <option value="Sync,Manage">匯出 / 匯入學習進度 (JSON)</option>
+            </optgroup>
+            <optgroup label="📖 法規條文全覽">
+                <option value="Rule,Part_A">Part A - General</option>
+                <option value="Rule,Part_B,0">Part B Sec I - 任何能見度</option>
+                <option value="Rule,Part_B,1">Part B Sec II - 互相看見時</option>
+                <option value="Rule,Part_B,2">Part B Sec III - 能見度受限時</option>
+                <option value="Rule,Part_C">Part C - Lights and shapes</option>
+                <option value="Rule,Part_D">Part D - Sound and light signals</option>
+                <option value="Rule,Part_E">Part E - Exemptions</option>
+            </optgroup>
+            <optgroup label="🃏 情境題全覽">
+                <option value="Situation,Open_Sea">Open Sea</option>
+                <option value="Situation,TSS_and_Narrow_Channel">TSS & Narrow Channel</option>
+                <option value="Situation,Restricted_Visibility">Restricted Visibility</option>
+            </optgroup>
+        </select>
+    </nav>
+
+    <main id="contentArea">
+        <div id="loading">載入題庫中，請稍候...</div>
+    </main>
+
+    <script>
+        let colregsData = null;
+        const STORAGE_KEY = 'colregs_srs_progress_pro';
+        
+        let srsProgress = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+
+        async function loadData() {
+            try {
+                const response = await fetch('data.json');
+                if (!response.ok) throw new Error('找不到 data.json');
+                colregsData = await response.json();
+                
+                document.getElementById('sectionSelect').value = "SRS,Situations";
+                navigate("SRS,Situations");
+            } catch (error) {
+                document.getElementById('contentArea').innerHTML = `<p style="color: red;">載入失敗: ${error.message}</p>`;
+            }
+        }
+
+        function navigate(value) {
+            if (!value) return;
+            const parts = value.split(',');
+            const type = parts[0];
+            const key = parts[1];
+            
+            if (type === 'Rule') {
+                renderRules(key, parts[2] ? parseInt(parts[2]) : null);
+            } else if (type === 'Situation') {
+                renderSituationsList(key);
+            } else if (type === 'SRS') {
+                renderSRSMode(key); // key 為 'Situations' 或 'Rules'
+            } else if (type === 'Sync') {
+                renderSyncPanel();
+            }
+            window.scrollTo(0, 0);
+        }
+
+        // ================= 時間與歷史紀錄格式化 =================
+        function formatTime(isoString) {
+            if (!isoString) return "從未複習";
+            const d = new Date(isoString);
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        }
+
+        function getQualityLabel(q) {
+            if(q === 0) return "忘記";
+            if(q === 3) return "困難";
+            if(q === 4) return "良好";
+            if(q === 5) return "簡單";
+            return "未知";
+        }
+
+        // ================= SM-2 演算法核心 (支援同日高頻重試) =================
+        function calculateSM2(quality, repetitions, interval, easeFactor) {
+            let newRepetitions = repetitions;
+            let newInterval = interval;
+            let newEaseFactor = easeFactor;
+
+            if (quality >= 3) {
+                // 完全理解，次數越少出現機率越低
+                if (newRepetitions === 0) newInterval = 1; // 明天
+                else if (newRepetitions === 1) newInterval = 4;
+                else newInterval = Math.round(newInterval * newEaseFactor);
+                newRepetitions++;
+            } else {
+                // 未如理想 (忘記) -> 10分鐘後當天再次出現
+                newRepetitions = 0;
+                newInterval = (10 / (24 * 60)); // 10分鐘轉換為天數
+            }
+
+            newEaseFactor = newEaseFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+            if (newEaseFactor < 1.3) newEaseFactor = 1.3;
+
+            return { repetitions: newRepetitions, interval: newInterval, easeFactor: newEaseFactor };
+        }
+
+        function rateCard(cardId, quality, srsType) {
+            const now = new Date();
+            let cardStats = srsProgress[cardId] || { repetitions: 0, interval: 0, easeFactor: 2.5, history: [] };
+            
+            const newStats = calculateSM2(quality, cardStats.repetitions, cardStats.interval, cardStats.easeFactor);
+            
+            // 計算下次複習日期
+            const nextReview = new Date(now.getTime() + newStats.interval * 24 * 60 * 60 * 1000);
+            
+            // 寫入歷史紀錄對比
+            const historyLog = cardStats.history || [];
+            historyLog.push({ date: now.toISOString(), quality: quality });
+
+            newStats.nextReviewDate = nextReview.toISOString();
+            newStats.history = historyLog;
+            
+            srsProgress[cardId] = newStats;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(srsProgress));
+
+            renderSRSMode(srsType);
+        }
+
+        // ================= 智能複習模式 (SRS) =================
+        function extractAllSituations() {
+            let all = [];
+            const categories = colregsData['Section_Two'].categories;
+            for (const catKey in categories) {
+                categories[catKey].situations.forEach(sit => {
+                    all.push({ id: `SIT_${catKey}_${sit.Situation}`, type: 'Situation', data: sit });
+                });
+            }
+            return all;
+        }
+
+        function extractAllRules() {
+            let all = [];
+            const parts = ['Part_A', 'Part_B', 'Part_C', 'Part_D', 'Part_E'];
+            parts.forEach(p => {
+                const partData = colregsData[p];
+                if (partData.rules) {
+                    partData.rules.forEach(r => all.push({ id: `RULE_${r.Rule}`, type: 'Rule', data: r }));
+                }
+                if (partData.sections) {
+                    partData.sections.forEach(sec => {
+                        if(sec.rules) sec.rules.forEach(r => all.push({ id: `RULE_${r.Rule}`, type: 'Rule', data: r }));
+                    });
+                }
+            });
+            return all;
+        }
+
+        function renderSRSMode(srsType) {
+            const container = document.getElementById('contentArea');
+            container.innerHTML = ''; 
+
+            const today = new Date().getTime();
+            let pool = srsType === 'Rules' ? extractAllRules() : extractAllSituations();
+            let dueCards = [];
+
+            pool.forEach(item => {
+                const stats = srsProgress[item.id];
+                if (!stats || new Date(stats.nextReviewDate).getTime() <= today) {
+                    dueCards.push(item);
+                }
+            });
+
+            if (dueCards.length === 0) {
+                container.innerHTML = `
+                    <div class="progress-banner">
+                        <h2 style="color:var(--primary-color);">🎉 任務清空！</h2>
+                        <p>太神啦！這個類別今天的複習任務已經全部完成。</p>
+                        <p>（若剛剛有標記「忘記」的題目，將在 10 分鐘後重新出現）</p>
+                    </div>`;
+                return;
+            }
+
+            const banner = document.createElement('div');
+            banner.className = 'progress-banner';
+            banner.innerHTML = `<strong>🎯 今日待複習：剩餘 ${dueCards.length} 題</strong>`;
+            container.appendChild(banner);
+
+            const currentCard = dueCards[0];
+            const cardEl = createFlashcard(currentCard.data, currentCard.id, true, currentCard.type, srsType);
+            container.appendChild(cardEl);
+        }
+
+        // ================= 產生閃卡 UI =================
+        function createFlashcard(dataObj, cardId, isSRSMode = false, type = 'Situation', srsType = 'Situations') {
+            const card = document.createElement('div');
+            card.className = type === 'Rule' ? 'rule-card' : 'situation-card';
+            
+            // 標題區
+            const title = document.createElement('div');
+            title.className = 'rule-title';
+            title.textContent = type === 'Rule' ? `${dataObj.Rule} : ${dataObj.Rule_Title || ''}` : dataObj.Situation;
+            card.appendChild(title);
+
+            // 歷史紀錄對比區
+            if (isSRSMode) {
+                const stats = srsProgress[cardId];
+                const historyBadge = document.createElement('div');
+                historyBadge.className = 'history-badge';
+                if (stats && stats.history && stats.history.length > 0) {
+                    const lastRecord = stats.history[stats.history.length - 1];
+                    historyBadge.textContent = `⏱️ 上次評估: ${formatTime(lastRecord.date)} (狀態: ${getQualityLabel(lastRecord.quality)}) | 連續答對: ${stats.repetitions} 次`;
+                } else {
+                    historyBadge.textContent = `⏱️ 這是您第一次測驗此題`;
+                }
+                card.appendChild(historyBadge);
+            }
+
+            const questionDiv = document.createElement('div');
+            const answerDiv = document.createElement('div');
+            answerDiv.className = 'flashcard-answer';
+
+            // 處理內容
+            if (dataObj.content && Array.isArray(dataObj.content)) {
+                if (type === 'Situation') {
+                    dataObj.content.forEach(qa => {
+                        const block = document.createElement('div');
+                        block.innerHTML = `<p class="english-text">${qa.english_original}</p><p class="chinese-text">${qa.chinese_translation}</p>`;
+                        if (qa.english_original.startsWith('Q.')) questionDiv.appendChild(block);
+                        else if (qa.english_original.startsWith('A.')) answerDiv.appendChild(block);
+                        else questionDiv.appendChild(block);
+                    });
+                } else {
+                    // 法規背誦模式：標題當問題，內容全遮住當解答
+                    questionDiv.innerHTML = `<p style="font-weight:bold;">請背誦此法規的重點內容...</p>`;
+                    dataObj.content.forEach(clause => {
+                        const block = document.createElement('div');
+                        if (clause.english_original) block.innerHTML += `<p class="english-text">${clause.english_original}</p>`;
+                        if (clause.chinese_translation) block.innerHTML += `<p class="chinese-text">${clause.chinese_translation}</p>`;
+                        answerDiv.appendChild(block);
+                    });
+                }
+            }
+
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = 'btn-show';
+            toggleBtn.textContent = '顯示解答';
+            toggleBtn.onclick = () => card.classList.add('show-answer');
+
+            card.appendChild(questionDiv);
+            card.appendChild(toggleBtn);
+            
+            if (isSRSMode) {
+                const srsControls = document.createElement('div');
+                srsControls.className = 'srs-controls';
+                srsControls.innerHTML = `
+                    <button class="btn-0" onclick="rateCard('${cardId}', 0, '${srsType}')">忘記 (10分鐘後)</button>
+                    <button class="btn-3" onclick="rateCard('${cardId}', 3, '${srsType}')">困難 (1天)</button>
+                    <button class="btn-4" onclick="rateCard('${cardId}', 4, '${srsType}')">良好 (正常)</button>
+                    <button class="btn-5" onclick="rateCard('${cardId}', 5, '${srsType}')">完全理解 (延後)</button>
+                `;
+                answerDiv.appendChild(srsControls);
+            }
+
+            card.appendChild(answerDiv);
+            return card;
+        }
+
+        // ================= 進度備份 (匯出/匯入 JSON) =================
+        function renderSyncPanel() {
+            const container = document.getElementById('contentArea');
+            container.innerHTML = `
+                <div class="sync-panel">
+                    <h2>💾 學習進度備份與轉移</h2>
+                    <p style="color:#666;">將手機的溫書進度匯出成 JSON 檔案，傳到電腦上匯入即可無縫接軌！</p>
+                    <br>
+                    <button onclick="exportProgress()" style="background-color:var(--btn-good); padding: 1rem;">⬇️ 匯出今日進度 (下載 JSON)</button>
+                    <br><br><hr style="border:0; border-top:1px solid #ccc; margin: 2rem 0;"><br>
+                    <label style="font-weight:bold; font-size:1.1rem;">⬆️ 匯入歷史進度：</label><br>
+                    <input type="file" id="importFile" accept=".json" onchange="importProgress(event)">
+                </div>
+            `;
+        }
+
+        function exportProgress() {
+            const dataStr = JSON.stringify(srsProgress, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const dateStr = new Date().toISOString().split('T')[0];
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `COLREGs_Progress_${dateStr}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importProgress(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    srsProgress = importedData;
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(srsProgress));
+                    alert("✅ 進度匯入成功！系統將為您重新計算今日任務。");
+                    document.getElementById('sectionSelect').value = "SRS,Situations";
+                    navigate("SRS,Situations");
+                } catch (err) {
+                    alert("❌ 檔案格式錯誤，匯入失敗。");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ================= 一般瀏覽渲染 =================
+        function renderSituationsList(categoryKey) {
+            const container = document.getElementById('contentArea');
+            container.innerHTML = `<h2>${colregsData['Section_Two'].categories[categoryKey].title}</h2>`; 
+            colregsData['Section_Two'].categories[categoryKey].situations.forEach(sit => {
+                container.appendChild(createFlashcard(sit, `SIT_${categoryKey}_${sit.Situation}`, false, 'Situation'));
+            });
+        }
+
+        function renderRules(partKey, sectionIndex = null) {
+            const container = document.getElementById('contentArea');
+            container.innerHTML = ''; 
+            let targetData = colregsData[partKey];
+            if (!targetData) return;
+
+            let rulesToRender = (targetData.sections && sectionIndex !== null) 
+                ? targetData.sections[sectionIndex].content || targetData.sections[sectionIndex].rules 
+                : targetData.sections || targetData.content || targetData.rules;
+
+            container.innerHTML = `<h2>${(targetData.sections && sectionIndex !== null) ? targetData.sections[sectionIndex].section_title : targetData.title}</h2>`;
+
+            rulesToRender.forEach(ruleObj => {
+                const card = document.createElement('div');
+                card.className = 'rule-card';
+                card.innerHTML = `<div class="rule-title">${ruleObj.Rule ? (ruleObj.Rule + ' : ' + (ruleObj.Rule_Title||'')) : (ruleObj.Section || '條文內容')}</div>`;
+                if (ruleObj.content && Array.isArray(ruleObj.content)) {
+                    ruleObj.content.forEach(c => {
+                        if(c.english_original) card.innerHTML += `<p class="english-text">${c.english_original}</p>`;
+                        if(c.chinese_translation) card.innerHTML += `<p class="chinese-text">${c.chinese_translation}</p>`;
+                    });
+                }
+                container.appendChild(card);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
