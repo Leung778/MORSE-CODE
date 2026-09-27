@@ -39,6 +39,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 70px; font-size: 17px; line-height: 1.5; transition: background 0.3s; }
 
+        /* 標題列 */
         header { background: var(--primary); color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         header h1 { font-size: 1.2rem; margin: 0; }
         .theme-toggle { background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer; }
@@ -47,29 +48,39 @@
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* 卡片與按鈕 */
         .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .card h3 { color: var(--primary); margin-bottom: 0.8rem; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
         
         .btn { display: block; width: 100%; padding: 0.9rem; background: var(--primary); color: white; text-align: center; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-bottom: 0.8rem; transition: transform 0.1s; }
         .btn:active { transform: scale(0.98); }
         .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+        .btn-success { background: var(--success); }
         
         select, input[type="text"] { width: 100%; padding: 0.9rem; background: var(--card-bg); color: var(--text-main); border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; margin-bottom: 1rem; outline: none; }
         select:focus, input[type="text"]:focus { border-color: var(--primary); }
 
+        /* 日常任務與閃卡 */
         .routine-slot { border-left: 5px solid var(--primary); padding-left: 12px; margin-bottom: 1.2rem; background: var(--highlight-bg); padding-top: 10px; padding-bottom: 10px; border-radius: 0 8px 8px 0; }
         .routine-time { font-size: 0.9rem; color: var(--text-sub); font-weight: bold; margin-bottom: 0.3rem; }
         .routine-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 0.5rem; }
 
-        .tts-btn { background: #e7f1ff; color: #0056b3; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 1rem; margin-left: 10px; flex-shrink: 0;}
+        .flashcard { text-align: center; min-height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem 1rem; }
+        .flashcard-term { font-size: 2rem; color: var(--primary); font-weight: bold; margin-bottom: 1rem; }
+        .flashcard-answer { width: 100%; text-align: left; border-top: 1px solid var(--border); padding-top: 1.5rem; margin-top: 1rem; display: none; animation: fadeIn 0.4s; }
+
+        /* 小工具 */
+        .tts-btn { background: #e7f1ff; color: #0056b3; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 1.1rem; display: inline-flex; justify-content: center; align-items: center; }
         body.dark-mode .tts-btn { background: #334a66; color: #66b0ff; }
         .kw-highlight { color: var(--danger); font-weight: bold; }
         .keyword-tag { display: inline-block; background: var(--border); padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.9rem; margin: 0.3rem 0.3rem 0 0; font-weight: bold;}
 
+        /* 測驗選項 */
         .option-btn { text-align: left; padding: 1.2rem; border: 2px solid var(--border); background: var(--card-bg); color: var(--text-main); border-radius: 8px; cursor: pointer; font-size: 1.1rem; margin-bottom: 0.8rem; width: 100%; line-height: 1.4; }
         .option-btn.correct { background: var(--success); color: white; border-color: var(--success); }
         .option-btn.wrong { background: var(--danger); color: white; border-color: var(--danger); }
 
+        /* 底部導覽列 */
         nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--nav-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 0.6rem 0; z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
         .nav-item { background: none; border: none; color: var(--nav-inactive); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; width: 25%; font-weight: bold;}
         .nav-item.active { color: var(--nav-active); }
@@ -83,7 +94,7 @@
         <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
     </header>
 
-    <!-- 1. 儀表板 -->
+    <!-- 1. 儀表板 (首頁) -->
     <main id="tab-dashboard" class="tab-content active">
         <div class="card">
             <h3>⚙️ 選擇今日作息模式</h3>
@@ -95,8 +106,8 @@
         </div>
 
         <div class="card">
-            <h3>🗓️ 今日微學習任務 <span style="font-size:0.9rem; font-weight:normal; color:var(--text-sub);" id="current-date"></span></h3>
-            <p style="font-size: 0.95rem; color: var(--text-sub); margin-bottom: 1rem;">系統會自動根據您的班表分配 23 個記憶單詞，減輕單次背誦負擔。</p>
+            <h3>🗓️ 微學習計畫 <span id="current-day-badge" style="font-size:0.9rem; font-weight:normal; background:var(--primary); color:white; padding:2px 8px; border-radius:12px;">Day 1</span></h3>
+            <p style="font-size: 0.95rem; color: var(--text-sub); margin-bottom: 1rem;">系統將資料分為 7 天，每日 23 詞，並融入您的通勤與休息時間（點擊進行閃卡背誦）。</p>
             <div id="schedule-container"></div>
         </div>
 
@@ -104,53 +115,74 @@
             <h3>📊 總進度與 SRS 記憶庫</h3>
             <p>已掌握 (Box 3+): <strong style="color: var(--success);" id="stat-mastered">0</strong> 詞</p>
             <p>需強化 (Box 0-2): <strong style="color: var(--danger);" id="stat-learning">161</strong> 詞</p>
-            <button class="btn btn-outline" style="margin-top: 1rem;" onclick="switchTab('tab-srs')">進入智慧複習</button>
         </div>
     </main>
 
-    <!-- 2. 字典 -->
-    <main id="tab-dict" class="tab-content">
-        <div class="card" style="position: sticky; top: 60px; z-index: 90; margin-bottom: 1rem; padding: 1rem;">
-            <input type="text" id="search-input" placeholder="🔍 搜尋英文、中文或關鍵字..." onkeyup="renderDict()" style="margin-bottom: 0;">
+    <!-- 2. 閃卡背誦模式 (專屬 Review Tab) -->
+    <main id="tab-review" class="tab-content">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; color:var(--text-sub);">
+                <span id="review-progress" style="font-weight:bold; font-size:1.1rem;">1 / 8</span>
+                <button class="btn btn-outline" style="width:auto; padding:0.3rem 0.8rem; margin:0; font-size:0.9rem;" onclick="exitReview()">退出背誦</button>
+            </div>
+            
+            <div class="flashcard">
+                <div id="review-term" class="flashcard-term">Term</div>
+                <button class="tts-btn" id="review-tts" style="margin: 0 auto 1rem auto;">🔊</button>
+                
+                <button class="btn" id="btn-reveal" onclick="revealReviewCard()">👀 顯示答案</button>
+
+                <div id="review-answer" class="flashcard-answer">
+                    <p style="color:var(--text-sub); font-size:1.2rem; font-weight:bold; margin-bottom:0.5rem;" id="review-zh">中文</p>
+                    <p style="font-size:1.1rem; margin-bottom:1rem;" id="review-en">Meaning</p>
+                    <div id="review-kw"></div>
+                </div>
+            </div>
+            
+            <button class="btn btn-success" id="btn-next-review" style="display:none; margin-top:1rem;" onclick="nextReviewCard()">下一個 ➔</button>
         </div>
-        <div id="dict-list"></div>
     </main>
 
-    <!-- 3. 測驗 -->
+    <!-- 3. 測驗 (Quiz) -->
     <main id="tab-quiz" class="tab-content">
         <div class="card" id="quiz-setup">
-            <h3>📝 隨機訓練</h3>
-            <select id="quiz-type">
-                <option value="mcq-term">選擇題: 看定義 ➔ 選術語</option>
-                <option value="mcq-def">選擇題: 看術語 ➔ 選定義</option>
-                <option value="input">高容錯輸入: 關鍵字拼寫</option>
-            </select>
-            <button class="btn" onclick="startQuiz()">開始測驗</button>
+            <h3 style="border-bottom:none; margin-bottom:0.5rem;">📝 選擇測驗模式</h3>
+            <p style="color:var(--text-sub); margin-bottom:1.5rem; font-size:0.95rem;">自由隨機測驗，用來驗證您的記憶成果。</p>
+            
+            <label style="font-weight:bold; display:block; margin-bottom:0.5rem; color:var(--primary);">🎯 選擇題 (Multiple Choice)</label>
+            <button class="btn btn-outline" onclick="startQuiz('mcq-term')">問術語 (給英文定義 ➔ 選術語)</button>
+            <button class="btn btn-outline" onclick="startQuiz('mcq-def')">問定義 (給術語 ➔ 選英文定義)</button>
+            
+            <label style="font-weight:bold; display:block; margin-top:1.5rem; margin-bottom:0.5rem; color:var(--primary);">⌨️ 填空題 (Fill in the Blanks)</label>
+            <button class="btn btn-outline" onclick="startQuiz('input')">關鍵字輸入 (給術語 ➔ 拼寫關鍵字)</button>
         </div>
 
         <div class="card" id="quiz-area" style="display: none;">
-            <h3 id="quiz-question" style="font-size: 1.3rem; color: var(--text-main); margin-bottom: 1.5rem; line-height: 1.5;">Question</h3>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <h3 id="quiz-question" style="font-size: 1.3rem; color: var(--text-main); margin-bottom: 1.5rem; line-height: 1.5; border:none;">Question</h3>
+                <button class="tts-btn" id="quiz-tts" style="display:none;">🔊</button>
+            </div>
+            
             <div id="quiz-options"></div>
             
             <div id="quiz-input-area" style="display:none;">
-                <p style="font-size: 0.95rem; color: var(--primary); font-weight: bold; margin-bottom: 10px;">至少需命中 <span id="kw-req"></span> 個核心詞 (不限時態/單複數)</p>
+                <p style="font-size: 0.95rem; color: var(--primary); font-weight: bold; margin-bottom: 10px;">至少需命中 <span id="kw-req"></span> 個核心詞 (忽略時態/單複數)</p>
                 <input type="text" id="quiz-input-box" placeholder="輸入英文關鍵字..." autocomplete="off">
                 <button class="btn" onclick="checkInputQuiz()">送出解答</button>
             </div>
 
             <div id="quiz-feedback" style="margin-top: 1.5rem; font-size: 1.1rem;"></div>
             <button id="quiz-next-btn" class="btn btn-outline" style="margin-top: 1.5rem; display: none;" onclick="generateQuestion()">下一題</button>
-            <button class="btn" style="background: var(--text-sub); margin-top: 0.5rem;" onclick="exitQuiz()">結束測驗</button>
+            <button class="btn" style="background: var(--text-sub); margin-top: 0.5rem;" onclick="exitQuiz()">返回測驗選單</button>
         </div>
     </main>
 
-    <!-- 4. SRS -->
-    <main id="tab-srs" class="tab-content">
-        <div class="card" style="text-align: center;">
-            <h3>🧠 SRS 間隔重複訓練</h3>
-            <p style="color: var(--text-sub); margin-bottom: 1.5rem;">根據您過往的答題紀錄，系統已抓出您最容易忘記的術語進行強化。</p>
-            <button class="btn" onclick="startQuiz(true)">開始複習 (優先抽取高權重詞彙)</button>
+    <!-- 4. 字典 -->
+    <main id="tab-dict" class="tab-content">
+        <div class="card" style="position: sticky; top: 60px; z-index: 90; margin-bottom: 1rem; padding: 1rem;">
+            <input type="text" id="search-input" placeholder="🔍 搜尋英文、中文或關鍵字..." onkeyup="renderDict()" style="margin-bottom: 0;">
         </div>
+        <div id="dict-list"></div>
     </main>
 
     <!-- 底部導覽列 -->
@@ -164,13 +196,10 @@
         <button class="nav-item" onclick="switchTab('tab-quiz', this)">
             <span class="nav-icon">📝</span><span>測驗</span>
         </button>
-        <button class="nav-item" onclick="switchTab('tab-srs', this)">
-            <span class="nav-icon">🧠</span><span>複習</span>
-        </button>
     </nav>
 
     <script>
-        // === 1. 完整資料庫內建 (161 條) ===
+        // === 1. 資料庫 (內建 161 條資料，並自動轉換格式) ===
         const rawData = [
             { "id": "001", "group": "遇險與搜救", "term": "Abandon vessel", "en": "To evacuate crew and passengers from a vessel following a distress", "zh": "棄船。船隻遇險救唔返嗰陣，下令全體船員同乘客即刻撤離。" },
             { "id": "002", "group": "遇險與搜救", "term": "Capsizing", "en": "Turning of a vessel upside down while on water", "zh": "翻船／傾覆。隻船喺水上面徹底底朝天翻咗轉。" },
@@ -351,6 +380,7 @@
         // === 2. 本地儲存與狀態管理 ===
         let userData = JSON.parse(localStorage.getItem('smcpUserData')) || {
             lastDate: '',
+            currentDay: 1, // 記錄7天週期的第幾天
             dailyProgress: { morning: [], lunch: [], evening: [] },
             srsData: {} 
         };
@@ -368,11 +398,21 @@
 
         function checkDailyReset() {
             const today = getTodayStr();
-            document.getElementById('current-date').innerText = today;
+            document.getElementById('current-day-badge').innerText = `Day ${userData.currentDay || 1}`;
+            
             if (userData.lastDate !== today) {
+                // 若換日且昨天有背誦，則天數 +1
+                if (userData.lastDate !== '') {
+                    const hasProgress = userData.dailyProgress.morning.length > 0 || userData.dailyProgress.lunch.length > 0 || userData.dailyProgress.evening.length > 0;
+                    if (hasProgress) {
+                        userData.currentDay = (userData.currentDay || 1) + 1;
+                        if (userData.currentDay > 7) userData.currentDay = 1; // 循環
+                    }
+                }
                 userData.lastDate = today;
                 userData.dailyProgress = { morning: [], lunch: [], evening: [] };
                 saveData();
+                document.getElementById('current-day-badge').innerText = `Day ${userData.currentDay}`;
             }
         }
 
@@ -381,7 +421,7 @@
             return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
         }
 
-        // === 3. 動態作息模式 (無縫結合日常通勤時間) ===
+        // === 3. 動態作息模式 (日常背誦任務) ===
         const schedules = {
             changshawan: {
                 morning: { time: "06:00 - 06:50", label: "🌅 晨間出門前", count: 8 },
@@ -412,7 +452,7 @@
                 const completed = userData.dailyProgress[p].length;
                 const total = s[p].count;
                 const isDone = completed >= total;
-                const btnStatus = isDone ? '<button class="btn" style="background:var(--success); padding:0.6rem;">✅ 已完成</button>' : `<button class="btn" style="padding:0.6rem;" onclick="startRoutine('${p}', ${total})">開始背誦 (${completed}/${total})</button>`;
+                const btnStatus = isDone ? '<button class="btn" style="background:var(--success); padding:0.6rem;">✅ 已完成</button>' : `<button class="btn" style="padding:0.6rem;" onclick="startReviewRoutine('${p}')">開始背誦 (${completed}/${total})</button>`;
 
                 html += `
                 <div class="routine-slot">
@@ -425,110 +465,77 @@
             container.innerHTML = html;
         }
 
-        // === 4. UI 切換與語音 ===
-        function switchTab(tabId, btnObj) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        // === 4. 閃卡背誦模式 (Review Flashcard) ===
+        let reviewQueue = [];
+        let reviewIndex = 0;
+        let currentPeriod = '';
+
+        function startReviewRoutine(period) {
+            currentPeriod = period;
+            const day = userData.currentDay || 1;
+            const itemsPerDay = 23;
+            const startIdx = (day - 1) * itemsPerDay;
+            const endIdx = day === 7 ? 161 : startIdx + itemsPerDay;
+            const dayData = smcpData.slice(startIdx, endIdx);
             
-            document.getElementById(tabId).classList.add('active');
-            if (btnObj) btnObj.classList.add('active');
-
-            if(tabId === 'tab-dashboard') updateSchedule();
-            if(tabId === 'tab-dict') renderDict();
+            if (period === 'morning') reviewQueue = dayData.slice(0, 8);
+            if (period === 'lunch') reviewQueue = dayData.slice(8, 16);
+            if (period === 'evening') reviewQueue = dayData.slice(16, 23);
+            
+            reviewIndex = 0;
+            switchTab('tab-review', document.querySelectorAll('.nav-item')[0]); // 保持首頁 active
+            renderReviewCard();
         }
 
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
-        }
-
-        function playTTS(text) {
-            if ('speechSynthesis' in window) {
-                // 輕量語音：只讀英文術語本身
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'en-US';
-                utterance.rate = 0.9; 
-                window.speechSynthesis.speak(utterance);
+        function renderReviewCard() {
+            if (reviewIndex >= reviewQueue.length) {
+                alert('🎉 本時段背誦任務完成！');
+                userData.dailyProgress[currentPeriod] = reviewQueue.map(item => item.id);
+                saveData();
+                switchTab('tab-dashboard', document.querySelectorAll('.nav-item')[0]);
+                return;
             }
+            
+            const item = reviewQueue[reviewIndex];
+            document.getElementById('review-progress').innerText = `${reviewIndex + 1} / ${reviewQueue.length}`;
+            document.getElementById('review-term').innerText = item.term;
+            
+            // 隱藏答案區，顯示「看答案」按鈕
+            document.getElementById('review-answer').style.display = 'none';
+            document.getElementById('btn-reveal').style.display = 'block';
+            document.getElementById('btn-next-review').style.display = 'none';
+            
+            // 設定語音
+            document.getElementById('review-tts').onclick = () => playTTS(item.term);
         }
 
-        function highlightKeywords(text, keywords) {
-            let result = text;
-            keywords.forEach(kw => {
-                const regex = new RegExp(`(${kw})`, "gi");
-                result = result.replace(regex, '<span class="kw-highlight">$1</span>');
-            });
-            return result;
+        function revealReviewCard() {
+            const item = reviewQueue[reviewIndex];
+            document.getElementById('review-zh').innerText = item.term_zh;
+            document.getElementById('review-en').innerHTML = highlightKeywords(item.meaning, item.keywords);
+            document.getElementById('review-kw').innerHTML = item.keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('');
+            
+            document.getElementById('review-answer').style.display = 'block';
+            document.getElementById('btn-reveal').style.display = 'none';
+            document.getElementById('btn-next-review').style.display = 'block';
         }
 
-        function renderDict() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            const list = document.getElementById('dict-list');
-            list.innerHTML = '';
-
-            const filtered = smcpData.filter(d => 
-                d.term.toLowerCase().includes(query) || 
-                d.meaning.toLowerCase().includes(query) || 
-                d.term_zh.includes(query) ||
-                d.keywords.some(k => k.toLowerCase().includes(query))
-            );
-
-            filtered.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                
-                const highlightedDef = highlightKeywords(item.meaning, item.keywords);
-                const kwTags = item.keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('');
-
-                card.innerHTML = `
-                    <h3 style="margin-bottom:0;">
-                        <span>#${item.id} ${item.term}</span>
-                        <button class="tts-btn" onclick="playTTS('${item.term.replace(/'/g, "\\'")}')">🔊</button>
-                    </h3>
-                    <p style="color:var(--text-sub); font-size:1.1rem; margin-bottom: 0.8rem; font-weight:bold;">${item.term_zh}</p>
-                    <p style="margin-bottom:0.5rem;">${highlightedDef}</p>
-                    <p style="background:var(--highlight-bg); padding:8px; border-radius:6px;">${item.meaning_zh}</p>
-                    <div style="margin-top:0.8rem;">${kwTags}</div>
-                `;
-                list.appendChild(card);
-            });
+        function nextReviewCard() {
+            reviewIndex++;
+            renderReviewCard();
         }
 
-        // === 5. 高容錯關鍵字比對 ===
-        function cleanWord(w) {
-            return w.toLowerCase()
-                    .replace(/[^a-z0-9]/g, '')
-                    .replace(/(ing|ed|es|s)$/, ''); // 簡單的詞幹提取
+        function exitReview() {
+            switchTab('tab-dashboard', document.querySelectorAll('.nav-item')[0]);
         }
 
-        function fuzzyMatch(userInput, keywords) {
-            const userWords = userInput.split(/\s+/).map(cleanWord);
-            let matchCount = 0;
-            let matchedKws = [];
-
-            keywords.forEach(kw => {
-                const cleanKw = cleanWord(kw);
-                if (userWords.some(uw => uw && (uw.includes(cleanKw) || cleanKw.includes(uw)))) {
-                    matchCount++;
-                    matchedKws.push(kw);
-                }
-            });
-            return { matchCount, matchedKws };
-        }
-
-        // === 6. 測驗與 SRS 邏輯 ===
+        // === 5. 測驗模式 (Quiz) ===
         let currentQuizItem = null;
-        let isSRSMode = false;
 
-        function startRoutine(period, total) {
-            alert(`已為您載入 ${period} 時段的單字進度！`);
-            switchTab('tab-quiz', document.querySelectorAll('.nav-item')[2]);
-            startQuiz();
-        }
-
-        function startQuiz(srs = false) {
-            isSRSMode = srs;
+        function startQuiz(quizType) {
             document.getElementById('quiz-setup').style.display = 'none';
             document.getElementById('quiz-area').style.display = 'block';
+            document.getElementById('quiz-question').dataset.type = quizType;
             generateQuestion();
         }
 
@@ -541,16 +548,18 @@
             document.getElementById('quiz-feedback').innerHTML = '';
             document.getElementById('quiz-next-btn').style.display = 'none';
             
-            const qType = document.getElementById('quiz-type').value;
+            const qType = document.getElementById('quiz-question').dataset.type;
             
             // 隨機抽題，避開重複
             currentQuizItem = smcpData[Math.floor(Math.random() * smcpData.length)];
             const qBox = document.getElementById('quiz-question');
             const optBox = document.getElementById('quiz-options');
             const inputArea = document.getElementById('quiz-input-area');
+            const ttsBtn = document.getElementById('quiz-tts');
             
             optBox.innerHTML = '';
             document.getElementById('quiz-input-box').value = '';
+            ttsBtn.style.display = 'none';
 
             if (qType.includes('mcq')) {
                 optBox.style.display = 'block';
@@ -564,16 +573,19 @@
                 options.sort(() => Math.random() - 0.5);
 
                 if (qType === 'mcq-term') {
-                    qBox.innerHTML = `請問以下定義對應哪個術語？<br><br><span style="color:var(--primary);">${currentQuizItem.meaning}</span><br><span style="font-size:1rem; color:var(--text-sub); font-weight:normal;">(${currentQuizItem.meaning_zh})</span>`;
+                    qBox.innerHTML = `請問以下定義對應哪個術語？<br><br><span style="color:var(--primary); font-weight:normal; font-size:1.1rem;">"${currentQuizItem.meaning}"</span>`;
                     options.forEach(opt => {
                         const btn = document.createElement('button');
                         btn.className = 'option-btn';
-                        btn.innerHTML = `<strong>${opt.term}</strong> <br><small style="color:var(--text-sub);">${opt.term_zh}</small>`;
+                        btn.innerHTML = `<strong>${opt.term}</strong>`;
                         btn.onclick = () => checkAnswer(btn, opt.id === currentQuizItem.id);
                         optBox.appendChild(btn);
                     });
                 } else {
-                    qBox.innerHTML = `請問 <strong style="color:var(--primary); font-size:1.5rem;">${currentQuizItem.term}</strong> 的定義是？<br><span style="font-size:1rem; color:var(--text-sub); font-weight:normal;">(${currentQuizItem.term_zh})</span>`;
+                    qBox.innerHTML = `請問 <strong style="color:var(--primary); font-size:1.5rem;">${currentQuizItem.term}</strong> 的定義是？`;
+                    ttsBtn.style.display = 'inline-flex';
+                    ttsBtn.onclick = () => playTTS(currentQuizItem.term);
+                    
                     options.forEach(opt => {
                         const btn = document.createElement('button');
                         btn.className = 'option-btn';
@@ -585,7 +597,10 @@
             } else {
                 optBox.style.display = 'none';
                 inputArea.style.display = 'block';
-                qBox.innerHTML = `請用英文簡述含義 (輸入關鍵字)：<br><br><strong style="color:var(--primary); font-size:1.5rem;">${currentQuizItem.term}</strong><br><span style="font-size:1rem; color:var(--text-sub); font-weight:normal;">(${currentQuizItem.term_zh})</span>`;
+                qBox.innerHTML = `請輸入關鍵字拼寫：<br><br><strong style="color:var(--primary); font-size:1.5rem;">${currentQuizItem.term}</strong><br><span style="font-size:1rem; color:var(--text-sub); font-weight:normal;">(${currentQuizItem.term_zh})</span>`;
+                ttsBtn.style.display = 'inline-flex';
+                ttsBtn.onclick = () => playTTS(currentQuizItem.term);
+                
                 const required = Math.max(1, Math.ceil(currentQuizItem.keywords.length / 2));
                 document.getElementById('kw-req').innerText = required;
             }
@@ -599,12 +614,10 @@
                 btn.classList.add('correct');
                 fb.innerHTML = '✅ 正確！';
                 fb.style.color = 'var(--success)';
-                processSRS(currentQuizItem.id, true);
             } else {
                 btn.classList.add('wrong');
                 fb.innerHTML = `❌ 錯誤。<br><br><span style="font-size:1.1rem; color:var(--text-main);">正解：<br><strong>${currentQuizItem.term}</strong><br>${currentQuizItem.meaning}</span>`;
                 fb.style.color = 'var(--danger)';
-                processSRS(currentQuizItem.id, false);
             }
             document.getElementById('quiz-next-btn').style.display = 'block';
         }
@@ -623,29 +636,97 @@
             if (result.matchCount >= required) {
                 fb.innerHTML = `✅ 命中！(找到 ${result.matchCount}/${required} 詞)` + detailHtml;
                 fb.style.color = 'var(--success)';
-                processSRS(currentQuizItem.id, true);
             } else {
                 fb.innerHTML = `❌ 關鍵字不足。(僅找到 ${result.matchCount}/${required} 詞)` + detailHtml;
                 fb.style.color = 'var(--danger)';
-                processSRS(currentQuizItem.id, false);
             }
             document.getElementById('quiz-next-btn').style.display = 'block';
             document.getElementById('quiz-input-area').style.display = 'none';
         }
 
-        function processSRS(id, isCorrect) {
-            let data = userData.srsData[id];
-            if (isCorrect) {
-                data.box = Math.min(5, data.box + 1);
-            } else {
-                data.box = 0;
+        // === 6. UI 共用函數 ===
+        function switchTab(tabId, btnObj) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            if (btnObj) btnObj.classList.add('active');
+
+            if(tabId === 'tab-dashboard') updateSchedule();
+            if(tabId === 'tab-dict') renderDict();
+        }
+
+        function toggleTheme() { document.body.classList.toggle('dark-mode'); }
+
+        function playTTS(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9; 
+                window.speechSynthesis.speak(utterance);
             }
-            saveData();
+        }
+
+        function highlightKeywords(text, keywords) {
+            let result = text;
+            keywords.forEach(kw => {
+                const regex = new RegExp(`(${kw})`, "gi");
+                result = result.replace(regex, '<span class="kw-highlight">$1</span>');
+            });
+            return result;
+        }
+
+        function cleanWord(w) { return w.toLowerCase().replace(/[^a-z0-9]/g, '').replace(/(ing|ed|es|s)$/, ''); }
+        
+        function fuzzyMatch(userInput, keywords) {
+            const userWords = userInput.split(/\s+/).map(cleanWord);
+            let matchCount = 0;
+            let matchedKws = [];
+
+            keywords.forEach(kw => {
+                const cleanKw = cleanWord(kw);
+                if (userWords.some(uw => uw && (uw.includes(cleanKw) || cleanKw.includes(uw)))) {
+                    matchCount++;
+                    matchedKws.push(kw);
+                }
+            });
+            return { matchCount, matchedKws };
+        }
+
+        function renderDict() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const list = document.getElementById('dict-list');
+            list.innerHTML = '';
+
+            const filtered = smcpData.filter(d => 
+                d.term.toLowerCase().includes(query) || 
+                d.meaning.toLowerCase().includes(query) || 
+                d.term_zh.includes(query) ||
+                d.keywords.some(k => k.toLowerCase().includes(query))
+            );
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                const highlightedDef = highlightKeywords(item.meaning, item.keywords);
+                const kwTags = item.keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('');
+
+                card.innerHTML = `
+                    <h3 style="margin-bottom:0;">
+                        <span>#${item.id} ${item.term}</span>
+                        <button class="tts-btn" onclick="playTTS('${item.term.replace(/'/g, "\\'")}')">🔊</button>
+                    </h3>
+                    <p style="color:var(--text-sub); font-size:1.1rem; margin-bottom: 0.8rem; font-weight:bold;">${item.term_zh}</p>
+                    <p style="margin-bottom:0.5rem;">${highlightedDef}</p>
+                    <p style="background:var(--highlight-bg); padding:8px; border-radius:6px;">${item.meaning_zh}</p>
+                    <div style="margin-top:0.8rem;">${kwTags}</div>
+                `;
+                list.appendChild(card);
+            });
         }
 
         function updateStats() {
-            let mastered = 0;
-            let learning = 0;
+            let mastered = 0, learning = 0;
             for (let id in userData.srsData) {
                 if (userData.srsData[id].box >= 3) mastered++;
                 else learning++;
@@ -654,7 +735,6 @@
             document.getElementById('stat-learning').innerText = learning;
         }
 
-        // === 初始化 ===
         window.onload = () => {
             checkDailyReset();
             updateSchedule();
