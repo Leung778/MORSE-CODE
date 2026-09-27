@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>INTERCO 專業海事通訊模擬器 v7</title>
+    <title>INTERCO 專業海事通訊模擬器 v7.1</title>
     <style>
         /* CSS 變數定義：支援深淺色主題 */
         :root[data-theme="light"] {
@@ -150,7 +150,8 @@
                 
                 <hr style="border: 0; height: 1px; background: var(--border); margin-bottom: 15px;">
                 <div style="text-align:left; font-weight:bold; margin-bottom:5px;">請輸入辨識結果：</div>
-                <input type="text" id="lampAnswerInput" placeholder="輸入解讀出的字母或數字..." autocapitalize="characters" autocomplete="off" style="margin-bottom: 10px; text-align:center; font-size:1.2rem;">
+                <div style="font-size: 0.8rem; color: var(--secondary); margin-bottom:10px;">(系統會自動發送 AA AA AA 作為開始，並以 AR 結束，作答時請忽略此部分)</div>
+                <input type="text" id="lampAnswerInput" placeholder="僅需輸入核心考題..." autocapitalize="characters" autocomplete="off" style="margin-bottom: 10px; text-align:center; font-size:1.2rem;">
                 <button class="action-btn btn-success" style="width:100%;" onclick="checkLampAnswer()">核對答案 (Enter)</button>
                 <div id="lampFeedback" style="margin-top:15px; font-weight:bold; text-align:center; min-height:45px; line-height: 1.4;"></div>
             </div>
@@ -204,7 +205,7 @@
         </div>
     </section>
 
-    <!-- 4. 學習統計 (全新) -->
+    <!-- 4. 學習統計 -->
     <section id="stats" class="tab-content">
         <div style="max-width: 600px; margin: 0 auto;">
             <div class="stat-card">
@@ -316,7 +317,6 @@
         if (!isCorrect) userStats.charMap[char].wrong++;
         localStorage.setItem('intercoStats', JSON.stringify(userStats));
         
-        // 即時更新 Quiz 介面的計分板
         document.getElementById('scoreCorrect').textContent = userStats.correct;
         document.getElementById('scoreTotal').textContent = userStats.total;
     }
@@ -337,14 +337,13 @@
         const accuracy = userStats.total > 0 ? Math.round((userStats.correct / userStats.total) * 100) : 0;
         document.getElementById('statAccuracy').textContent = `${accuracy}%`;
 
-        // 計算弱點：錯誤率高於 0 的字元，依錯誤次數排序
         let weaks = [];
         for (let char in userStats.charMap) {
             let data = userStats.charMap[char];
             if (data.wrong > 0) weaks.push({ char: char, wrong: data.wrong, rate: data.wrong/data.total });
         }
         weaks.sort((a, b) => b.wrong - a.wrong || b.rate - a.rate);
-        weaks = weaks.slice(0, 5); // 取 Top 5
+        weaks = weaks.slice(0, 5); 
 
         const listDiv = document.getElementById('statWeakList');
         if (weaks.length === 0) {
@@ -355,7 +354,6 @@
     }
 
     function getSmartRandomChar(subset = allChars) {
-        // 間隔重複學習法 (Spaced Repetition)：30% 機率從常錯字元出題
         let weaks = [];
         for (let char in userStats.charMap) {
             if (userStats.charMap[char].wrong > 0 && subset.includes(char)) weaks.push(char);
@@ -369,8 +367,7 @@
     // =========================================================
     // 聲音引擎 (Web Audio API) + QRN 雜訊模擬
     // =========================================================
-    let audioCtx = null;
-    let noiseSource = null;
+    let audioCtx = null; let noiseSource = null;
 
     function startNoise() {
         if (!document.getElementById('noiseToggle').checked) return;
@@ -381,28 +378,23 @@
         for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
         
         noiseSource = audioCtx.createBufferSource();
-        noiseSource.buffer = buffer;
-        noiseSource.loop = true;
+        noiseSource.buffer = buffer; noiseSource.loop = true;
         
         let filter = audioCtx.createBiquadFilter();
-        filter.type = 'lowpass'; filter.frequency.value = 1500; // 模擬無線電窄頻
+        filter.type = 'lowpass'; filter.frequency.value = 1500; 
         
-        let gain = audioCtx.createGain();
-        gain.gain.value = 0.08; // 雜音音量
+        let gain = audioCtx.createGain(); gain.gain.value = 0.08; 
         
         noiseSource.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
         noiseSource.start();
     }
 
-    function stopNoise() {
-        if (noiseSource) { noiseSource.stop(); noiseSource.disconnect(); noiseSource = null; }
-    }
+    function stopNoise() { if (noiseSource) { noiseSource.stop(); noiseSource.disconnect(); noiseSource = null; } }
 
     function playAudio(morseStr) {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         startNoise();
-        const dot = 0.08; let offset = 0.1;
-        let totalDuration = 0.1;
+        const dot = 0.08; let offset = 0.1; let totalDuration = 0.1;
 
         for (let char of morseStr) {
             if(char === ' ' || char === '/') { offset += dot * 3; totalDuration += dot*3; continue; }
@@ -423,7 +415,6 @@
     // 全域快捷鍵綁定 (Hotkeys)
     // =========================================================
     document.addEventListener('keydown', (e) => {
-        // 若使用者正在輸入框打字，則不觸發快捷鍵
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
             if (e.key === 'Enter') {
                 if (document.getElementById('quiz').classList.contains('active')) checkQuizAnswer();
@@ -431,7 +422,6 @@
             }
             return; 
         }
-
         if (document.getElementById('quiz').classList.contains('active')) {
             if (e.key === 'ArrowRight') generateQuiz();
             if (e.key === ' ') { e.preventDefault(); if (document.getElementById('quizMode').value === 'morse_to_letter') playAudio(DB[currentQuizTarget].morse); }
@@ -442,7 +432,7 @@
     });
 
     // =========================================================
-    // 燈號閃爍引擎 (Flashing Light) + 視線不良 Fog 特效
+    // 燈號閃爍引擎 (Flashing Light) + 自動 AA AA AA 及 AR 程序
     // =========================================================
     let currentLampText = ""; let lampCancel = false; let isLampFlashing = false;
     const bulb = document.getElementById('lampBulb');
@@ -476,10 +466,14 @@
         fb.innerHTML = "<span style='color:var(--secondary);'>發送中... (請專注觀看燈號)</span>";
         await sleep(800);
 
-        for (let i = 0; i < text.length; i++) {
+        // ★ 加入標準呼叫程序：前面加上 "AA AA AA "，後面加上 " AR"
+        const transmissionText = "AA AA AA " + text + " AR";
+
+        for (let i = 0; i < transmissionText.length; i++) {
             if (lampCancel) break;
-            const char = text[i];
+            const char = transmissionText[i];
             if (char === ' ') { await sleep(wordSpace - charSpace); continue; }
+            
             const morse = DB[char] ? DB[char].morse : '';
             for (let j = 0; j < morse.length; j++) {
                 if (lampCancel) break;
@@ -490,7 +484,7 @@
             }
             await sleep(charSpace);
         }
-        if (!lampCancel) fb.innerHTML = "<span style='color:var(--text-muted);'>發送完畢，請在上方輸入您辨識出的內容。</span>";
+        if (!lampCancel) fb.innerHTML = "<span style='color:var(--text-muted);'>發送完畢，請在上方輸入您辨識出的核心內容。</span>";
         isLampFlashing = false;
     }
 
@@ -505,11 +499,11 @@
 
     function checkLampAnswer() {
         if (!currentLampText || isLampFlashing) return;
+        // 使用者輸入只需要比對核心答案，無需輸入 AA AA AA 或 AR
         const ans = document.getElementById('lampAnswerInput').value.trim().toUpperCase();
         const fb = document.getElementById('lampFeedback');
         
         let allCorrect = true;
-        // 為了詳細紀錄統計，拆解單字分析
         let textNoSpace = currentLampText.replace(/\s/g, '');
         let ansNoSpace = ans.replace(/\s/g, '');
         
@@ -517,14 +511,14 @@
             let char = textNoSpace[i];
             let userChar = ansNoSpace[i] || '';
             let isC = (char === userChar);
-            recordStat(char, isC); // 寫入 LocalStorage
+            recordStat(char, isC);
             if (!isC) allCorrect = false;
         }
         
         if (allCorrect && textNoSpace.length === ansNoSpace.length) {
-            fb.innerHTML = `<span style="color:var(--success);">✔ 完全正確！</span><br>答案: ${currentLampText}`;
+            fb.innerHTML = `<span style="color:var(--success);">✔ 完全正確！</span><br>核心答案: ${currentLampText}`;
         } else {
-            fb.innerHTML = `<span style="color:var(--danger);">✘ 辨識有誤！</span><br>正確答案: <span style="color:var(--primary);">${currentLampText}</span><br>您的輸入: ${ans || '(未輸入)'}`;
+            fb.innerHTML = `<span style="color:var(--danger);">✘ 辨識有誤！</span><br>正確核心答案: <span style="color:var(--primary);">${currentLampText}</span><br>您的輸入: ${ans || '(未輸入)'}`;
         }
     }
 
