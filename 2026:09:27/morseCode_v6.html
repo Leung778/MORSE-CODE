@@ -150,8 +150,13 @@
                 
                 <hr style="border: 0; height: 1px; background: var(--border); margin-bottom: 15px;">
                 <div style="text-align:left; font-weight:bold; margin-bottom:5px;">請輸入辨識結果：</div>
-                <div style="font-size: 0.8rem; color: var(--secondary); margin-bottom:10px;">(系統會自動發送 AA AA AA 作為開始，並以 AR 結束，作答時請忽略此部分)</div>
-                <input type="text" id="lampAnswerInput" placeholder="僅需輸入核心考題..." autocapitalize="characters" autocomplete="off" style="margin-bottom: 10px; text-align:center; font-size:1.2rem;">
+                
+                <!-- 提示使用者不需要輸入通訊協定 -->
+                <div id="protocolHint" style="display:none; font-size: 0.85rem; color: var(--secondary); margin-bottom: 8px;">
+                    * 段落模式會以 <b>AA AA AA</b> 起頭、<b>AR</b> 結尾，作答時請略過這些程序信號。
+                </div>
+                
+                <input type="text" id="lampAnswerInput" placeholder="輸入解讀出的字母或數字..." autocapitalize="characters" autocomplete="off" style="margin-bottom: 10px; text-align:center; font-size:1.2rem;">
                 <button class="action-btn btn-success" style="width:100%;" onclick="checkLampAnswer()">核對答案 (Enter)</button>
                 <div id="lampFeedback" style="margin-top:15px; font-weight:bold; text-align:center; min-height:45px; line-height: 1.4;"></div>
             </div>
@@ -218,9 +223,7 @@
             <div class="study-module">
                 <div class="study-header">⚠️ 最常答錯的地雷字元 (Top 5)</div>
                 <div class="study-body" style="text-align:center; padding: 25px 15px;">
-                    <div class="weak-list" id="statWeakList">
-                        <!-- 動態生成弱點 -->
-                    </div>
+                    <div class="weak-list" id="statWeakList"></div>
                     <div style="margin-top:20px; font-size:0.9rem; color:var(--text-muted);">系統出題時會稍微提高這些字元的出現機率，幫助您加強記憶。</div>
                 </div>
             </div>
@@ -346,11 +349,8 @@
         weaks = weaks.slice(0, 5); 
 
         const listDiv = document.getElementById('statWeakList');
-        if (weaks.length === 0) {
-            listDiv.innerHTML = "<div style='color:var(--text-muted);'>目前還沒有容易錯的字元，繼續保持！</div>";
-        } else {
-            listDiv.innerHTML = weaks.map(w => `<div class="weak-item">${w.char} (錯 ${w.wrong} 次)</div>`).join('');
-        }
+        if (weaks.length === 0) listDiv.innerHTML = "<div style='color:var(--text-muted);'>目前還沒有容易錯的字元，繼續保持！</div>";
+        else listDiv.innerHTML = weaks.map(w => `<div class="weak-item">${w.char} (錯 ${w.wrong} 次)</div>`).join('');
     }
 
     function getSmartRandomChar(subset = allChars) {
@@ -358,9 +358,7 @@
         for (let char in userStats.charMap) {
             if (userStats.charMap[char].wrong > 0 && subset.includes(char)) weaks.push(char);
         }
-        if (weaks.length > 0 && Math.random() < 0.3) {
-            return weaks[Math.floor(Math.random() * weaks.length)];
-        }
+        if (weaks.length > 0 && Math.random() < 0.3) return weaks[Math.floor(Math.random() * weaks.length)];
         return subset[Math.floor(Math.random() * subset.length)];
     }
 
@@ -372,19 +370,12 @@
     function startNoise() {
         if (!document.getElementById('noiseToggle').checked) return;
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let bufferSize = audioCtx.sampleRate * 2; 
-        let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        let bufferSize = audioCtx.sampleRate * 2; let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
         let output = buffer.getChannelData(0);
         for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
-        
-        noiseSource = audioCtx.createBufferSource();
-        noiseSource.buffer = buffer; noiseSource.loop = true;
-        
-        let filter = audioCtx.createBiquadFilter();
-        filter.type = 'lowpass'; filter.frequency.value = 1500; 
-        
+        noiseSource = audioCtx.createBufferSource(); noiseSource.buffer = buffer; noiseSource.loop = true;
+        let filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 1500; 
         let gain = audioCtx.createGain(); gain.gain.value = 0.08; 
-        
         noiseSource.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
         noiseSource.start();
     }
@@ -395,7 +386,6 @@
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         startNoise();
         const dot = 0.08; let offset = 0.1; let totalDuration = 0.1;
-
         for (let char of morseStr) {
             if(char === ' ' || char === '/') { offset += dot * 3; totalDuration += dot*3; continue; }
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
@@ -432,13 +422,17 @@
     });
 
     // =========================================================
-    // 燈號閃爍引擎 (Flashing Light) + 自動 AA AA AA 及 AR 程序
+    // 燈號閃爍引擎 (Flashing Light)
     // =========================================================
     let currentLampText = ""; let lampCancel = false; let isLampFlashing = false;
     const bulb = document.getElementById('lampBulb');
     const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-    function toggleLampMode() { document.getElementById('lampBlockConfig').style.display = (document.querySelector('input[name="lampMode"]:checked').value === 'block') ? 'flex' : 'none'; }
+    function toggleLampMode() { 
+        const isBlock = document.querySelector('input[name="lampMode"]:checked').value === 'block';
+        document.getElementById('lampBlockConfig').style.display = isBlock ? 'flex' : 'none'; 
+        document.getElementById('protocolHint').style.display = isBlock ? 'block' : 'none';
+    }
 
     function generateLampText() {
         const mode = document.querySelector('input[name="lampMode"]:checked').value;
@@ -459,21 +453,24 @@
         if (currentWpm < 1) currentWpm = 1;
 
         const isFog = document.getElementById('fogToggle').checked;
+        const mode = document.querySelector('input[name="lampMode"]:checked').value;
         const dot = 100; const dash = dot * 3; const symSpace = dot;
         const charSpace = dot * 3 * (10 / currentWpm); const wordSpace = dot * 7 * (10 / currentWpm);
+
+        // ** 重點更新：段落模式下加入起頭 AA AA AA 與結尾 AR **
+        let sequenceToFlash = text;
+        if (mode === 'block') {
+            sequenceToFlash = "AA AA AA " + text + " AR";
+        }
 
         const fb = document.getElementById('lampFeedback');
         fb.innerHTML = "<span style='color:var(--secondary);'>發送中... (請專注觀看燈號)</span>";
         await sleep(800);
 
-        // ★ 加入標準呼叫程序：前面加上 "AA AA AA "，後面加上 " AR"
-        const transmissionText = "AA AA AA " + text + " AR";
-
-        for (let i = 0; i < transmissionText.length; i++) {
+        for (let i = 0; i < sequenceToFlash.length; i++) {
             if (lampCancel) break;
-            const char = transmissionText[i];
+            const char = sequenceToFlash[i];
             if (char === ' ') { await sleep(wordSpace - charSpace); continue; }
-            
             const morse = DB[char] ? DB[char].morse : '';
             for (let j = 0; j < morse.length; j++) {
                 if (lampCancel) break;
@@ -484,7 +481,7 @@
             }
             await sleep(charSpace);
         }
-        if (!lampCancel) fb.innerHTML = "<span style='color:var(--text-muted);'>發送完畢，請在上方輸入您辨識出的核心內容。</span>";
+        if (!lampCancel) fb.innerHTML = "<span style='color:var(--text-muted);'>發送完畢，請在上方輸入您辨識出的內容。</span>";
         isLampFlashing = false;
     }
 
@@ -499,7 +496,6 @@
 
     function checkLampAnswer() {
         if (!currentLampText || isLampFlashing) return;
-        // 使用者輸入只需要比對核心答案，無需輸入 AA AA AA 或 AR
         const ans = document.getElementById('lampAnswerInput').value.trim().toUpperCase();
         const fb = document.getElementById('lampFeedback');
         
@@ -511,14 +507,14 @@
             let char = textNoSpace[i];
             let userChar = ansNoSpace[i] || '';
             let isC = (char === userChar);
-            recordStat(char, isC);
+            recordStat(char, isC); 
             if (!isC) allCorrect = false;
         }
         
         if (allCorrect && textNoSpace.length === ansNoSpace.length) {
-            fb.innerHTML = `<span style="color:var(--success);">✔ 完全正確！</span><br>核心答案: ${currentLampText}`;
+            fb.innerHTML = `<span style="color:var(--success);">✔ 完全正確！</span><br>密碼內文: ${currentLampText}`;
         } else {
-            fb.innerHTML = `<span style="color:var(--danger);">✘ 辨識有誤！</span><br>正確核心答案: <span style="color:var(--primary);">${currentLampText}</span><br>您的輸入: ${ans || '(未輸入)'}`;
+            fb.innerHTML = `<span style="color:var(--danger);">✘ 辨識有誤！</span><br>密碼內文: <span style="color:var(--primary);">${currentLampText}</span><br>您的輸入: ${ans || '(未輸入)'}`;
         }
     }
 
