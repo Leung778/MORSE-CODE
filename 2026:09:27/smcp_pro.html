@@ -45,10 +45,11 @@
         /* 標題列 */
         header { background: var(--primary); color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         header h1 { font-size: 1.2rem; margin: 0; }
-        .theme-toggle { background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer; }
+        .header-controls { display: flex; gap: 15px; align-items: center; }
+        .icon-btn { background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer; padding: 0; }
 
         /* 頁面切換 */
-        .tab-content { display: none; padding: 1rem; max-width: 800px; margin: 0 auto; animation: fadeIn 0.3s; }
+        .tab-content { display: none; padding: 1rem; max-width: 800px; margin: 0 auto; animation: fadeIn 0.2s; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -60,35 +61,55 @@
         .btn:active { transform: scale(0.98); }
         .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
         
-        select, input[type="text"] { width: 100%; padding: 0.9rem; background: var(--card-bg); color: var(--text-main); border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; margin-bottom: 1rem; outline: none; }
+        select, input[type="text"], textarea { width: 100%; padding: 0.9rem; background: var(--card-bg); color: var(--text-main); border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; margin-bottom: 1rem; outline: none; transition: border-color 0.2s; }
         select:focus, input[type="text"]:focus { border-color: var(--primary); }
 
-        /* 日常任務與閃卡 */
+        /* 日常任務與進度條 */
         .routine-slot { border-left: 5px solid var(--primary); padding-left: 12px; margin-bottom: 1.2rem; background: var(--highlight-bg); padding-top: 10px; padding-bottom: 10px; border-radius: 0 8px 8px 0; }
         .routine-time { font-size: 0.9rem; color: var(--text-sub); font-weight: bold; margin-bottom: 0.3rem; }
         .routine-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 0.5rem; }
 
-        .flashcard { text-align: center; min-height: 350px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1.5rem 1rem; }
-        .flashcard-term { font-size: 2rem; color: var(--primary); font-weight: bold; margin-bottom: 1rem; }
-        .flashcard-answer { width: 100%; text-align: left; border-top: 1px solid var(--border); padding-top: 1.5rem; margin-top: 1rem; display: none; animation: fadeIn 0.4s; }
+        .progress-bar { width: 100%; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin: 10px 0; }
+        .progress-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.3s ease; }
 
-        /* 小工具 */
+        /* 閃卡模式 (Tap to Flip) */
+        .flashcard { text-align: center; min-height: 320px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1.5rem 1rem; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .flashcard-term { font-size: 2.2rem; color: var(--primary); font-weight: bold; margin-bottom: 1rem; }
+        .flashcard-answer { width: 100%; text-align: left; border-top: 1px solid var(--border); padding-top: 1.5rem; margin-top: 1rem; display: none; animation: fadeIn 0.3s; cursor: default; }
+        .tap-hint { font-size: 0.9rem; color: var(--text-sub); animation: pulse 2s infinite; margin-top: 2rem; }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+
+        /* 搜尋與高亮 */
+        .search-wrapper { position: relative; width: 100%; margin-bottom: 1rem; }
+        .search-wrapper input { margin-bottom: 0; padding-right: 40px; }
+        .search-clear { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 1.2rem; color: var(--text-sub); cursor: pointer; display: none; }
+        mark { background: #ffc107; color: #000; padding: 0 2px; border-radius: 3px; font-weight: bold; }
+        
         .tts-btn { background: #e7f1ff; color: #0056b3; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 1.1rem; display: inline-flex; justify-content: center; align-items: center; }
         body.dark-mode .tts-btn { background: #334a66; color: #66b0ff; }
         .kw-highlight { color: var(--danger); font-weight: bold; }
         .keyword-tag { display: inline-block; background: var(--border); padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.9rem; margin: 0.3rem 0.3rem 0 0; font-weight: bold;}
 
-        /* 測驗選項 */
-        .option-btn { text-align: left; padding: 1.2rem; border: 2px solid var(--border); background: var(--card-bg); color: var(--text-main); border-radius: 8px; cursor: pointer; font-size: 1.1rem; margin-bottom: 0.8rem; width: 100%; line-height: 1.4; }
+        /* 測驗選項與戰績 */
+        .option-btn { text-align: left; padding: 1.2rem; border: 2px solid var(--border); background: var(--card-bg); color: var(--text-main); border-radius: 8px; cursor: pointer; font-size: 1.1rem; margin-bottom: 0.8rem; width: 100%; line-height: 1.4; transition: background 0.1s; }
         .option-btn.correct { background: var(--success); color: white; border-color: var(--success); }
         .option-btn.wrong { background: var(--danger); color: white; border-color: var(--danger); }
+        .quiz-score-board { display: inline-block; background: #e7f1ff; color: #0056b3; padding: 4px 12px; border-radius: 12px; font-size: 0.9rem; font-weight: bold; }
+        body.dark-mode .quiz-score-board { background: #334a66; color: #66b0ff; }
 
-        /* --- 新增：展開式統計名單樣式 --- */
+        /* 統計區塊與清單特訓 */
         .stat-row { display: flex; justify-content: space-between; padding: 12px 5px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
         .stat-row:hover { background: var(--bg-color); }
         .stat-row:last-child { border-bottom: none; }
         .word-list-container { display: none; padding: 10px; background: var(--bg-color); border-radius: 8px; margin-bottom: 10px; max-height: 250px; overflow-y: auto; border: 1px inset var(--border); }
         .word-tag { display: inline-block; background: var(--card-bg); border: 1px solid var(--border); padding: 4px 8px; margin: 4px; border-radius: 6px; font-size: 0.9rem; color: var(--text-main); }
+
+        /* Toast 輕量提示 & Modal */
+        .toast { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 12px 24px; border-radius: 24px; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s; font-size: 0.95rem; font-weight: bold; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .toast.show { opacity: 1; }
+        
+        .modal-overlay { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.6); z-index: 200; justify-content: center; align-items: center; animation: fadeIn 0.2s; }
+        .modal-content { background: var(--card-bg); width: 90%; max-width: 400px; border-radius: 12px; padding: 1.5rem; position: relative; }
 
         /* 底部導覽列 */
         nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--nav-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 0.6rem 0; z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
@@ -101,7 +122,10 @@
 
     <header>
         <h1>⚓ SMCP Pro</h1>
-        <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+        <div class="header-controls">
+            <button class="icon-btn" onclick="openSettings()">⚙️</button>
+            <button class="icon-btn theme-toggle" onclick="toggleTheme()">🌓</button>
+        </div>
     </header>
 
     <!-- 1. 儀表板 (首頁) -->
@@ -123,9 +147,8 @@
 
         <div class="card">
             <h3>📊 總進度與 SRS 記憶庫</h3>
-            <p style="font-size:0.9rem; color:var(--text-sub); margin-bottom:10px;">點擊列表即可展開查看對應的詳細術語清單。</p>
+            <p style="font-size:0.9rem; color:var(--text-sub); margin-bottom:10px;">點擊列表即可展開查看單字，並發起清單專屬特訓。</p>
             
-            <!-- 加入 onclick 觸發清單展開功能 -->
             <div class="stat-row" onclick="toggleWordList('list-mastered')">
                 <span>✅ 熟悉 (秒答 2 次以上)</span> 
                 <div><strong style="color: var(--success);" id="stat-mastered">0</strong> 詞 ▾</div>
@@ -149,39 +172,36 @@
     <!-- 2. 閃卡背誦模式 (專屬 Review Tab) -->
     <main id="tab-review" class="tab-content">
         <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; color:var(--text-sub);">
-                <span id="review-progress" style="font-weight:bold; font-size:1.1rem; color:var(--primary);">剩餘 8 詞</span>
-                
-                <!-- 雙向背誦切換開關 -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; color:var(--text-sub);">
+                <span id="review-progress-text" style="font-weight:bold; font-size:1rem; color:var(--primary);">0 / 8</span>
                 <select id="review-direction" onchange="renderReviewCard()" style="width:auto; margin:0; padding:0.3rem 0.5rem; font-size:0.9rem;">
-                    <option value="en-to-zh">看英文 ➔ 想定義</option>
-                    <option value="zh-to-en">看中文 ➔ 想術語</option>
+                    <option value="en-to-zh">英文 ➔ 意思</option>
+                    <option value="zh-to-en">中文 ➔ 術語</option>
                 </select>
-
                 <button class="btn btn-outline" style="width:auto; padding:0.3rem 0.8rem; margin:0; font-size:0.9rem;" onclick="exitReview()">退出</button>
             </div>
             
-            <div class="flashcard">
-                <!-- 提示線索 -->
+            <!-- 進度條 -->
+            <div class="progress-bar"><div id="review-progress-fill" class="progress-fill"></div></div>
+            
+            <!-- 卡片區域 (點擊翻面) -->
+            <div class="flashcard" id="flashcard-box" onclick="if(document.getElementById('review-answer').style.display === 'none') revealReviewCard()">
                 <div id="review-category" style="font-size:0.9rem; color:var(--primary); font-weight:bold; background:var(--highlight-bg); padding:4px 12px; border-radius:12px; margin-bottom:1rem;">[分類標籤]</div>
                 
-                <!-- 題目 -->
                 <div id="review-term" class="flashcard-term">Term</div>
-                <button class="tts-btn" id="review-tts" style="margin: 0 auto 1.5rem auto;">🔊</button>
+                <button class="tts-btn" id="review-tts" style="margin: 0 auto 1.5rem auto;" onclick="event.stopPropagation(); playTTS(document.getElementById('review-term').innerText)">🔊</button>
                 
-                <button class="btn" id="btn-reveal" style="padding:1.2rem; font-size:1.2rem; background:#343a40;" onclick="revealReviewCard()">👀 點擊顯示答案</button>
+                <div id="tap-hint" class="tap-hint">👆 點擊卡片空白處顯示答案</div>
 
-                <!-- 答案區 -->
-                <div id="review-answer" class="flashcard-answer">
+                <div id="review-answer" class="flashcard-answer" onclick="event.stopPropagation();">
                     <p style="font-size:1.4rem; font-weight:bold; color:var(--primary); margin-bottom:0.5rem; text-align:center;" id="review-target-main">主要答案</p>
                     <p style="font-size:1.1rem; color:var(--text-sub); margin-bottom:1rem; line-height:1.4; text-align:center;" id="review-target-sub">次要解釋</p>
                     <div id="review-kw" style="text-align:center;"></div>
                     
-                    <!-- 自我評估按鈕 (Anki Style) -->
-                    <div id="review-grade-btns" style="display:flex; gap:10px; margin-top:1.5rem; width:100%;">
-                        <button class="btn" style="background:var(--danger); flex:1; padding:1rem 0;" onclick="gradeReview(0)">❌ 忘記<br><small style="font-weight:normal;">稍後重測</small></button>
-                        <button class="btn" style="background:var(--warning); color:#333; flex:1; padding:1rem 0;" onclick="gradeReview(1)">🤔 模糊<br><small style="font-weight:normal;">維持權重</small></button>
-                        <button class="btn" style="background:var(--success); flex:1; padding:1rem 0;" onclick="gradeReview(2)">✅ 秒答<br><small style="font-weight:normal;">已掌握</small></button>
+                    <div style="display:flex; gap:10px; margin-top:1.5rem; width:100%;">
+                        <button class="btn" style="background:var(--danger); flex:1; padding:0.8rem 0;" onclick="gradeReview(0)">❌ 忘記<br><small style="font-weight:normal;">重測</small></button>
+                        <button class="btn" style="background:var(--warning); color:#333; flex:1; padding:0.8rem 0;" onclick="gradeReview(1)">🤔 模糊<br><small style="font-weight:normal;">保留</small></button>
+                        <button class="btn" style="background:var(--success); flex:1; padding:0.8rem 0;" onclick="gradeReview(2)">✅ 秒答<br><small style="font-weight:normal;">掌握</small></button>
                     </div>
                 </div>
             </div>
@@ -203,10 +223,11 @@
         </div>
 
         <div class="card" id="quiz-area" style="display: none;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <h3 id="quiz-question" style="font-size: 1.3rem; color: var(--text-main); margin-bottom: 1.5rem; line-height: 1.5; border:none;">Question</h3>
-                <button class="tts-btn" id="quiz-tts" style="display:none;">🔊</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem;">
+                <span id="quiz-score-board" class="quiz-score-board">答對 0 / 0 題</span>
+                <button class="tts-btn" id="quiz-tts" style="display:none; margin:0;">🔊</button>
             </div>
+            <h3 id="quiz-question" style="font-size: 1.25rem; color: var(--text-main); margin-bottom: 1.5rem; line-height: 1.5; border:none;">Question</h3>
             
             <div id="quiz-options"></div>
             
@@ -218,26 +239,39 @@
 
             <div id="quiz-feedback" style="margin-top: 1.5rem; font-size: 1.1rem; text-align:center; font-weight:bold;"></div>
             <button id="quiz-next-btn" class="btn btn-outline" style="margin-top: 1.5rem; display: none;" onclick="generateQuestion()">下一題</button>
-            <button class="btn" style="background: var(--text-sub); margin-top: 0.5rem;" onclick="exitQuiz()">返回測驗選單</button>
+            <button class="btn" style="background: var(--text-sub); margin-top: 0.5rem;" onclick="exitQuiz()">結束測驗與結算</button>
         </div>
     </main>
 
-    <!-- 4. SRS (智慧強化) -->
-    <main id="tab-srs" class="tab-content">
-        <div class="card" style="text-align: center; padding: 2rem 1rem;">
-            <h3 style="justify-content: center; font-size:1.5rem; margin-bottom: 1rem;">🧠 弱點強化特訓</h3>
-            <p style="color: var(--text-sub); margin-bottom: 2rem;">系統將從「❌ 陌生」與「🤔 模糊」的記憶庫中，隨機抽取 10 題進行閃卡強化訓練。</p>
-            <button class="btn" style="padding: 1rem; font-size:1.2rem;" onclick="startSRSReview()">開始特訓</button>
-        </div>
-    </main>
-
-    <!-- 5. 字典 -->
+    <!-- 4. 字典 -->
     <main id="tab-dict" class="tab-content">
         <div class="card" style="position: sticky; top: 60px; z-index: 90; margin-bottom: 1rem; padding: 1rem;">
-            <input type="text" id="search-input" placeholder="🔍 搜尋英文、中文或關鍵字..." onkeyup="renderDict()" style="margin-bottom: 0;">
+            <div class="search-wrapper">
+                <input type="text" id="search-input" placeholder="🔍 搜尋英文、中文或關鍵字..." onkeyup="renderDict()">
+                <button class="search-clear" id="search-clear-btn" onclick="clearSearch()">✕</button>
+            </div>
         </div>
         <div id="dict-list"></div>
     </main>
+
+    <!-- 5. 設定 Modal -->
+    <div id="settings-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeSettings()">✕</button>
+            <h3 style="margin-bottom: 1.5rem; color: var(--primary);">⚙️ 系統設定</h3>
+            <p style="font-size:0.9rem; color:var(--text-sub); margin-bottom:1rem;">手動備份您的學習進度以防遺失。</p>
+            <button class="btn" style="background: #28a745;" onclick="exportData()">📥 下載進度備份 (.json)</button>
+            <label class="btn" style="background: #17a2b8; display:block; cursor:pointer;">
+                📂 匯入進度檔
+                <input type="file" accept=".json" style="display:none;" onchange="importData(event)">
+            </label>
+            <hr style="border:0; border-top:1px solid var(--border); margin:1.5rem 0;">
+            <button class="btn" style="background: var(--danger);" onclick="clearAllData()">⚠️ 清空所有學習紀錄</button>
+        </div>
+    </div>
+
+    <!-- Toast 輕量提示 -->
+    <div id="toast" class="toast">提示訊息</div>
 
     <!-- 底部導覽列 -->
     <nav class="bottom-nav">
@@ -250,13 +284,10 @@
         <button class="nav-item" onclick="switchTab('tab-quiz', this)">
             <span class="nav-icon">📝</span><span>測驗</span>
         </button>
-        <button class="nav-item" onclick="switchTab('tab-srs', this)">
-            <span class="nav-icon">🧠</span><span>複習</span>
-        </button>
     </nav>
 
     <script>
-        // === 1. 資料庫 (內建完整 161 條資料，免伺服器離線執行) ===
+        // === 1. 資料庫 (內建 161 條資料並自動轉換) ===
         const rawData = [
   { "id": "001", "group": "遇險與搜救", "term": "Abandon vessel", "en": "To evacuate crew and passengers from a vessel following a distress", "zh": "棄船。船隻遇險救唔返嗰陣，下令全體船員同乘客即刻撤離。" },
   { "id": "002", "group": "遇險與搜救", "term": "Capsizing", "en": "Turning of a vessel upside down while on water", "zh": "翻船／傾覆。隻船喺水上面徹底底朝天翻咗轉。" },
@@ -421,13 +452,12 @@
   { "id": "161", "group": "航行告示與常規", "term": "Resume (to)", "en": "here: To re-start a voyage, service or search", "zh": "恢復。中斷後重新開展航行、客運班次或搜救行動。" }
 ];
 
-        // 自動轉換為系統所需格式
         const smcpData = rawData.map(item => {
             return {
                 id: parseInt(item.id, 10),
                 category: item.group,
                 term: item.term,
-                term_zh: item.zh.split('。')[0], // 擷取句號前作為簡短中文
+                term_zh: item.zh.split('。')[0], 
                 meaning: item.en,
                 meaning_zh: item.zh,
                 keywords: item.en.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 3)
@@ -447,25 +477,20 @@
             updateStats();
         }
 
-        // 初始化記憶庫 (Box=0 代表完全陌生)
         smcpData.forEach(item => {
-            if (!userData.srsData[item.id]) {
-                userData.srsData[item.id] = { box: 0 };
-            }
+            if (!userData.srsData[item.id]) userData.srsData[item.id] = { box: 0 };
         });
 
-        // 跨日檢查機制
         function checkDailyReset() {
             const today = getTodayStr();
             document.getElementById('current-day-badge').innerText = `Day ${userData.currentDay || 1}`;
             
             if (userData.lastDate !== today) {
                 if (userData.lastDate !== '') {
-                    // 若前一天有進度，才跳下一天
                     const hasProgress = userData.dailyProgress.morning.length > 0 || userData.dailyProgress.lunch.length > 0 || userData.dailyProgress.evening.length > 0;
                     if (hasProgress) {
                         userData.currentDay = (userData.currentDay || 1) + 1;
-                        if (userData.currentDay > 7) userData.currentDay = 1; // 7天循環
+                        if (userData.currentDay > 7) userData.currentDay = 1; 
                     }
                 }
                 userData.lastDate = today;
@@ -480,7 +505,6 @@
             return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
         }
 
-        // 即時更新首頁的 SRS 數據庫統計
         function updateStats() {
             let mastered = [], familiar = [], learning = [];
             
@@ -495,12 +519,18 @@
             document.getElementById('stat-familiar').innerText = familiar.length;
             document.getElementById('stat-learning').innerText = learning.length;
 
-            // 更新隱藏的清單
-            const renderList = (arr) => arr.map(i => `<span class="word-tag">#${i.id} ${i.term}</span>`).join('');
+            const renderList = (arr, listType) => {
+                if(arr.length === 0) return '<p style="color:var(--text-sub); text-align:center;">無</p>';
+                let html = arr.map(i => `<span class="word-tag">#${i.id} ${i.term}</span>`).join('');
+                if(listType !== 'mastered') {
+                    html += `<br><button class="btn btn-outline" style="padding:0.5rem; font-size:0.9rem; margin-top:10px;" onclick="startTargetedReview('${listType}')">🚀 立即特訓此清單</button>`;
+                }
+                return html;
+            };
             
-            document.getElementById('list-mastered').innerHTML = renderList(mastered);
-            document.getElementById('list-familiar').innerHTML = renderList(familiar);
-            document.getElementById('list-learning').innerHTML = renderList(learning);
+            document.getElementById('list-mastered').innerHTML = renderList(mastered, 'mastered');
+            document.getElementById('list-familiar').innerHTML = renderList(familiar, 'familiar');
+            document.getElementById('list-learning').innerHTML = renderList(learning, 'learning');
         }
 
         function toggleWordList(id) {
@@ -508,19 +538,17 @@
             if (el.style.display === 'block') {
                 el.style.display = 'none';
             } else {
-                // 關閉其他開啟的清單
                 document.querySelectorAll('.word-list-container').forEach(list => list.style.display = 'none');
                 el.style.display = 'block';
             }
         }
 
-        // 處理每一次答對/答錯對權重的影響
         function processSRS(id, isCorrect) {
             let data = userData.srsData[id];
             if (isCorrect) {
-                data.box = Math.min(5, data.box + 1); // 答對，Box 等級提升
+                data.box = Math.min(5, data.box + 1); 
             } else {
-                data.box = 0; // 答錯，直接重置為 0
+                data.box = 0; 
             }
             saveData();
         }
@@ -556,7 +584,6 @@
                 const isCompleted = userData.dailyProgress[p].length > 0;
                 const total = s[p].count;
                 
-                // 優化：即使完成，按鈕依然保留，且可點擊重新複習
                 const btnStatus = isCompleted 
                     ? `<button class="btn" style="background:#e8f5e9; color:var(--success); border:1px solid var(--success); padding:0.6rem;" onclick="startReviewRoutine('${p}')">✅ 已完成 (點擊再次複習)</button>` 
                     : `<button class="btn" style="padding:0.6rem;" onclick="startReviewRoutine('${p}')">開始背誦 (0/${total})</button>`;
@@ -572,10 +599,10 @@
             container.innerHTML = html;
         }
 
-        // === 4. 閃卡背誦模式 (Anki Style: 忘記/模糊/秒答) ===
+        // === 4. 閃卡背誦模式 ===
         let reviewQueue = [];
-        let currentReviewChunk = [];
         let currentPeriod = '';
+        let initialQueueLength = 0;
 
         function startReviewRoutine(period) {
             currentPeriod = period;
@@ -585,53 +612,76 @@
             const endIdx = day === 7 ? smcpData.length : startIdx + itemsPerDay;
             const dayData = smcpData.slice(startIdx, endIdx);
             
-            // 根據時段切片
-            if (period === 'morning') currentReviewChunk = dayData.slice(0, 8);
-            if (period === 'lunch') currentReviewChunk = dayData.slice(8, 16);
-            if (period === 'evening') currentReviewChunk = dayData.slice(16, 23);
+            let chunk = [];
+            if (period === 'morning') chunk = dayData.slice(0, 8);
+            if (period === 'lunch') chunk = dayData.slice(8, 16);
+            if (period === 'evening') chunk = dayData.slice(16, 23);
             
-            // 複製一份進入作答佇列
-            reviewQueue = [...currentReviewChunk];
+            reviewQueue = [...chunk];
+            initialQueueLength = reviewQueue.length;
+            
+            switchTab('tab-review', document.querySelectorAll('.nav-item')[0]);
+            renderReviewCard();
+        }
+
+        function startTargetedReview(listType) {
+            let pool = [];
+            smcpData.forEach(item => {
+                const box = userData.srsData[item.id].box;
+                if (listType === 'learning' && box === 0) pool.push(item);
+                if (listType === 'familiar' && box === 1) pool.push(item);
+            });
+            
+            if (pool.length === 0) return;
+            
+            pool.sort(() => Math.random() - 0.5);
+            reviewQueue = pool.slice(0, 15); // 特訓最多抽15題
+            initialQueueLength = reviewQueue.length;
+            currentPeriod = 'targeted';
             
             switchTab('tab-review', document.querySelectorAll('.nav-item')[0]);
             renderReviewCard();
         }
 
         function renderReviewCard() {
-            // 如果佇列清空了，代表本輪完成
             if (reviewQueue.length === 0) {
-                alert('🎉 恭喜！本時段的詞彙已經全部背誦完畢！');
-                userData.dailyProgress[currentPeriod] = currentReviewChunk.map(item => item.id); 
-                saveData();
-                updateSchedule();
+                if(currentPeriod !== 'targeted') {
+                    showToast('🎉 本時段的詞彙已背誦完畢！');
+                    // 隨意存入虛擬陣列代表完成
+                    userData.dailyProgress[currentPeriod] = [1]; 
+                    saveData();
+                    updateSchedule();
+                } else {
+                    showToast('🎉 特訓完成！記憶庫已更新。');
+                }
                 switchTab('tab-dashboard', document.querySelectorAll('.nav-item')[0]);
                 return;
             }
             
-            // 永遠取佇列的第一個來測
             const item = reviewQueue[0];
             const direction = document.getElementById('review-direction').value;
             
-            document.getElementById('review-progress').innerText = `剩餘 ${reviewQueue.length} 詞`;
+            document.getElementById('review-progress-text').innerText = `${initialQueueLength - reviewQueue.length + 1} / ${initialQueueLength}`;
+            document.getElementById('review-progress-fill').style.width = `${((initialQueueLength - reviewQueue.length) / initialQueueLength) * 100}%`;
             document.getElementById('review-category').innerText = `[${item.category}]`;
             
-            // 雙向背誦邏輯
             if (direction === 'en-to-zh') {
                 document.getElementById('review-term').innerText = item.term;
                 document.getElementById('review-tts').style.display = 'inline-flex';
-                document.getElementById('review-tts').onclick = () => playTTS(item.term);
+                document.getElementById('review-tts').onclick = (e) => { e.stopPropagation(); playTTS(item.term); };
             } else {
-                // 中翻英模式 (正面顯示中文，隱藏語音避免劇透)
                 document.getElementById('review-term').innerText = item.term_zh;
                 document.getElementById('review-tts').style.display = 'none';
             }
             
-            // UI 狀態切換
+            document.getElementById('tap-hint').style.display = 'block';
             document.getElementById('review-answer').style.display = 'none';
             document.getElementById('btn-reveal').style.display = 'block';
         }
 
         function revealReviewCard() {
+            if(document.getElementById('review-answer').style.display === 'block') return;
+
             const item = reviewQueue[0];
             const direction = document.getElementById('review-direction').value;
             
@@ -641,46 +691,49 @@
             } else {
                 document.getElementById('review-target-main').innerText = item.term;
                 document.getElementById('review-target-sub').innerHTML = item.meaning_zh;
-                // 中翻英時，答案揭曉後才出現英文語音按鈕
                 document.getElementById('review-tts').style.display = 'inline-flex';
-                document.getElementById('review-tts').onclick = () => playTTS(item.term);
+                document.getElementById('review-tts').onclick = (e) => { e.stopPropagation(); playTTS(item.term); };
             }
             
             document.getElementById('review-kw').innerHTML = item.keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('');
             
+            document.getElementById('tap-hint').style.display = 'none';
             document.getElementById('review-answer').style.display = 'block';
             document.getElementById('btn-reveal').style.display = 'none';
         }
 
         function gradeReview(quality) {
-            // 將這張卡片從佇列中取出
+            event.stopPropagation();
             const item = reviewQueue.shift(); 
             
             if (quality === 0) {
-                // ❌ 忘記：塞回佇列尾端，必須重測到會為止
                 reviewQueue.push(item);
                 processSRS(item.id, false);
             } else if (quality === 1) {
-                // 🤔 模糊：同樣塞回佇列尾端再測一次
                 reviewQueue.push(item);
             } else {
-                // ✅ 秒答：真正移出這輪的佇列，並增加 SRS 權重
                 processSRS(item.id, true);
+                if(currentPeriod !== 'targeted' && !userData.dailyProgress[currentPeriod].includes(item.id)) {
+                    userData.dailyProgress[currentPeriod].push(item.id);
+                    saveData();
+                }
             }
-            
             renderReviewCard();
         }
 
         function exitReview() {
-            if(confirm("確定要退出嗎？本時段進度尚未完成喔！")) {
-                switchTab('tab-dashboard', document.querySelectorAll('.nav-item')[0]);
-            }
+            switchTab('tab-dashboard', document.querySelectorAll('.nav-item')[0]);
         }
 
         // === 5. 自由測驗模式 (Quiz) ===
         let currentQuizItem = null;
+        let quizAttempts = 0;
+        let quizCorrect = 0;
 
         function startQuiz(quizType) {
+            quizAttempts = 0;
+            quizCorrect = 0;
+            updateQuizScoreBoard();
             document.getElementById('quiz-setup').style.display = 'none';
             document.getElementById('quiz-area').style.display = 'block';
             document.getElementById('quiz-question').dataset.type = quizType;
@@ -688,8 +741,13 @@
         }
 
         function exitQuiz() {
+            showToast(`測驗結束！共答對 ${quizCorrect} / ${quizAttempts} 題`);
             document.getElementById('quiz-setup').style.display = 'block';
             document.getElementById('quiz-area').style.display = 'none';
+        }
+
+        function updateQuizScoreBoard() {
+            document.getElementById('quiz-score-board').innerText = `答對 ${quizCorrect} / ${quizAttempts} 題`;
         }
 
         function generateQuestion() {
@@ -757,7 +815,9 @@
             document.querySelectorAll('.option-btn').forEach(b => b.style.pointerEvents = 'none');
             const fb = document.getElementById('quiz-feedback');
             
+            quizAttempts++;
             if (isCorrect) {
+                quizCorrect++;
                 btn.classList.add('correct');
                 fb.innerHTML = '✅ 正確！';
                 fb.style.color = 'var(--success)';
@@ -768,6 +828,7 @@
                 fb.style.color = 'var(--danger)';
                 processSRS(currentQuizItem.id, false);
             }
+            updateQuizScoreBoard();
             document.getElementById('quiz-next-btn').style.display = 'block';
         }
 
@@ -777,12 +838,16 @@
             const required = Math.max(1, Math.ceil(currentQuizItem.keywords.length / 2));
             const fb = document.getElementById('quiz-feedback');
 
+            // 標示漏掉的關鍵字
+            const missing = currentQuizItem.keywords.filter(k => !result.matchedKws.includes(k));
             let detailHtml = `<div style="text-align:left; background:var(--highlight-bg); padding:10px; border-radius:8px; margin-top:15px; font-size:1rem; line-height:1.4; color:#333;">
                 <strong>標準定義:</strong> ${highlightKeywords(currentQuizItem.meaning, currentQuizItem.keywords)}<br>
-                <div style="margin-top:5px;">${currentQuizItem.keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('')}</div>
+                <div style="margin-top:5px;">漏掉的字: ${missing.length > 0 ? missing.map(k => `<span class="keyword-tag" style="background:var(--danger); color:white;">${k}</span>`).join('') : '無'}</div>
             </div>`;
 
+            quizAttempts++;
             if (result.matchCount >= required) {
+                quizCorrect++;
                 fb.innerHTML = `✅ 命中！(找到 ${result.matchCount}/${required} 詞)` + detailHtml;
                 fb.style.color = 'var(--success)';
                 processSRS(currentQuizItem.id, true);
@@ -791,11 +856,12 @@
                 fb.style.color = 'var(--danger)';
                 processSRS(currentQuizItem.id, false);
             }
+            updateQuizScoreBoard();
             document.getElementById('quiz-next-btn').style.display = 'block';
             document.getElementById('quiz-input-area').style.display = 'none';
         }
 
-        // === 6. UI 共用函數 ===
+        // === 6. 字典與 UI 共用函數 ===
         function switchTab(tabId, btnObj) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -816,6 +882,13 @@
                 utterance.rate = 0.9; 
                 window.speechSynthesis.speak(utterance);
             }
+        }
+
+        // 高亮搜尋字詞 (使用 mark 標籤)
+        function highlightSearch(text, query) {
+            if (!query) return text;
+            const regex = new RegExp(`(${query})`, "gi");
+            return text.replace(regex, '<mark>$1</mark>');
         }
 
         function highlightKeywords(text, keywords) {
@@ -845,35 +918,94 @@
         }
 
         function renderDict() {
-            const query = document.getElementById('search-input').value.toLowerCase();
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
             const list = document.getElementById('dict-list');
+            const clearBtn = document.getElementById('search-clear-btn');
+            
+            clearBtn.style.display = query.length > 0 ? 'block' : 'none';
             list.innerHTML = '';
 
             const filtered = smcpData.filter(d => 
                 d.term.toLowerCase().includes(query) || 
                 d.meaning.toLowerCase().includes(query) || 
-                d.term_zh.includes(query) ||
-                d.keywords.some(k => k.toLowerCase().includes(query))
+                d.term_zh.includes(query)
             );
 
             filtered.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'card';
-                const highlightedDef = highlightKeywords(item.meaning, item.keywords);
+                
+                const displayTerm = highlightSearch(item.term, query);
+                const displayEn = highlightSearch(item.meaning, query);
+                const displayZh = highlightSearch(item.meaning_zh, query);
                 const kwTags = item.keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('');
 
                 card.innerHTML = `
                     <h3 style="margin-bottom:0;">
-                        <span>#${item.id} ${item.term}</span>
+                        <span>#${item.id} ${displayTerm}</span>
                         <button class="tts-btn" onclick="playTTS('${item.term.replace(/'/g, "\\'")}')">🔊</button>
                     </h3>
                     <p style="color:var(--text-sub); font-size:1.1rem; margin-bottom: 0.8rem; font-weight:bold;">${item.term_zh}</p>
-                    <p style="margin-bottom:0.5rem;">${highlightedDef}</p>
-                    <p style="background:var(--highlight-bg); padding:8px; border-radius:6px; color:var(--text-main);">${item.meaning_zh}</p>
+                    <p style="margin-bottom:0.5rem;">${displayEn}</p>
+                    <p style="background:var(--highlight-bg); padding:8px; border-radius:6px; color:var(--text-main);">${displayZh}</p>
                     <div style="margin-top:0.8rem;">${kwTags}</div>
                 `;
                 list.appendChild(card);
             });
+        }
+
+        function clearSearch() {
+            document.getElementById('search-input').value = '';
+            renderDict();
+        }
+
+        // === 7. 設定與備份 (Modal & Toast) ===
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function openSettings() { document.getElementById('settings-modal').style.display = 'flex'; }
+        function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
+
+        function exportData() {
+            const dataStr = JSON.stringify(userData);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `SMCP_Backup_${getTodayStr()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("📥 進度已成功匯出");
+            closeSettings();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    userData = JSON.parse(e.target.result);
+                    saveData();
+                    showToast("✅ 進度已成功還原！");
+                    updateSchedule();
+                    closeSettings();
+                } catch(err) {
+                    alert("❌ 檔案格式錯誤");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function clearAllData() {
+            if(confirm("確定要清空所有學習紀錄嗎？這將無法復原。")) {
+                localStorage.removeItem('smcpUserData');
+                location.reload();
+            }
         }
 
         // 初始化
