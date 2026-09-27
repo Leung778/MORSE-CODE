@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- PWA 支援標籤 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#0056b3">
@@ -58,7 +59,6 @@
         .btn { display: block; width: 100%; padding: 0.9rem; background: var(--primary); color: white; text-align: center; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-bottom: 0.8rem; transition: transform 0.1s; }
         .btn:active { transform: scale(0.98); }
         .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
-        .btn-success { background: var(--success); }
         
         select, input[type="text"] { width: 100%; padding: 0.9rem; background: var(--card-bg); color: var(--text-main); border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; margin-bottom: 1rem; outline: none; }
         select:focus, input[type="text"]:focus { border-color: var(--primary); }
@@ -83,9 +83,12 @@
         .option-btn.correct { background: var(--success); color: white; border-color: var(--success); }
         .option-btn.wrong { background: var(--danger); color: white; border-color: var(--danger); }
 
-        /* 統計區塊 */
-        .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+        /* --- 新增：展開式統計名單樣式 --- */
+        .stat-row { display: flex; justify-content: space-between; padding: 12px 5px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+        .stat-row:hover { background: var(--bg-color); }
         .stat-row:last-child { border-bottom: none; }
+        .word-list-container { display: none; padding: 10px; background: var(--bg-color); border-radius: 8px; margin-bottom: 10px; max-height: 250px; overflow-y: auto; border: 1px inset var(--border); }
+        .word-tag { display: inline-block; background: var(--card-bg); border: 1px solid var(--border); padding: 4px 8px; margin: 4px; border-radius: 6px; font-size: 0.9rem; color: var(--text-main); }
 
         /* 底部導覽列 */
         nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--nav-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 0.6rem 0; z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
@@ -120,16 +123,26 @@
 
         <div class="card">
             <h3>📊 總進度與 SRS 記憶庫</h3>
-            <p style="font-size:0.9rem; color:var(--text-sub); margin-bottom:10px;">系統根據您的背誦狀態自動分類，並即時更新。</p>
-            <div class="stat-row">
-                <span>✅ 熟悉 (秒答 2 次以上)</span> <strong style="color: var(--success);" id="stat-mastered">0</strong>
+            <p style="font-size:0.9rem; color:var(--text-sub); margin-bottom:10px;">點擊列表即可展開查看對應的詳細術語清單。</p>
+            
+            <!-- 加入 onclick 觸發清單展開功能 -->
+            <div class="stat-row" onclick="toggleWordList('list-mastered')">
+                <span>✅ 熟悉 (秒答 2 次以上)</span> 
+                <div><strong style="color: var(--success);" id="stat-mastered">0</strong> 詞 ▾</div>
             </div>
-            <div class="stat-row">
-                <span>🤔 模糊 (秒答 1 次)</span> <strong style="color: var(--warning);" id="stat-familiar">0</strong>
+            <div id="list-mastered" class="word-list-container"></div>
+
+            <div class="stat-row" onclick="toggleWordList('list-familiar')">
+                <span>🤔 模糊 (秒答 1 次)</span> 
+                <div><strong style="color: var(--warning);" id="stat-familiar">0</strong> 詞 ▾</div>
             </div>
-            <div class="stat-row">
-                <span>❌ 陌生 (從未秒答/忘記)</span> <strong style="color: var(--danger);" id="stat-learning">161</strong>
+            <div id="list-familiar" class="word-list-container"></div>
+
+            <div class="stat-row" onclick="toggleWordList('list-learning')">
+                <span>❌ 陌生 (從未秒答/忘記)</span> 
+                <div><strong style="color: var(--danger);" id="stat-learning">161</strong> 詞 ▾</div>
             </div>
+            <div id="list-learning" class="word-list-container"></div>
         </div>
     </main>
 
@@ -469,16 +482,36 @@
 
         // 即時更新首頁的 SRS 數據庫統計
         function updateStats() {
-            let mastered = 0, familiar = 0, learning = 0;
-            for (let id in userData.srsData) {
-                const box = userData.srsData[id].box;
-                if (box >= 2) mastered++;
-                else if (box === 1) familiar++;
-                else learning++;
+            let mastered = [], familiar = [], learning = [];
+            
+            smcpData.forEach(item => {
+                const box = userData.srsData[item.id] ? userData.srsData[item.id].box : 0;
+                if (box >= 2) mastered.push(item);
+                else if (box === 1) familiar.push(item);
+                else learning.push(item);
+            });
+
+            document.getElementById('stat-mastered').innerText = mastered.length;
+            document.getElementById('stat-familiar').innerText = familiar.length;
+            document.getElementById('stat-learning').innerText = learning.length;
+
+            // 更新隱藏的清單
+            const renderList = (arr) => arr.map(i => `<span class="word-tag">#${i.id} ${i.term}</span>`).join('');
+            
+            document.getElementById('list-mastered').innerHTML = renderList(mastered);
+            document.getElementById('list-familiar').innerHTML = renderList(familiar);
+            document.getElementById('list-learning').innerHTML = renderList(learning);
+        }
+
+        function toggleWordList(id) {
+            const el = document.getElementById(id);
+            if (el.style.display === 'block') {
+                el.style.display = 'none';
+            } else {
+                // 關閉其他開啟的清單
+                document.querySelectorAll('.word-list-container').forEach(list => list.style.display = 'none');
+                el.style.display = 'block';
             }
-            document.getElementById('stat-mastered').innerText = mastered;
-            document.getElementById('stat-familiar').innerText = familiar;
-            document.getElementById('stat-learning').innerText = learning;
         }
 
         // 處理每一次答對/答錯對權重的影響
@@ -564,35 +597,13 @@
             renderReviewCard();
         }
 
-        function startSRSReview() {
-            // 從 SRS 記憶庫中篩選出 Box 0 或 1 (陌生與模糊) 的詞彙
-            let srsPool = smcpData.filter(item => userData.srsData[item.id].box <= 1);
-            if(srsPool.length === 0) {
-                alert("🎉 太強了！目前沒有需要強化的詞彙。");
-                return;
-            }
-            
-            // 隨機打亂並抽取最多 10 題
-            srsPool.sort(() => Math.random() - 0.5);
-            currentReviewChunk = srsPool.slice(0, 10);
-            reviewQueue = [...currentReviewChunk];
-            currentPeriod = 'srs';
-            
-            switchTab('tab-review', document.querySelectorAll('.nav-item')[0]);
-            renderReviewCard();
-        }
-
         function renderReviewCard() {
             // 如果佇列清空了，代表本輪完成
             if (reviewQueue.length === 0) {
-                if(currentPeriod === 'srs') {
-                    alert('🎉 SRS 強化完成！您的記憶已更新。');
-                } else {
-                    alert('🎉 恭喜！本時段的詞彙已經全部背誦完畢！');
-                    userData.dailyProgress[currentPeriod] = currentReviewChunk.map(item => item.id); 
-                    saveData();
-                    updateSchedule();
-                }
+                alert('🎉 恭喜！本時段的詞彙已經全部背誦完畢！');
+                userData.dailyProgress[currentPeriod] = currentReviewChunk.map(item => item.id); 
+                saveData();
+                updateSchedule();
                 switchTab('tab-dashboard', document.querySelectorAll('.nav-item')[0]);
                 return;
             }
@@ -792,7 +803,7 @@
             document.getElementById(tabId).classList.add('active');
             if (btnObj) btnObj.classList.add('active');
 
-            if(tabId === 'tab-dashboard') updateSchedule();
+            if(tabId === 'tab-dashboard') { updateSchedule(); updateStats(); }
             if(tabId === 'tab-dict') renderDict();
         }
 
@@ -858,7 +869,7 @@
                     </h3>
                     <p style="color:var(--text-sub); font-size:1.1rem; margin-bottom: 0.8rem; font-weight:bold;">${item.term_zh}</p>
                     <p style="margin-bottom:0.5rem;">${highlightedDef}</p>
-                    <p style="background:var(--highlight-bg); padding:8px; border-radius:6px; color:#333;">${item.meaning_zh}</p>
+                    <p style="background:var(--highlight-bg); padding:8px; border-radius:6px; color:var(--text-main);">${item.meaning_zh}</p>
                     <div style="margin-top:0.8rem;">${kwTags}</div>
                 `;
                 list.appendChild(card);
