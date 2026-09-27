@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-Hant" data-theme="light">
+<html lang="zh-Hant" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>INTERCO 海事通訊與摩斯密碼訓練器 v6.1</title>
+    <title>INTERCO 專業海事通訊模擬器 v7</title>
     <style>
         /* CSS 變數定義：支援深淺色主題 */
         :root[data-theme="light"] {
@@ -12,7 +12,6 @@
             --lamp-bg: #e2e8f0; --lamp-off: #cbd5e1; --success: #16a34a; --danger: #dc2626;
             --keyboard-bg: #e2e8f0; --key-bg: #ffffff;
         }
-
         :root[data-theme="dark"] {
             --primary: #3b82f6; --secondary: #38bdf8; --bg: #0f172a; --card-bg: #1e293b;
             --text: #f8fafc; --text-muted: #94a3b8; --border: #334155; --tab-bg: #0f172a;
@@ -21,19 +20,17 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        
         body { background-color: var(--bg); color: var(--text); padding: 10px; display: flex; justify-content: center; transition: background-color 0.3s, color 0.3s; min-height: 100vh; }
-        .container { width: 100%; max-width: 1000px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); overflow: hidden; display: flex; flex-direction: column; transition: background-color 0.3s; }
-
+        .container { width: 100%; max-width: 1000px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); overflow: hidden; display: flex; flex-direction: column; transition: background-color 0.3s; }
+        
         header { background-color: var(--primary); color: #fff; padding: 15px 20px; text-align: center; position: relative; }
         header h1 { font-size: 1.5rem; margin-bottom: 5px; }
         header p { font-size: 0.9rem; opacity: 0.8; }
-
         .theme-toggle { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 20px; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
         .theme-toggle:hover { background: rgba(255,255,255,0.3); }
 
         .tabs { display: flex; border-bottom: 1px solid var(--border); background-color: var(--tab-bg); overflow-x: auto; white-space: nowrap; }
-        .tab-btn { flex: 1; padding: 12px 15px; text-align: center; background: none; border: none; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: 0.2s; font-size: 0.95rem; min-width: 100px; }
+        .tab-btn { flex: 1; padding: 12px 15px; text-align: center; background: none; border: none; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: 0.2s; font-size: 0.95rem; min-width: 90px; }
         .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background-color: var(--card-bg); }
         .tab-content { display: none; padding: 20px; overflow-y: auto; flex-grow: 1; }
         .tab-content.active { display: block; }
@@ -41,18 +38,20 @@
         /* 圖鑑區 */
         .flag-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; }
         .flag-card { border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; background: var(--card-bg); transition: transform 0.1s, box-shadow 0.1s; }
-        .flag-card:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .flag-card:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .flag-svg-box { display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--text-muted); border-radius: 4px; overflow: hidden; margin-bottom: 5px; width: 60px; height: 40px; background: #fff; }
         .flag-letter { font-size: 1.1rem; font-weight: bold; }
         .flag-morse { font-family: monospace; color: var(--primary); font-weight: bold; }
 
-        /* 燈號區 */
+        /* 燈號區與特效 */
         .lamp-container { display: flex; flex-direction: column; align-items: center; padding: 20px; background: var(--lamp-bg); border-radius: 10px; border: 1px solid var(--border); }
-        .lamp-box { width: 140px; height: 140px; background-color: var(--lamp-off); border: 6px solid var(--text-muted); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; box-shadow: inset 0 5px 15px rgba(0,0,0,0.5); }
-        .lamp-bulb { width: 90px; height: 90px; background-color: rgba(255,255,255,0.1); border-radius: 50%; transition: background-color 0.03s, box-shadow 0.03s; }
+        .lamp-box { width: 140px; height: 140px; background-color: var(--lamp-off); border: 6px solid var(--text-muted); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 10px; box-shadow: inset 0 5px 15px rgba(0,0,0,0.8); }
+        .lamp-bulb { width: 90px; height: 90px; background-color: rgba(255,255,255,0.05); border-radius: 50%; transition: background-color 0.03s, box-shadow 0.03s; }
         .lamp-bulb.lit { background-color: #ffff33; box-shadow: 0 0 40px 10px #ffff33, inset 0 0 20px #fff; }
-        .control-panel { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px; background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
+        /* 視線不良特效 (Fog) */
+        .lamp-bulb.lit.fog-mode { background-color: #c9c935; box-shadow: 0 0 20px 2px #a1a12a; filter: blur(3px); }
         
+        .control-panel { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 10px; background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-top: 10px;}
         .btn-row { display: flex; gap: 10px; width: 100%; }
         button.action-btn { flex: 1; padding: 10px 15px; background-color: var(--primary); color: #fff; border: none; border-radius: 6px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
         button.action-btn:hover { filter: brightness(1.1); }
@@ -61,45 +60,52 @@
 
         select, input[type="text"], input[type="number"] { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; background: var(--card-bg); color: var(--text); }
         
-        /* 綜合測驗區 */
+        /* 測驗區與統計 */
         .quiz-wrapper { max-width: 500px; margin: 0 auto; text-align: center; }
-        .score-board { display: flex; justify-content: space-between; padding: 8px 15px; background: var(--tab-bg); border-radius: 6px; font-weight: bold; margin-bottom: 15px; }
+        .score-board { display: flex; justify-content: space-between; padding: 10px 15px; background: var(--tab-bg); border-radius: 6px; font-weight: bold; margin-bottom: 15px; border: 1px solid var(--border); }
         .quiz-target-display { min-height: 120px; display: flex; justify-content: center; align-items: center; margin: 15px 0; background: var(--lamp-bg); border-radius: 8px; border: 1px solid var(--border); }
         .quiz-target-text { font-size: 3rem; font-family: monospace; color: var(--primary); letter-spacing: 5px; font-weight: bold;}
         .feedback-area { min-height: 50px; margin: 15px 0; font-weight: bold; font-size: 1.1rem; line-height: 1.4; }
         
         .virtual-keyboard { background: var(--keyboard-bg); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 5px; margin-top: 15px; }
         .vk-row { display: flex; justify-content: center; gap: 5px; }
-        .vk-key { background: var(--key-bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 10px 0; font-weight: bold; font-size: 1.1rem; cursor: pointer; flex: 1; max-width: 45px; text-align: center; box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
+        .vk-key { background: var(--key-bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 10px 0; font-weight: bold; font-size: 1.1rem; cursor: pointer; flex: 1; max-width: 45px; text-align: center; box-shadow: 0 2px 0 rgba(0,0,0,0.3); }
         .vk-key:active { transform: translateY(2px); box-shadow: none; }
         .vk-key.special { max-width: 65px; background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* Study Center */
+        /* Realism Settings */
+        .realism-box { background: var(--tab-bg); padding: 10px; border-radius: 6px; border: 1px solid var(--border); display: flex; justify-content: space-around; font-size: 0.9rem; font-weight: bold; }
+        .realism-box label { cursor: pointer; display: flex; align-items: center; gap: 5px; }
+
+        /* Study Center & Stats */
         .study-module { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
         .study-header { background: var(--primary); color: white; padding: 12px 15px; font-weight: bold; }
         .study-body { padding: 15px; }
         .study-table { width: 100%; border-collapse: collapse; }
         .study-table th, .study-table td { border: 1px solid var(--border); padding: 8px; text-align: left; }
         .study-table th { background: var(--tab-bg); }
-        
         .self-eval-box { display: none; background: var(--tab-bg); border: 1px dashed var(--secondary); border-radius: 6px; padding: 10px; margin-top: 10px; }
-        .official-meaning { color: var(--secondary); font-style: italic; margin-bottom: 10px; }
+        
+        .stat-card { background: var(--tab-bg); padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; border: 1px solid var(--border); }
+        .stat-big { font-size: 2.5rem; color: var(--primary); font-weight: bold; margin: 10px 0; }
+        .weak-list { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .weak-item { background: var(--danger); color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>INTERCO 海事通訊模擬器</h1>
-        <p>Flags, Morse Code & Communications</p>
-        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 深色</button>
+        <h1>INTERCO 專業海事通訊模擬器</h1>
+        <p>Flags, Morse Code, Realistic Scenarios & Tracking</p>
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌞 淺色</button>
     </header>
 
     <nav class="tabs">
         <button class="tab-btn active" onclick="switchTab('lookup')">旗幟圖鑑</button>
         <button class="tab-btn" onclick="switchTab('flashing')">燈號訓練</button>
         <button class="tab-btn" onclick="switchTab('quiz')">綜合測驗</button>
-        <button class="tab-btn" onclick="switchTab('study')">研讀中心</button>
+        <button class="tab-btn" onclick="switchTab('stats'); renderStats();">學習統計</button>
     </nav>
 
     <!-- 1. 旗幟圖鑑 -->
@@ -110,49 +116,42 @@
         <div class="flag-grid" id="flagGridNumbers"></div>
     </section>
 
-    <!-- 2. 燈號訓練 (已修正測驗模式) -->
+    <!-- 2. 燈號訓練 -->
     <section id="flashing" class="tab-content">
         <div class="lamp-container">
             <div class="lamp-box"><div id="lampBulb" class="lamp-bulb"></div></div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom:5px;">提示: 在此頁面按 <b>Space</b> 可重播，按 <b>方向鍵右(➔)</b> 換題</div>
             
             <div class="control-panel">
-                <!-- 訓練模式選擇 -->
+                <div class="realism-box" style="margin-bottom: 10px;">
+                    <label title="模擬起霧或遠距離的模糊黯淡燈光"><input type="checkbox" id="fogToggle"> 🌧️ 視線不良 (Fog)</label>
+                </div>
+                
                 <div style="margin-bottom: 10px; font-weight:bold;">
-                    <label style="margin-right:15px; cursor:pointer;">
-                        <input type="radio" name="lampMode" value="single" checked onchange="toggleLampMode()"> 單字元訓練
-                    </label>
-                    <label style="cursor:pointer;">
-                        <input type="radio" name="lampMode" value="block" onchange="toggleLampMode()"> 段落組合訓練
-                    </label>
+                    <label style="margin-right:15px;"><input type="radio" name="lampMode" value="single" checked onchange="toggleLampMode()"> 單字元訓練</label>
+                    <label><input type="radio" name="lampMode" value="block" onchange="toggleLampMode()"> 段落組合訓練</label>
                 </div>
 
-                <!-- 段落組合設定 (預設隱藏) -->
                 <div id="lampBlockConfig" style="display: none; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.95rem;">
                     <span>產生 <input type="number" id="lampGroups" value="3" min="1" max="10" style="width:50px; padding:4px; display:inline-block;"> 組</span>
                     <span>每組 <input type="number" id="lampChars" value="5" min="1" max="10" style="width:50px; padding:4px; display:inline-block;"> 字</span>
                 </div>
 
-                <!-- 速度設定 (手動輸入) -->
                 <div style="display:flex; align-items:center; justify-content: space-between; margin-bottom: 15px;">
                     <span style="font-weight:bold;">發送速度 (WPM):</span>
                     <input type="number" id="lampWpmInput" value="6" min="3" max="40" style="width:80px; text-align:center;">
                 </div>
                 
-                <!-- 發送操作按鈕 -->
                 <div class="btn-row" style="margin-bottom: 15px;">
                     <button class="action-btn" style="background-color:#0284c7;" onclick="nextLampQuestion()">發送新題</button>
                     <button class="action-btn" style="background-color:#475569;" onclick="replayLampSignal()">重播</button>
                     <button class="action-btn btn-danger" onclick="stopFlashing()">停止</button>
                 </div>
-
-                <hr style="border: 0; height: 1px; background: var(--border); margin-bottom: 15px;">
-
-                <!-- 隱藏答案與作答區 -->
-                <div style="text-align:left; font-weight:bold; margin-bottom:5px;">請輸入辨識結果：</div>
-                <input type="text" id="lampAnswerInput" placeholder="輸入解讀出的字母或數字..." autocapitalize="characters" autocomplete="off" style="margin-bottom: 10px; font-family:monospace; text-align:center; font-size:1.2rem;">
-                <button class="action-btn btn-success" style="width:100%;" onclick="checkLampAnswer()">核對答案 (Enter)</button>
                 
-                <!-- 狀態與結果回饋 -->
+                <hr style="border: 0; height: 1px; background: var(--border); margin-bottom: 15px;">
+                <div style="text-align:left; font-weight:bold; margin-bottom:5px;">請輸入辨識結果：</div>
+                <input type="text" id="lampAnswerInput" placeholder="輸入解讀出的字母或數字..." autocapitalize="characters" autocomplete="off" style="margin-bottom: 10px; text-align:center; font-size:1.2rem;">
+                <button class="action-btn btn-success" style="width:100%;" onclick="checkLampAnswer()">核對答案 (Enter)</button>
                 <div id="lampFeedback" style="margin-top:15px; font-weight:bold; text-align:center; min-height:45px; line-height: 1.4;"></div>
             </div>
         </div>
@@ -161,6 +160,10 @@
     <!-- 3. 綜合測驗 -->
     <section id="quiz" class="tab-content">
         <div class="quiz-wrapper">
+            <div class="realism-box" style="margin-bottom: 15px;">
+                <label title="模擬海上無線電的靜電雜訊干擾"><input type="checkbox" id="noiseToggle"> 📻 無線電干擾 (QRN Noise)</label>
+            </div>
+
             <div class="score-board">
                 <span>答對: <span id="scoreCorrect" style="color:var(--success);">0</span></span>
                 <span>總題數: <span id="scoreTotal">0</span></span>
@@ -170,19 +173,19 @@
                 <label><strong>測驗模式：</strong></label>
                 <select id="quizMode" onchange="generateQuiz()">
                     <option value="flag_to_letter">看旗幟 ➔ 猜字母/數字</option>
-                    <option value="morse_to_letter">看摩斯 ➔ 猜字母/數字</option>
+                    <option value="morse_to_letter">聽摩斯 ➔ 猜字母/數字</option>
                     <option value="flag_to_morse">看旗幟 ➔ 猜摩斯密碼</option>
                     <option value="letter_to_meaning">看字母 ➔ 官方含意 (Meaning)</option>
                 </select>
             </div>
 
             <div class="quiz-target-display" id="quizDisplay"></div>
-
+            
             <div style="margin-bottom: 15px;">
                 <input type="text" id="quizAnswer" placeholder="請輸入答案..." readonly style="margin-bottom: 10px; text-align:center; font-size:1.5rem; font-weight:bold; text-transform:uppercase; letter-spacing: 2px;">
                 <div class="btn-row">
                     <button class="action-btn btn-success" onclick="checkQuizAnswer()">核對答案 (Enter)</button>
-                    <button class="action-btn" onclick="generateQuiz()">跳過 / 下一題</button>
+                    <button class="action-btn" onclick="generateQuiz()">跳過 / 下一題 (➔)</button>
                 </div>
             </div>
 
@@ -201,9 +204,26 @@
         </div>
     </section>
 
-    <!-- 4. 研讀中心 -->
-    <section id="study" class="tab-content">
-        <div id="studyContentContainer"></div>
+    <!-- 4. 學習統計 (全新) -->
+    <section id="stats" class="tab-content">
+        <div style="max-width: 600px; margin: 0 auto;">
+            <div class="stat-card">
+                <h3 style="color:var(--text-muted);">總體學習正確率</h3>
+                <div class="stat-big" id="statAccuracy">0%</div>
+                <div>累計作答: <span id="statTotal">0</span> 題 / 答對: <span id="statCorrect">0</span> 題</div>
+                <div style="margin-top:10px; font-size:0.85rem; color:var(--text-muted);"><button onclick="clearStats()" style="background:none; border:1px solid var(--border); color:var(--text); padding:4px 8px; border-radius:4px; cursor:pointer;">清除歷史紀錄</button></div>
+            </div>
+            
+            <div class="study-module">
+                <div class="study-header">⚠️ 最常答錯的地雷字元 (Top 5)</div>
+                <div class="study-body" style="text-align:center; padding: 25px 15px;">
+                    <div class="weak-list" id="statWeakList">
+                        <!-- 動態生成弱點 -->
+                    </div>
+                    <div style="margin-top:20px; font-size:0.9rem; color:var(--text-muted);">系統出題時會稍微提高這些字元的出現機率，幫助您加強記憶。</div>
+                </div>
+            </div>
+        </div>
     </section>
 </div>
 
@@ -238,31 +258,25 @@
         'X': { morse: '-..-', meaning: 'Stop carrying out your intentions and watch my signals.', keys: ['stop', 'intentions', 'watch'] },
         'Y': { morse: '-.--', meaning: 'I am dragging my anchor.', keys: ['dragging', 'anchor'] },
         'Z': { morse: '--..', meaning: 'I require a tug. (Fishing: shooting nets)', keys: ['tug'] },
-        '1': { morse: '.----', meaning: 'Numeral 1', keys:['1'] }, '2': { morse: '..---', meaning: 'Numeral 2', keys:['2'] },
-        '3': { morse: '...--', meaning: 'Numeral 3', keys:['3'] }, '4': { morse: '....-', meaning: 'Numeral 4', keys:['4'] },
-        '5': { morse: '.....', meaning: 'Numeral 5', keys:['5'] }, '6': { morse: '-....', meaning: 'Numeral 6', keys:['6'] },
-        '7': { morse: '--...', meaning: 'Numeral 7', keys:['7'] }, '8': { morse: '---..', meaning: 'Numeral 8', keys:['8'] },
-        '9': { morse: '----.', meaning: 'Numeral 9', keys:['9'] }, '0': { morse: '-----', meaning: 'Numeral 0', keys:['0'] }
+        '1': { morse: '.----', keys:['1'] }, '2': { morse: '..---', keys:['2'] }, '3': { morse: '...--', keys:['3'] }, '4': { morse: '....-', keys:['4'] },
+        '5': { morse: '.....', keys:['5'] }, '6': { morse: '-....', keys:['6'] }, '7': { morse: '--...', keys:['7'] }, '8': { morse: '---..', keys:['8'] },
+        '9': { morse: '----.', keys:['9'] }, '0': { morse: '-----', keys:['0'] }
     };
 
     const SVG_RAW = {
-      'A': `<polygon points="0,0 60,0 45,20 60,40 0,40" fill="#ffffff"/><polygon points="30,0 60,0 45,20 60,40 30,40" fill="#0033a0"/>`,
-      'B': `<polygon points="0,0 60,0 45,20 60,40 0,40" fill="#da291c"/>`,
+      'A': `<polygon points="0,0 60,0 45,20 60,40 0,40" fill="#ffffff"/><polygon points="30,0 60,0 45,20 60,40 30,40" fill="#0033a0"/>`, 'B': `<polygon points="0,0 60,0 45,20 60,40 0,40" fill="#da291c"/>`,
       'C': `<rect width="60" height="8" fill="#0033a0"/><rect y="8" width="60" height="8" fill="#ffffff"/><rect y="16" width="60" height="8" fill="#da291c"/><rect y="24" width="60" height="8" fill="#ffffff"/><rect y="32" width="60" height="8" fill="#0033a0"/>`,
-      'D': `<rect width="60" height="10" fill="#ffd100"/><rect y="10" width="60" height="20" fill="#0033a0"/><rect y="30" width="60" height="10" fill="#ffd100"/>`,
-      'E': `<rect width="60" height="20" fill="#0033a0"/><rect y="20" width="60" height="20" fill="#da291c"/>`,
+      'D': `<rect width="60" height="10" fill="#ffd100"/><rect y="10" width="60" height="20" fill="#0033a0"/><rect y="30" width="60" height="10" fill="#ffd100"/>`, 'E': `<rect width="60" height="20" fill="#0033a0"/><rect y="20" width="60" height="20" fill="#da291c"/>`,
       'F': `<rect width="60" height="40" fill="#ffffff"/><polygon points="30,5 55,20 30,35 5,20" fill="#da291c"/>`,
       'G': `<rect width="10" height="40" fill="#ffd100"/><rect x="10" width="10" height="40" fill="#0033a0"/><rect x="20" width="10" height="40" fill="#ffd100"/><rect x="30" width="10" height="40" fill="#0033a0"/><rect x="40" width="10" height="40" fill="#ffd100"/><rect x="50" width="10" height="40" fill="#0033a0"/>`,
-      'H': `<rect width="30" height="40" fill="#ffffff"/><rect x="30" width="30" height="40" fill="#da291c"/>`,
-      'I': `<rect width="60" height="40" fill="#ffd100"/><circle cx="30" cy="20" r="10" fill="#000000"/>`,
+      'H': `<rect width="30" height="40" fill="#ffffff"/><rect x="30" width="30" height="40" fill="#da291c"/>`, 'I': `<rect width="60" height="40" fill="#ffd100"/><circle cx="30" cy="20" r="10" fill="#000000"/>`,
       'J': `<rect width="60" height="13.3" fill="#0033a0"/><rect y="13.3" width="60" height="13.3" fill="#ffffff"/><rect y="26.6" width="60" height="13.4" fill="#0033a0"/>`,
       'K': `<rect width="30" height="40" fill="#ffd100"/><rect x="30" width="30" height="40" fill="#0033a0"/>`,
       'L': `<rect width="30" height="20" fill="#ffd100"/><rect x="30" width="30" height="20" fill="#000000"/><rect y="20" width="30" height="20" fill="#000000"/><rect x="30" y="20" width="30" height="20" fill="#ffd100"/>`,
       'M': `<rect width="60" height="40" fill="#0033a0"/><line x1="0" y1="0" x2="60" y2="40" stroke="#ffffff" stroke-width="8"/><line x1="60" y1="0" x2="0" y2="40" stroke="#ffffff" stroke-width="8"/>`,
       'N': `<rect width="60" height="40" fill="#ffffff"/><rect width="15" height="10" fill="#0033a0"/><rect x="30" width="15" height="10" fill="#0033a0"/><rect x="15" y="10" width="15" height="10" fill="#0033a0"/><rect x="45" y="10" width="15" height="10" fill="#0033a0"/><rect y="20" width="15" height="10" fill="#0033a0"/><rect x="30" y="20" width="15" height="10" fill="#0033a0"/><rect x="15" y="30" width="15" height="10" fill="#0033a0"/><rect x="45" y="30" width="15" height="10" fill="#0033a0"/>`,
       'O': `<polygon points="0,0 60,40 0,40" fill="#da291c"/><polygon points="0,0 60,0 60,40" fill="#ffd100"/>`,
-      'P': `<rect width="60" height="40" fill="#0033a0"/><rect x="20" y="12" width="20" height="16" fill="#ffffff"/>`,
-      'Q': `<rect width="60" height="40" fill="#ffd100"/>`,
+      'P': `<rect width="60" height="40" fill="#0033a0"/><rect x="20" y="12" width="20" height="16" fill="#ffffff"/>`, 'Q': `<rect width="60" height="40" fill="#ffd100"/>`,
       'R': `<rect width="60" height="40" fill="#da291c"/><rect x="25" width="10" height="40" fill="#ffd100"/><rect y="15" width="60" height="10" fill="#ffd100"/>`,
       'S': `<rect width="60" height="40" fill="#ffffff"/><rect x="20" y="12" width="20" height="16" fill="#0033a0"/>`,
       'T': `<rect width="20" height="40" fill="#da291c"/><rect x="20" width="20" height="40" fill="#ffffff"/><rect x="40" width="20" height="40" fill="#0033a0"/>`,
@@ -272,8 +286,7 @@
       'X': `<rect width="60" height="40" fill="#ffffff"/><rect x="25" width="10" height="40" fill="#0033a0"/><rect y="15" width="60" height="10" fill="#0033a0"/>`,
       'Y': `<rect width="60" height="40" fill="#da291c"/><polygon points="0,0 20,0 0,20" fill="#ffd100"/><polygon points="40,0 60,0 0,40" fill="#ffd100"/><polygon points="60,20 60,40 40,40" fill="#ffd100"/><polygon points="20,40 0,40 0,40" fill="#ffd100"/><polygon points="20,0 60,0 0,40 0,20" fill="#ffd100"/>`,
       'Z': `<polygon points="0,0 60,0 30,20" fill="#ffd100"/><polygon points="60,0 60,40 30,20" fill="#000000"/><polygon points="0,40 60,40 30,20" fill="#da291c"/><polygon points="0,0 0,40 30,20" fill="#0033a0"/>`,
-      '1': `<polygon points="0,0 60,15 60,25 0,40" fill="#ffffff"/><circle cx="20" cy="20" r="6" fill="#da291c"/>`,
-      '2': `<polygon points="0,0 60,15 60,25 0,40" fill="#0033a0"/><circle cx="20" cy="20" r="6" fill="#ffffff"/>`,
+      '1': `<polygon points="0,0 60,15 60,25 0,40" fill="#ffffff"/><circle cx="20" cy="20" r="6" fill="#da291c"/>`, '2': `<polygon points="0,0 60,15 60,25 0,40" fill="#0033a0"/><circle cx="20" cy="20" r="6" fill="#ffffff"/>`,
       '3': `<polygon points="0,0 20,5 20,35 0,40" fill="#da291c"/><polygon points="20,5 40,10 40,30 20,35" fill="#ffffff"/><polygon points="40,10 60,15 60,25 40,30" fill="#0033a0"/>`,
       '4': `<polygon points="0,0 60,15 60,25 0,40" fill="#da291c"/><line x1="16" y1="5" x2="16" y2="35" stroke="#ffffff" stroke-width="4"/><line x1="0" y1="20" x2="30" y2="20" stroke="#ffffff" stroke-width="4"/>`,
       '5': `<polygon points="0,0 30,7.5 30,32.5 0,40" fill="#ffd100"/><polygon points="30,7.5 60,15 60,25 30,32.5" fill="#0033a0"/>`,
@@ -284,28 +297,314 @@
       '0': `<polygon points="0,0 20,5 20,35 0,40" fill="#ffd100"/><polygon points="20,5 40,10 40,30 20,35" fill="#da291c"/><polygon points="40,10 60,15 60,25 40,30" fill="#ffd100"/>`
     };
 
-    function getSVG(char, w='100%', h='100%') {
-        if(!SVG_RAW[char]) return '';
-        return `<svg viewBox="0 0 60 40" width="${w}" height="${h}" style="display:block;">${SVG_RAW[char]}</svg>`;
-    }
+    function getSVG(char, w='100%', h='100%') { return SVG_RAW[char] ? `<svg viewBox="0 0 60 40" width="${w}" height="${h}" style="display:block;">${SVG_RAW[char]}</svg>` : ''; }
 
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
     const numbers = '0123456789'.split('');
     const allChars = [...letters, ...numbers];
 
     // =========================================================
-    // UI 控制
+    // LocalStorage 學習統計引擎
+    // =========================================================
+    let userStats = JSON.parse(localStorage.getItem('intercoStats')) || { total: 0, correct: 0, charMap: {} };
+    
+    function recordStat(char, isCorrect) {
+        userStats.total++;
+        if (isCorrect) userStats.correct++;
+        if (!userStats.charMap[char]) userStats.charMap[char] = { total: 0, wrong: 0 };
+        userStats.charMap[char].total++;
+        if (!isCorrect) userStats.charMap[char].wrong++;
+        localStorage.setItem('intercoStats', JSON.stringify(userStats));
+        
+        // 即時更新 Quiz 介面的計分板
+        document.getElementById('scoreCorrect').textContent = userStats.correct;
+        document.getElementById('scoreTotal').textContent = userStats.total;
+    }
+
+    function clearStats() {
+        if(confirm("確定要清除所有學習紀錄嗎？")) {
+            userStats = { total: 0, correct: 0, charMap: {} };
+            localStorage.setItem('intercoStats', JSON.stringify(userStats));
+            renderStats();
+            document.getElementById('scoreCorrect').textContent = 0;
+            document.getElementById('scoreTotal').textContent = 0;
+        }
+    }
+
+    function renderStats() {
+        document.getElementById('statTotal').textContent = userStats.total;
+        document.getElementById('statCorrect').textContent = userStats.correct;
+        const accuracy = userStats.total > 0 ? Math.round((userStats.correct / userStats.total) * 100) : 0;
+        document.getElementById('statAccuracy').textContent = `${accuracy}%`;
+
+        // 計算弱點：錯誤率高於 0 的字元，依錯誤次數排序
+        let weaks = [];
+        for (let char in userStats.charMap) {
+            let data = userStats.charMap[char];
+            if (data.wrong > 0) weaks.push({ char: char, wrong: data.wrong, rate: data.wrong/data.total });
+        }
+        weaks.sort((a, b) => b.wrong - a.wrong || b.rate - a.rate);
+        weaks = weaks.slice(0, 5); // 取 Top 5
+
+        const listDiv = document.getElementById('statWeakList');
+        if (weaks.length === 0) {
+            listDiv.innerHTML = "<div style='color:var(--text-muted);'>目前還沒有容易錯的字元，繼續保持！</div>";
+        } else {
+            listDiv.innerHTML = weaks.map(w => `<div class="weak-item">${w.char} (錯 ${w.wrong} 次)</div>`).join('');
+        }
+    }
+
+    function getSmartRandomChar(subset = allChars) {
+        // 間隔重複學習法 (Spaced Repetition)：30% 機率從常錯字元出題
+        let weaks = [];
+        for (let char in userStats.charMap) {
+            if (userStats.charMap[char].wrong > 0 && subset.includes(char)) weaks.push(char);
+        }
+        if (weaks.length > 0 && Math.random() < 0.3) {
+            return weaks[Math.floor(Math.random() * weaks.length)];
+        }
+        return subset[Math.floor(Math.random() * subset.length)];
+    }
+
+    // =========================================================
+    // 聲音引擎 (Web Audio API) + QRN 雜訊模擬
+    // =========================================================
+    let audioCtx = null;
+    let noiseSource = null;
+
+    function startNoise() {
+        if (!document.getElementById('noiseToggle').checked) return;
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let bufferSize = audioCtx.sampleRate * 2; 
+        let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        let output = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+        
+        noiseSource = audioCtx.createBufferSource();
+        noiseSource.buffer = buffer;
+        noiseSource.loop = true;
+        
+        let filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass'; filter.frequency.value = 1500; // 模擬無線電窄頻
+        
+        let gain = audioCtx.createGain();
+        gain.gain.value = 0.08; // 雜音音量
+        
+        noiseSource.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+        noiseSource.start();
+    }
+
+    function stopNoise() {
+        if (noiseSource) { noiseSource.stop(); noiseSource.disconnect(); noiseSource = null; }
+    }
+
+    function playAudio(morseStr) {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        startNoise();
+        const dot = 0.08; let offset = 0.1;
+        let totalDuration = 0.1;
+
+        for (let char of morseStr) {
+            if(char === ' ' || char === '/') { offset += dot * 3; totalDuration += dot*3; continue; }
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'sine'; osc.frequency.value = 600;
+            const duration = (char === '-') ? dot * 3 : dot;
+            const start = audioCtx.currentTime + offset; const stop = start + duration;
+            gain.gain.setValueAtTime(0, start); gain.gain.linearRampToValueAtTime(0.3, start + 0.01);
+            gain.gain.setValueAtTime(0.3, stop - 0.01); gain.gain.linearRampToValueAtTime(0, stop);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(start); osc.stop(stop);
+            offset += duration + dot; totalDuration += duration + dot;
+        }
+        setTimeout(stopNoise, totalDuration * 1000 + 300);
+    }
+
+    // =========================================================
+    // 全域快捷鍵綁定 (Hotkeys)
+    // =========================================================
+    document.addEventListener('keydown', (e) => {
+        // 若使用者正在輸入框打字，則不觸發快捷鍵
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+            if (e.key === 'Enter') {
+                if (document.getElementById('quiz').classList.contains('active')) checkQuizAnswer();
+                else if (document.getElementById('flashing').classList.contains('active')) checkLampAnswer();
+            }
+            return; 
+        }
+
+        if (document.getElementById('quiz').classList.contains('active')) {
+            if (e.key === 'ArrowRight') generateQuiz();
+            if (e.key === ' ') { e.preventDefault(); if (document.getElementById('quizMode').value === 'morse_to_letter') playAudio(DB[currentQuizTarget].morse); }
+        } else if (document.getElementById('flashing').classList.contains('active')) {
+            if (e.key === 'ArrowRight') nextLampQuestion();
+            if (e.key === ' ') { e.preventDefault(); replayLampSignal(); }
+        }
+    });
+
+    // =========================================================
+    // 燈號閃爍引擎 (Flashing Light) + 視線不良 Fog 特效
+    // =========================================================
+    let currentLampText = ""; let lampCancel = false; let isLampFlashing = false;
+    const bulb = document.getElementById('lampBulb');
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+    function toggleLampMode() { document.getElementById('lampBlockConfig').style.display = (document.querySelector('input[name="lampMode"]:checked').value === 'block') ? 'flex' : 'none'; }
+
+    function generateLampText() {
+        const mode = document.querySelector('input[name="lampMode"]:checked').value;
+        if (mode === 'single') return getSmartRandomChar();
+        const groups = parseInt(document.getElementById('lampGroups').value) || 3;
+        const chars = parseInt(document.getElementById('lampChars').value) || 5;
+        let result = [];
+        for (let i = 0; i < groups; i++) {
+            let g = ""; for (let j = 0; j < chars; j++) g += getSmartRandomChar();
+            result.push(g);
+        }
+        return result.join(' ');
+    }
+
+    async function processFlashing(text) {
+        isLampFlashing = true; lampCancel = false;
+        let currentWpm = parseInt(document.getElementById('lampWpmInput').value) || 6;
+        if (currentWpm < 1) currentWpm = 1;
+
+        const isFog = document.getElementById('fogToggle').checked;
+        const dot = 100; const dash = dot * 3; const symSpace = dot;
+        const charSpace = dot * 3 * (10 / currentWpm); const wordSpace = dot * 7 * (10 / currentWpm);
+
+        const fb = document.getElementById('lampFeedback');
+        fb.innerHTML = "<span style='color:var(--secondary);'>發送中... (請專注觀看燈號)</span>";
+        await sleep(800);
+
+        for (let i = 0; i < text.length; i++) {
+            if (lampCancel) break;
+            const char = text[i];
+            if (char === ' ') { await sleep(wordSpace - charSpace); continue; }
+            const morse = DB[char] ? DB[char].morse : '';
+            for (let j = 0; j < morse.length; j++) {
+                if (lampCancel) break;
+                bulb.className = isFog ? "lamp-bulb lit fog-mode" : "lamp-bulb lit";
+                await sleep(morse[j] === '.' ? dot : dash);
+                bulb.className = "lamp-bulb";
+                if (j < morse.length - 1) await sleep(symSpace);
+            }
+            await sleep(charSpace);
+        }
+        if (!lampCancel) fb.innerHTML = "<span style='color:var(--text-muted);'>發送完畢，請在上方輸入您辨識出的內容。</span>";
+        isLampFlashing = false;
+    }
+
+    async function nextLampQuestion() {
+        if (isLampFlashing) { stopFlashing(); await sleep(200); }
+        currentLampText = generateLampText();
+        document.getElementById('lampAnswerInput').value = ""; document.getElementById('lampFeedback').innerHTML = "";
+        processFlashing(currentLampText);
+    }
+    function replayLampSignal() { if (isLampFlashing || !currentLampText) return; document.getElementById('lampFeedback').innerHTML = ""; document.getElementById('lampAnswerInput').value = ""; processFlashing(currentLampText); }
+    function stopFlashing() { lampCancel = true; bulb.className = "lamp-bulb"; document.getElementById('lampFeedback').innerHTML = "<span style='color:var(--danger);'>已強制停止發送。</span>"; }
+
+    function checkLampAnswer() {
+        if (!currentLampText || isLampFlashing) return;
+        const ans = document.getElementById('lampAnswerInput').value.trim().toUpperCase();
+        const fb = document.getElementById('lampFeedback');
+        
+        let allCorrect = true;
+        // 為了詳細紀錄統計，拆解單字分析
+        let textNoSpace = currentLampText.replace(/\s/g, '');
+        let ansNoSpace = ans.replace(/\s/g, '');
+        
+        for (let i=0; i<textNoSpace.length; i++) {
+            let char = textNoSpace[i];
+            let userChar = ansNoSpace[i] || '';
+            let isC = (char === userChar);
+            recordStat(char, isC); // 寫入 LocalStorage
+            if (!isC) allCorrect = false;
+        }
+        
+        if (allCorrect && textNoSpace.length === ansNoSpace.length) {
+            fb.innerHTML = `<span style="color:var(--success);">✔ 完全正確！</span><br>答案: ${currentLampText}`;
+        } else {
+            fb.innerHTML = `<span style="color:var(--danger);">✘ 辨識有誤！</span><br>正確答案: <span style="color:var(--primary);">${currentLampText}</span><br>您的輸入: ${ans || '(未輸入)'}`;
+        }
+    }
+
+    // =========================================================
+    // 測驗系統 (Quiz Engine)
+    // =========================================================
+    let currentQuizTarget = ''; let hasAnswered = false;
+
+    function renderKeyboard(type) {
+        const kb = document.getElementById('vKeyboard'); kb.innerHTML = '';
+        const input = document.getElementById('quizAnswer');
+        const kbClick = (val) => { if (val === 'DEL') input.value = input.value.slice(0, -1); else if (val === 'SPACE') input.value += ' '; else input.value += val; };
+
+        if (type === 'alpha') {
+            const rows = [['1','2','3','4','5','6','7','8','9','0'],['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['Z','X','C','V','B','N','M', 'DEL']];
+            rows.forEach(r => { let div = document.createElement('div'); div.className = 'vk-row'; r.forEach(k => { let btn = document.createElement('button'); btn.className = 'vk-key' + (k==='DEL'?' special':''); btn.textContent = k; btn.onclick = () => kbClick(k); div.appendChild(btn); }); kb.appendChild(div); });
+        } else if (type === 'morse') {
+            let div = document.createElement('div'); div.className = 'vk-row';
+            let dot = document.createElement('button'); dot.className = 'vk-key'; dot.innerHTML = '<h2>.</h2>'; dot.onclick = () => kbClick('.');
+            let dash = document.createElement('button'); dash.className = 'vk-key'; dash.innerHTML = '<h2>-</h2>'; dash.onclick = () => kbClick('-');
+            let del = document.createElement('button'); del.className = 'vk-key special'; del.textContent = 'DEL'; del.onclick = () => kbClick('DEL');
+            div.append(dot, dash, del); kb.appendChild(div);
+        } else if (type === 'text') { input.removeAttribute('readonly'); input.focus(); return; }
+        input.setAttribute('readonly', true);
+    }
+
+    function generateQuiz() {
+        hasAnswered = false; document.getElementById('quizFeedback').innerHTML = '';
+        document.getElementById('selfEvalBox').style.display = 'none'; document.getElementById('quizAnswer').value = '';
+        const mode = document.getElementById('quizMode').value; const display = document.getElementById('quizDisplay');
+        currentQuizTarget = getSmartRandomChar(mode === 'letter_to_meaning' ? letters : allChars);
+
+        if (mode === 'flag_to_letter') { display.innerHTML = `<div style="width:120px;height:80px;">${getSVG(currentQuizTarget)}</div>`; renderKeyboard('alpha'); }
+        else if (mode === 'morse_to_letter') { display.innerHTML = `<div class="quiz-target-text">${DB[currentQuizTarget].morse}</div>`; playAudio(DB[currentQuizTarget].morse); renderKeyboard('alpha'); }
+        else if (mode === 'flag_to_morse') { display.innerHTML = `<div style="width:120px;height:80px;">${getSVG(currentQuizTarget)}</div>`; renderKeyboard('morse'); }
+        else if (mode === 'letter_to_meaning') { display.innerHTML = `<div class="quiz-target-text" style="font-size:4rem; color:var(--text);">${currentQuizTarget}</div>`; renderKeyboard('text'); document.getElementById('quizAnswer').placeholder = "輸入英文關鍵字 (如 diver, dangerous...)"; }
+    }
+
+    function checkQuizAnswer() {
+        if (hasAnswered) return;
+        const mode = document.getElementById('quizMode').value; const ans = document.getElementById('quizAnswer').value.trim().toUpperCase();
+        if (!ans) return; const fb = document.getElementById('quizFeedback'); let isCorrect = false; hasAnswered = true; 
+
+        if (mode === 'flag_to_letter' || mode === 'morse_to_letter') {
+            isCorrect = (ans === currentQuizTarget);
+            if(isCorrect) fb.innerHTML = `<span style="color:var(--success);">✔ 正確！是 ${currentQuizTarget} (${DB[currentQuizTarget].morse})</span>`;
+            else fb.innerHTML = `<span style="color:var(--danger);">✘ 錯誤！正確為 ${currentQuizTarget} (${DB[currentQuizTarget].morse})</span>`;
+            playAudio(DB[currentQuizTarget].morse);
+            recordStat(currentQuizTarget, isCorrect);
+        } else if (mode === 'flag_to_morse') {
+            isCorrect = (ans === DB[currentQuizTarget].morse);
+            if(isCorrect) fb.innerHTML = `<span style="color:var(--success);">✔ 正確！${currentQuizTarget} 的摩斯碼為 ${DB[currentQuizTarget].morse}</span>`;
+            else fb.innerHTML = `<span style="color:var(--danger);">✘ 錯誤！${currentQuizTarget} 的正確碼為 ${DB[currentQuizTarget].morse}</span>`;
+            playAudio(DB[currentQuizTarget].morse);
+            recordStat(currentQuizTarget, isCorrect);
+        } else if (mode === 'letter_to_meaning') {
+            const userAns = ans.toLowerCase(); const keys = DB[currentQuizTarget].keys;
+            const match = keys.filter(k => userAns.includes(k));
+            if (match.length > 0) fb.innerHTML = `<span style="color:var(--success);">✔ 偵測到關鍵字 (${match.join(', ')})</span>`;
+            else fb.innerHTML = `<span style="color:var(--danger);">⚠️ 未偵測到預設關鍵字</span>`;
+            document.getElementById('officialMeaningText').textContent = DB[currentQuizTarget].meaning;
+            document.getElementById('selfEvalBox').style.display = 'block'; return;
+        }
+    }
+
+    function resolveSelfEval(passed) {
+        const fb = document.getElementById('quizFeedback');
+        if (passed) fb.innerHTML += `<br><span style="color:var(--success);">-> 已記錄為：正確 ✔</span>`;
+        else fb.innerHTML += `<br><span style="color:var(--danger);">-> 已記錄為：錯誤 ✘</span>`;
+        recordStat(currentQuizTarget, passed);
+        document.getElementById('selfEvalBox').style.display = 'none';
+    }
+
+    // =========================================================
+    // 初始化與 UI 輔助
     // =========================================================
     function toggleTheme() {
-        const html = document.documentElement;
-        const btn = document.getElementById('themeBtn');
-        if (html.getAttribute('data-theme') === 'light') {
-            html.setAttribute('data-theme', 'dark');
-            btn.textContent = '🌞 淺色';
-        } else {
-            html.setAttribute('data-theme', 'light');
-            btn.textContent = '🌙 深色';
-        }
+        const html = document.documentElement; const btn = document.getElementById('themeBtn');
+        if (html.getAttribute('data-theme') === 'light') { html.setAttribute('data-theme', 'dark'); btn.textContent = '🌞 淺色'; } 
+        else { html.setAttribute('data-theme', 'light'); btn.textContent = '🌙 深色'; }
     }
 
     function switchTab(id) {
@@ -316,245 +615,14 @@
         document.getElementById(id).classList.add('active');
     }
 
-    function initLookup() {
-        const gridL = document.getElementById('flagGridLetters');
-        const gridN = document.getElementById('flagGridNumbers');
+    window.onload = () => {
+        const gridL = document.getElementById('flagGridLetters'); const gridN = document.getElementById('flagGridNumbers');
         letters.forEach(c => { gridL.innerHTML += `<div class="flag-card" onclick="playAudio('${DB[c].morse}')" title="播放音效"><div class="flag-svg-box">${getSVG(c)}</div><div class="flag-letter">${c}</div><div class="flag-morse">${DB[c].morse}</div></div>`; });
         numbers.forEach(c => { gridN.innerHTML += `<div class="flag-card" onclick="playAudio('${DB[c].morse}')" title="播放音效"><div class="flag-svg-box">${getSVG(c)}</div><div class="flag-letter">${c}</div><div class="flag-morse">${DB[c].morse}</div></div>`; });
-
-        document.getElementById('studyContentContainer').innerHTML = `
-            <div class="study-module">
-                <div class="study-header">國際通訊信號 (單字母含意)</div>
-                <div class="study-body">
-                    <table class="study-table">
-                        <thead><tr><th>代號</th><th>摩斯密碼</th><th>官方含意 (INTERCO)</th></tr></thead>
-                        <tbody>${letters.map(c => `<tr><td><strong>${c}</strong></td><td><code style="color:var(--primary); font-weight:bold;">${DB[c].morse}</code></td><td>${DB[c].meaning}</td></tr>`).join('')}</tbody>
-                    </table>
-                </div>
-            </div>`;
-    }
-
-    // =========================================================
-    // 燈號閃爍引擎 (Flashing Light)
-    // =========================================================
-    let currentLampText = "";
-    let lampCancel = false;
-    let isLampFlashing = false;
-    const bulb = document.getElementById('lampBulb');
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-    function toggleLampMode() {
-        const mode = document.querySelector('input[name="lampMode"]:checked').value;
-        document.getElementById('lampBlockConfig').style.display = (mode === 'block') ? 'flex' : 'none';
-    }
-
-    function generateLampText() {
-        const mode = document.querySelector('input[name="lampMode"]:checked').value;
-        if (mode === 'single') {
-            return allChars[Math.floor(Math.random() * allChars.length)];
-        } else {
-            const groups = parseInt(document.getElementById('lampGroups').value) || 3;
-            const chars = parseInt(document.getElementById('lampChars').value) || 5;
-            let result = [];
-            for (let i = 0; i < groups; i++) {
-                let g = "";
-                for (let j = 0; j < chars; j++) {
-                    g += allChars[Math.floor(Math.random() * allChars.length)];
-                }
-                result.push(g);
-            }
-            return result.join(' ');
-        }
-    }
-
-    async function processFlashing(text) {
-        isLampFlashing = true;
-        lampCancel = false;
-        
-        let currentWpm = parseInt(document.getElementById('lampWpmInput').value) || 6;
-        if (currentWpm < 1) currentWpm = 1;
-
-        const dot = 100; 
-        const dash = dot * 3;
-        const symSpace = dot;
-        const charSpace = dot * 3 * (10 / currentWpm); 
-        const wordSpace = dot * 7 * (10 / currentWpm);
-
-        const fb = document.getElementById('lampFeedback');
-        fb.innerHTML = "<span style='color:var(--secondary);'>發送中... (請專注觀看燈號)</span>";
-        await sleep(800);
-
-        for (let i = 0; i < text.length; i++) {
-            if (lampCancel) break;
-            const char = text[i];
-            
-            if (char === ' ') {
-                await sleep(wordSpace - charSpace);
-                continue;
-            }
-
-            const morse = DB[char] ? DB[char].morse : '';
-            for (let j = 0; j < morse.length; j++) {
-                if (lampCancel) break;
-                bulb.classList.add('lit');
-                await sleep(morse[j] === '.' ? dot : dash);
-                bulb.classList.remove('lit');
-                if (j < morse.length - 1) await sleep(symSpace);
-            }
-            await sleep(charSpace);
-        }
-        
-        if (!lampCancel) {
-            fb.innerHTML = "<span style='color:var(--text-muted);'>發送完畢，請在上方輸入您辨識出的內容。</span>";
-        }
-        isLampFlashing = false;
-    }
-
-    async function nextLampQuestion() {
-        if (isLampFlashing) { stopFlashing(); await sleep(200); }
-        currentLampText = generateLampText();
-        document.getElementById('lampAnswerInput').value = "";
-        document.getElementById('lampFeedback').innerHTML = "";
-        processFlashing(currentLampText);
-    }
-
-    function replayLampSignal() {
-        if (isLampFlashing || !currentLampText) return;
-        document.getElementById('lampFeedback').innerHTML = "";
-        document.getElementById('lampAnswerInput').value = "";
-        processFlashing(currentLampText);
-    }
-
-    function stopFlashing() {
-        lampCancel = true;
-        bulb.classList.remove('lit');
-        document.getElementById('lampFeedback').innerHTML = "<span style='color:var(--danger);'>已強制停止發送。</span>";
-    }
-
-    function checkLampAnswer() {
-        if (!currentLampText) return;
-        if (isLampFlashing) {
-            document.getElementById('lampFeedback').innerHTML = "<span style='color:var(--danger);'>請等待發送完畢再核對答案！</span>";
-            return;
-        }
-
-        const ans = document.getElementById('lampAnswerInput').value.trim().toUpperCase();
-        const fb = document.getElementById('lampFeedback');
-        
-        if (ans === currentLampText) {
-            fb.innerHTML = `<span style="color:var(--success);">✔ 完全正確！</span><br>正確答案正是: ${currentLampText}`;
-        } else {
-            fb.innerHTML = `<span style="color:var(--danger);">✘ 辨識錯誤！</span><br>正確答案為: <span style="color:var(--primary);">${currentLampText}</span><br>您的輸入為: ${ans || '(未輸入)'}`;
-        }
-    }
-
-    document.getElementById('lampAnswerInput').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') checkLampAnswer();
-    });
-
-    // =========================================================
-    // 聲音引擎 (Web Audio API)
-    // =========================================================
-    let audioCtx = null;
-    function playAudio(morseStr) {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const dot = 0.08; let offset = 0.05;
-        for (let char of morseStr) {
-            if(char === ' ' || char === '/') { offset += dot * 3; continue; }
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.type = 'sine'; osc.frequency.value = 600;
-            const duration = (char === '-') ? dot * 3 : dot;
-            const start = audioCtx.currentTime + offset; const stop = start + duration;
-            gain.gain.setValueAtTime(0, start); gain.gain.linearRampToValueAtTime(0.3, start + 0.01);
-            gain.gain.setValueAtTime(0.3, stop - 0.01); gain.gain.linearRampToValueAtTime(0, stop);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(start); osc.stop(stop);
-            offset += duration + dot; 
-        }
-    }
-
-    // =========================================================
-    // 測驗系統 (Quiz Engine)
-    // =========================================================
-    let currentQuizTarget = ''; let hasAnswered = false; let quizScore = 0; let quizTotal = 0;
-
-    function renderKeyboard(type) {
-        const kb = document.getElementById('vKeyboard'); kb.innerHTML = '';
-        const input = document.getElementById('quizAnswer');
-        const kbClick = (val) => { if (val === 'DEL') input.value = input.value.slice(0, -1); else if (val === 'SPACE') input.value += ' '; else input.value += val; };
-
-        if (type === 'alpha') {
-            const rows = [['1','2','3','4','5','6','7','8','9','0'],['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['Z','X','C','V','B','N','M', 'DEL']];
-            rows.forEach(r => {
-                let div = document.createElement('div'); div.className = 'vk-row';
-                r.forEach(k => { let btn = document.createElement('button'); btn.className = 'vk-key' + (k==='DEL'?' special':''); btn.textContent = k; btn.onclick = () => kbClick(k); div.appendChild(btn); });
-                kb.appendChild(div);
-            });
-        } else if (type === 'morse') {
-            let div = document.createElement('div'); div.className = 'vk-row';
-            let dot = document.createElement('button'); dot.className = 'vk-key'; dot.innerHTML = '<h2>.</h2>'; dot.onclick = () => kbClick('.');
-            let dash = document.createElement('button'); dash.className = 'vk-key'; dash.innerHTML = '<h2>-</h2>'; dash.onclick = () => kbClick('-');
-            let del = document.createElement('button'); del.className = 'vk-key special'; del.textContent = 'DEL'; del.onclick = () => kbClick('DEL');
-            div.append(dot, dash, del); kb.appendChild(div);
-        } else if (type === 'text') {
-            input.removeAttribute('readonly'); input.focus(); return; 
-        }
-        input.setAttribute('readonly', true);
-    }
-
-    function generateQuiz() {
-        hasAnswered = false; document.getElementById('quizFeedback').innerHTML = '';
-        document.getElementById('selfEvalBox').style.display = 'none'; document.getElementById('quizAnswer').value = '';
-        const mode = document.getElementById('quizMode').value; const display = document.getElementById('quizDisplay');
-        currentQuizTarget = allChars[Math.floor(Math.random() * allChars.length)];
-
-        if (mode === 'flag_to_letter') { display.innerHTML = `<div style="width:120px;height:80px;">${getSVG(currentQuizTarget)}</div>`; renderKeyboard('alpha'); }
-        else if (mode === 'morse_to_letter') { display.innerHTML = `<div class="quiz-target-text">${DB[currentQuizTarget].morse}</div>`; playAudio(DB[currentQuizTarget].morse); renderKeyboard('alpha'); }
-        else if (mode === 'flag_to_morse') { display.innerHTML = `<div style="width:120px;height:80px;">${getSVG(currentQuizTarget)}</div>`; renderKeyboard('morse'); }
-        else if (mode === 'letter_to_meaning') {
-            currentQuizTarget = letters[Math.floor(Math.random() * letters.length)];
-            display.innerHTML = `<div class="quiz-target-text" style="font-size:4rem; color:var(--text);">${currentQuizTarget}</div>`;
-            renderKeyboard('text'); document.getElementById('quizAnswer').placeholder = "輸入英文關鍵字 (例如 diver, dangerous, yes...)";
-        }
-    }
-
-    function checkQuizAnswer() {
-        if (hasAnswered) return;
-        const mode = document.getElementById('quizMode').value; const ans = document.getElementById('quizAnswer').value.trim().toUpperCase();
-        if (!ans) return; const fb = document.getElementById('quizFeedback'); let isCorrect = false; hasAnswered = true; quizTotal++;
-
-        if (mode === 'flag_to_letter' || mode === 'morse_to_letter') {
-            isCorrect = (ans === currentQuizTarget);
-            if(isCorrect) fb.innerHTML = `<span style="color:var(--success);">✔ 正確！是 ${currentQuizTarget} (${DB[currentQuizTarget].morse})</span>`;
-            else fb.innerHTML = `<span style="color:var(--danger);">✘ 錯誤！正確為 ${currentQuizTarget} (${DB[currentQuizTarget].morse})</span>`;
-            playAudio(DB[currentQuizTarget].morse);
-        } else if (mode === 'flag_to_morse') {
-            isCorrect = (ans === DB[currentQuizTarget].morse);
-            if(isCorrect) fb.innerHTML = `<span style="color:var(--success);">✔ 正確！${currentQuizTarget} 的摩斯碼為 ${DB[currentQuizTarget].morse}</span>`;
-            else fb.innerHTML = `<span style="color:var(--danger);">✘ 錯誤！${currentQuizTarget} 的正確碼為 ${DB[currentQuizTarget].morse}</span>`;
-            playAudio(DB[currentQuizTarget].morse);
-        } else if (mode === 'letter_to_meaning') {
-            quizTotal--; const userAns = ans.toLowerCase(); const keys = DB[currentQuizTarget].keys;
-            const match = keys.filter(k => userAns.includes(k));
-            if (match.length > 0) fb.innerHTML = `<span style="color:var(--success);">✔ 偵測到關鍵字 (${match.join(', ')})</span>`;
-            else fb.innerHTML = `<span style="color:var(--danger);">⚠️ 未偵測到預設關鍵字</span>`;
-            document.getElementById('officialMeaningText').textContent = DB[currentQuizTarget].meaning;
-            document.getElementById('selfEvalBox').style.display = 'block'; return;
-        }
-        if (isCorrect) quizScore++; updateScoreBoard();
-    }
-
-    function resolveSelfEval(passed) {
-        quizTotal++; const fb = document.getElementById('quizFeedback');
-        if (passed) { quizScore++; fb.innerHTML += `<br><span style="color:var(--success);">-> 已記錄為：正確 ✔</span>`; }
-        else { fb.innerHTML += `<br><span style="color:var(--danger);">-> 已記錄為：錯誤 ✘</span>`; }
-        document.getElementById('selfEvalBox').style.display = 'none'; updateScoreBoard();
-    }
-
-    function updateScoreBoard() { document.getElementById('scoreCorrect').textContent = quizScore; document.getElementById('scoreTotal').textContent = quizTotal; }
-
-    document.getElementById('quizAnswer').addEventListener('keydown', (e) => { if (e.key === 'Enter') checkQuizAnswer(); });
-    window.onload = () => { initLookup(); generateQuiz(); };
+        document.getElementById('scoreCorrect').textContent = userStats.correct;
+        document.getElementById('scoreTotal').textContent = userStats.total;
+        generateQuiz();
+    };
 </script>
 </body>
 </html>
