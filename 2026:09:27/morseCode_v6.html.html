@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>INTERCO 海事通訊與摩斯密碼訓練器 v6</title>
+    <style>
+        /* CSS 變數定義：支援深淺色主題 */
+        :root[data-theme="light"] {
+            --primary: #1e3a8a;
+            --secondary: #0ea5e9;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #475569;
+            --border: #cbd5e1;
+            --tab-bg: #f1f5f9;
+            --lamp-bg: #e2e8f0;
+            --lamp-off: #cbd5e1;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --keyboard-bg: #e2e8f0;
+            --key-bg: #ffffff;
+        }
+
+        :root[data-theme="dark"] {
+            --primary: #3b82f6;
+            --secondary: #38bdf8;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --tab-bg: #0f172a;
+            --lamp-bg: #0f172a;
+            --lamp-off: #1e293b;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --keyboard-bg: #334155;
+            --key-bg: #475569;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: #fff;
+            padding: 15px 20px;
+            text-align: center;
+            position: relative;
+        }
+        header h1 { font-size: 1.5rem; margin-bottom: 5px; }
+        header p { font-size: 0.9rem; opacity: 0.8; }
+
+        /* 主題切換按鈕 */
+        .theme-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+        .theme-toggle:hover { background: rgba(255,255,255,0.3); }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            background-color: var(--tab-bg);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px 15px;
+            text-align: center;
+            background: none;
+            border: none;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: 0.2s;
+            font-size: 0.95rem;
+            min-width: 100px;
+        }
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background-color: var(--card-bg);
+        }
+
+        .tab-content { display: none; padding: 20px; overflow-y: auto; flex-grow: 1; }
+        .tab-content.active { display: block; }
+
+        /* ================= 旗幟網格 (Lookup) ================= */
+        .flag-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 12px;
+        }
+        .flag-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            background: var(--card-bg);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .flag-card:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .flag-svg-box {
+            display: inline-flex; align-items: center; justify-content: center;
+            border: 1px solid var(--text-muted); border-radius: 4px; overflow: hidden;
+            margin-bottom: 5px; width: 60px; height: 40px; background: #fff;
+        }
+        .flag-letter { font-size: 1.1rem; font-weight: bold; }
+        .flag-morse { font-family: monospace; color: var(--primary); font-weight: bold; }
+
+        /* ================= 燈號訓練區 (Flashing Light) ================= */
+        .lamp-container {
+            display: flex; flex-direction: column; align-items: center;
+            padding: 20px; background: var(--lamp-bg); border-radius: 10px; border: 1px solid var(--border);
+        }
+        .lamp-box {
+            width: 140px; height: 140px;
+            background-color: var(--lamp-off); border: 6px solid var(--text-muted);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            margin-bottom: 20px; box-shadow: inset 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .lamp-bulb {
+            width: 90px; height: 90px;
+            background-color: rgba(255,255,255,0.1); border-radius: 50%;
+            transition: background-color 0.03s, box-shadow 0.03s;
+        }
+        .lamp-bulb.lit {
+            background-color: #ffff33;
+            box-shadow: 0 0 40px 10px #ffff33, inset 0 0 20px #fff;
+        }
+        .control-panel {
+            width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 10px;
+        }
+        .btn-row { display: flex; gap: 10px; width: 100%; }
+        button.action-btn {
+            flex: 1; padding: 10px 15px; background-color: var(--primary); color: #fff;
+            border: none; border-radius: 6px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
+        button.action-btn:hover { filter: brightness(1.1); }
+        button.btn-danger { background-color: var(--danger); }
+        button.btn-success { background-color: var(--success); }
+        
+        .wpm-slider { display: flex; align-items: center; justify-content: space-between; font-weight: bold; }
+        .wpm-slider input { flex-grow: 1; margin: 0 15px; }
+
+        /* ================= 測驗區 (Quiz) 與 虛擬鍵盤 ================= */
+        .quiz-wrapper { max-width: 500px; margin: 0 auto; text-align: center; }
+        .score-board {
+            display: flex; justify-content: space-between; padding: 8px 15px;
+            background: var(--tab-bg); border-radius: 6px; font-weight: bold; margin-bottom: 15px;
+        }
+        .quiz-target-display {
+            min-height: 120px; display: flex; justify-content: center; align-items: center;
+            margin: 15px 0; background: var(--lamp-bg); border-radius: 8px; border: 1px solid var(--border);
+        }
+        .quiz-target-text { font-size: 3rem; font-family: monospace; color: var(--primary); letter-spacing: 5px; font-weight: bold;}
+        
+        .quiz-input-area { margin-bottom: 15px; }
+        select, input[type="text"] {
+            width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px;
+            font-size: 1rem; background: var(--card-bg); color: var(--text); margin-bottom: 10px;
+        }
+        #quizAnswer { font-size: 1.5rem; text-align: center; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;}
+        
+        .feedback-area { min-height: 50px; margin: 15px 0; font-weight: bold; font-size: 1.1rem; line-height: 1.4; }
+        
+        /* 虛擬鍵盤 */
+        .virtual-keyboard {
+            background: var(--keyboard-bg); padding: 10px; border-radius: 8px;
+            display: flex; flex-direction: column; gap: 5px; margin-top: 15px;
+        }
+        .vk-row { display: flex; justify-content: center; gap: 5px; }
+        .vk-key {
+            background: var(--key-bg); color: var(--text); border: 1px solid var(--border);
+            border-radius: 4px; padding: 10px 0; font-weight: bold; font-size: 1.1rem;
+            cursor: pointer; flex: 1; max-width: 45px; text-align: center; box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+        }
+        .vk-key:active { transform: translateY(2px); box-shadow: none; }
+        .vk-key.special { max-width: 65px; background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* ================= Study Center ================= */
+        .study-module {
+            border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; overflow: hidden;
+        }
+        .study-header { background: var(--primary); color: white; padding: 12px 15px; font-weight: bold; }
+        .study-body { padding: 15px; }
+        .study-table { width: 100%; border-collapse: collapse; }
+        .study-table th, .study-table td { border: 1px solid var(--border); padding: 8px; text-align: left; }
+        .study-table th { background: var(--tab-bg); }
+
+        /* ================= 自我評估區 ================= */
+        .self-eval-box {
+            display: none; background: var(--tab-bg); border: 1px dashed var(--secondary);
+            border-radius: 6px; padding: 10px; margin-top: 10px;
+        }
+        .official-meaning { color: var(--secondary); font-style: italic; margin-bottom: 10px; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>INTERCO 海事通訊模擬器</h1>
+        <p>Flags, Morse Code & Communications</p>
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 深色</button>
+    </header>
+
+    <nav class="tabs">
+        <button class="tab-btn active" onclick="switchTab('lookup')">旗幟圖鑑</button>
+        <button class="tab-btn" onclick="switchTab('flashing')">燈號訓練</button>
+        <button class="tab-btn" onclick="switchTab('quiz')">綜合測驗</button>
+        <button class="tab-btn" onclick="switchTab('study')">研讀中心</button>
+    </nav>
+
+    <!-- 1. 旗幟圖鑑 Lookup -->
+    <section id="lookup" class="tab-content active">
+        <h3 style="margin-bottom:10px; color:var(--text-muted);">字母旗 (A-Z)</h3>
+        <div class="flag-grid" id="flagGridLetters"></div>
+        <h3 style="margin:20px 0 10px; color:var(--text-muted);">數字旗 (0-9)</h3>
+        <div class="flag-grid" id="flagGridNumbers"></div>
+    </section>
+
+    <!-- 2. 燈號訓練 Flashing Light -->
+    <section id="flashing" class="tab-content">
+        <div class="lamp-container">
+            <div class="lamp-box"><div id="lampBulb" class="lamp-bulb"></div></div>
+            
+            <div class="control-panel">
+                <div class="wpm-slider">
+                    速度: <span id="wpmDisplay">6</span> WPM
+                    <input type="range" id="wpmSlider" min="3" max="15" step="1" value="6" oninput="updateWpm(this.value)">
+                </div>
+                
+                <input type="text" id="lampTextInput" placeholder="輸入要發送的英數字 (留空則隨機)" autocapitalize="characters">
+                
+                <div class="btn-row">
+                    <button class="action-btn btn-success" onclick="startFlashing()">開始發送</button>
+                    <button class="action-btn btn-danger" onclick="stopFlashing()">強制停止</button>
+                </div>
+                <div id="lampCurrentText" style="text-align:center; font-family:monospace; font-size:1.2rem; color:var(--secondary); min-height: 25px;"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. 綜合測驗 Quiz -->
+    <section id="quiz" class="tab-content">
+        <div class="quiz-wrapper">
+            <div class="score-board">
+                <span>答對: <span id="scoreCorrect" style="color:var(--success);">0</span></span>
+                <span>總題數: <span id="scoreTotal">0</span></span>
+            </div>
+
+            <div style="text-align: left; margin-bottom: 10px;">
+                <label><strong>測驗模式：</strong></label>
+                <select id="quizMode" onchange="generateQuiz()">
+                    <option value="flag_to_letter">看旗幟 ➔ 猜字母/數字</option>
+                    <option value="morse_to_letter">看摩斯 ➔ 猜字母/數字</option>
+                    <option value="flag_to_morse">看旗幟 ➔ 猜摩斯密碼</option>
+                    <option value="letter_to_meaning">看字母 ➔ 官方含意 (Meaning)</option>
+                </select>
+            </div>
+
+            <div class="quiz-target-display" id="quizDisplay">
+                <!-- 題目顯示區 (SVG 或 摩斯密碼 或 字母) -->
+            </div>
+
+            <div class="quiz-input-area">
+                <input type="text" id="quizAnswer" placeholder="請輸入答案..." readonly>
+                <div class="btn-row">
+                    <button class="action-btn btn-success" onclick="checkAnswer()">核對答案 (Enter)</button>
+                    <button class="action-btn" onclick="generateQuiz()">跳過 / 下一題</button>
+                </div>
+            </div>
+
+            <div class="feedback-area" id="quizFeedback"></div>
+
+            <!-- 含意測驗自我評估區 -->
+            <div class="self-eval-box" id="selfEvalBox">
+                <div style="font-size:0.9rem; margin-bottom:5px;">標準含意參考：</div>
+                <div class="official-meaning" id="officialMeaningText"></div>
+                <div class="btn-row">
+                    <button class="action-btn btn-success" onclick="resolveSelfEval(true)">算我對 (+1)</button>
+                    <button class="action-btn btn-danger" onclick="resolveSelfEval(false)">算我錯</button>
+                </div>
+            </div>
+
+            <!-- 虛擬鍵盤 (會根據模式動態切換) -->
+            <div class="virtual-keyboard" id="vKeyboard"></div>
+        </div>
+    </section>
+
+    <!-- 4. 研讀中心 Study Center -->
+    <section id="study" class="tab-content">
+        <div id="studyContentContainer"></div>
+    </section>
+
+</div>
+
+<script>
+    // =========================================================
+    // 核心資料庫 (Database)
+    // =========================================================
+    const DB = {
+        'A': { morse: '.-', meaning: 'I have a diver down; keep well clear at slow speed.', keys: ['diver', 'down', 'slow'] },
+        'B': { morse: '-...', meaning: 'I am taking in, discharging, or carrying dangerous goods.', keys: ['dangerous', 'goods'] },
+        'C': { morse: '-.-.', meaning: 'Yes (Affirmative).', keys: ['yes', 'affirmative'] },
+        'D': { morse: '-..', meaning: 'Keep clear of me; I am manoeuvring with difficulty.', keys: ['manoeuvring', 'difficulty', 'clear'] },
+        'E': { morse: '.', meaning: 'I am altering my course to starboard.', keys: ['starboard'] },
+        'F': { morse: '..-.', meaning: 'I am disabled; communicate with me.', keys: ['disabled', 'communicate'] },
+        'G': { morse: '--.', meaning: 'I require a pilot. (Fishing: hauling nets)', keys: ['pilot'] },
+        'H': { morse: '....', meaning: 'I have a pilot on board.', keys: ['pilot', 'board'] },
+        'I': { morse: '..', meaning: 'I am altering my course to port.', keys: ['port'] },
+        'J': { morse: '.---', meaning: 'I am on fire and have dangerous cargo; keep clear.', keys: ['fire', 'dangerous'] },
+        'K': { morse: '-.-', meaning: 'I wish to communicate with you.', keys: ['communicate'] },
+        'L': { morse: '.-..', meaning: 'You should stop your vessel instantly.', keys: ['stop', 'instantly'] },
+        'M': { morse: '--', meaning: 'My vessel is stopped and making no way through water.', keys: ['stopped'] },
+        'N': { morse: '-.', meaning: 'No (Negative).', keys: ['no', 'negative'] },
+        'O': { morse: '---', meaning: 'Man overboard.', keys: ['overboard'] },
+        'P': { morse: '.--.', meaning: 'All persons report on board; proceeding to sea.', keys: ['report', 'board', 'sea'] },
+        'Q': { morse: '--.-', meaning: 'My vessel is healthy and request free pratique.', keys: ['healthy', 'pratique'] },
+        'R': { morse: '.-.', meaning: '(No single-letter meaning in INTERCO)', keys: ['none', 'no meaning'] },
+        'S': { morse: '...', meaning: 'I am operating astern propulsion.', keys: ['astern', 'propulsion'] },
+        'T': { morse: '-', meaning: 'Keep clear of me; engaged in pair trawling.', keys: ['trawling'] },
+        'U': { morse: '..-', meaning: 'You are running into danger.', keys: ['danger'] },
+        'V': { morse: '...-', meaning: 'I require assistance.', keys: ['assistance'] },
+        'W': { morse: '.--', meaning: 'I require medical assistance.', keys: ['medical'] },
+        'X': { morse: '-..-', meaning: 'Stop carrying out your intentions and watch my signals.', keys: ['stop', 'intentions', 'watch'] },
+        'Y': { morse: '-.--', meaning: 'I am dragging my anchor.', keys: ['dragging', 'anchor'] },
+        'Z': { morse: '--..', meaning: 'I require a tug. (Fishing: shooting nets)', keys: ['tug'] },
+        '1': { morse: '.----', meaning: 'Numeral 1', keys:['1'] }, '2': { morse: '..---', meaning: 'Numeral 2', keys:['2'] },
+        '3': { morse: '...--', meaning: 'Numeral 3', keys:['3'] }, '4': { morse: '....-', meaning: 'Numeral 4', keys:['4'] },
+        '5': { morse: '.....', meaning: 'Numeral 5', keys:['5'] }, '6': { morse: '-....', meaning: 'Numeral 6', keys:['6'] },
+        '7': { morse: '--...', meaning: 'Numeral 7', keys:['7'] }, '8': { morse: '---..', meaning: 'Numeral 8', keys:['8'] },
+        '9': { morse: '----.', meaning: 'Numeral 9', keys:['9'] }, '0': { morse: '-----', meaning: 'Numeral 0', keys:['0'] }
+    };
+
+    const SVG_RAW = {
+      'A': `<polygon points="0,0 60,0 45,20 60,40 0,40" fill="#ffffff"/><polygon points="30,0 60,0 45,20 60,40 30,40" fill="#0033a0"/>`,
+      'B': `<polygon points="0,0 60,0 45,20 60,40 0,40" fill="#da291c"/>`,
+      'C': `<rect width="60" height="8" fill="#0033a0"/><rect y="8" width="60" height="8" fill="#ffffff"/><rect y="16" width="60" height="8" fill="#da291c"/><rect y="24" width="60" height="8" fill="#ffffff"/><rect y="32" width="60" height="8" fill="#0033a0"/>`,
+      'D': `<rect width="60" height="10" fill="#ffd100"/><rect y="10" width="60" height="20" fill="#0033a0"/><rect y="30" width="60" height="10" fill="#ffd100"/>`,
+      'E': `<rect width="60" height="20" fill="#0033a0"/><rect y="20" width="60" height="20" fill="#da291c"/>`,
+      'F': `<rect width="60" height="40" fill="#ffffff"/><polygon points="30,5 55,20 30,35 5,20" fill="#da291c"/>`,
+      'G': `<rect width="10" height="40" fill="#ffd100"/><rect x="10" width="10" height="40" fill="#0033a0"/><rect x="20" width="10" height="40" fill="#ffd100"/><rect x="30" width="10" height="40" fill="#0033a0"/><rect x="40" width="10" height="40" fill="#ffd100"/><rect x="50" width="10" height="40" fill="#0033a0"/>`,
+      'H': `<rect width="30" height="40" fill="#ffffff"/><rect x="30" width="30" height="40" fill="#da291c"/>`,
+      'I': `<rect width="60" height="40" fill="#ffd100"/><circle cx="30" cy="20" r="10" fill="#000000"/>`,
+      'J': `<rect width="60" height="13.3" fill="#0033a0"/><rect y="13.3" width="60" height="13.3" fill="#ffffff"/><rect y="26.6" width="60" height="13.4" fill="#0033a0"/>`,
+      'K': `<rect width="30" height="40" fill="#ffd100"/><rect x="30" width="30" height="40" fill="#0033a0"/>`,
+      'L': `<rect width="30" height="20" fill="#ffd100"/><rect x="30" width="30" height="20" fill="#000000"/><rect y="20" width="30" height="20" fill="#000000"/><rect x="30" y="20" width="30" height="20" fill="#ffd100"/>`,
+      'M': `<rect width="60" height="40" fill="#0033a0"/><line x1="0" y1="0" x2="60" y2="40" stroke="#ffffff" stroke-width="8"/><line x1="60" y1="0" x2="0" y2="40" stroke="#ffffff" stroke-width="8"/>`,
+      'N': `<rect width="60" height="40" fill="#ffffff"/><rect width="15" height="10" fill="#0033a0"/><rect x="30" width="15" height="10" fill="#0033a0"/><rect x="15" y="10" width="15" height="10" fill="#0033a0"/><rect x="45" y="10" width="15" height="10" fill="#0033a0"/><rect y="20" width="15" height="10" fill="#0033a0"/><rect x="30" y="20" width="15" height="10" fill="#0033a0"/><rect x="15" y="30" width="15" height="10" fill="#0033a0"/><rect x="45" y="30" width="15" height="10" fill="#0033a0"/>`,
+      'O': `<polygon points="0,0 60,40 0,40" fill="#da291c"/><polygon points="0,0 60,0 60,40" fill="#ffd100"/>`,
+      'P': `<rect width="60" height="40" fill="#0033a0"/><rect x="20" y="12" width="20" height="16" fill="#ffffff"/>`,
+      'Q': `<rect width="60" height="40" fill="#ffd100"/>`,
+      'R': `<rect width="60" height="40" fill="#da291c"/><rect x="25" width="10" height="40" fill="#ffd100"/><rect y="15" width="60" height="10" fill="#ffd100"/>`,
+      'S': `<rect width="60" height="40" fill="#ffffff"/><rect x="20" y="12" width="20" height="16" fill="#0033a0"/>`,
+      'T': `<rect width="20" height="40" fill="#da291c"/><rect x="20" width="20" height="40" fill="#ffffff"/><rect x="40" width="20" height="40" fill="#0033a0"/>`,
+      'U': `<rect width="30" height="20" fill="#da291c"/><rect x="30" width="30" height="20" fill="#ffffff"/><rect y="20" width="30" height="20" fill="#ffffff"/><rect x="30" y="20" width="30" height="20" fill="#da291c"/>`,
+      'V': `<rect width="60" height="40" fill="#ffffff"/><line x1="0" y1="0" x2="60" y2="40" stroke="#da291c" stroke-width="8"/><line x1="60" y1="0" x2="0" y2="40" stroke="#da291c" stroke-width="8"/>`,
+      'W': `<rect width="60" height="40" fill="#0033a0"/><rect x="10" y="7" width="40" height="26" fill="#ffffff"/><rect x="20" y="14" width="20" height="12" fill="#da291c"/>`,
+      'X': `<rect width="60" height="40" fill="#ffffff"/><rect x="25" width="10" height="40" fill="#0033a0"/><rect y="15" width="60" height="10" fill="#0033a0"/>`,
+      'Y': `<rect width="60" height="40" fill="#da291c"/><polygon points="0,0 20,0 0,20" fill="#ffd100"/><polygon points="40,0 60,0 0,40" fill="#ffd100"/><polygon points="60,20 60,40 40,40" fill="#ffd100"/><polygon points="20,40 0,40 0,40" fill="#ffd100"/><polygon points="20,0 60,0 0,40 0,20" fill="#ffd100"/>`,
+      'Z': `<polygon points="0,0 60,0 30,20" fill="#ffd100"/><polygon points="60,0 60,40 30,20" fill="#000000"/><polygon points="0,40 60,40 30,20" fill="#da291c"/><polygon points="0,0 0,40 30,20" fill="#0033a0"/>`,
+      '1': `<polygon points="0,0 60,15 60,25 0,40" fill="#ffffff"/><circle cx="20" cy="20" r="6" fill="#da291c"/>`,
+      '2': `<polygon points="0,0 60,15 60,25 0,40" fill="#0033a0"/><circle cx="20" cy="20" r="6" fill="#ffffff"/>`,
+      '3': `<polygon points="0,0 20,5 20,35 0,40" fill="#da291c"/><polygon points="20,5 40,10 40,30 20,35" fill="#ffffff"/><polygon points="40,10 60,15 60,25 40,30" fill="#0033a0"/>`,
+      '4': `<polygon points="0,0 60,15 60,25 0,40" fill="#da291c"/><line x1="16" y1="5" x2="16" y2="35" stroke="#ffffff" stroke-width="4"/><line x1="0" y1="20" x2="30" y2="20" stroke="#ffffff" stroke-width="4"/>`,
+      '5': `<polygon points="0,0 30,7.5 30,32.5 0,40" fill="#ffd100"/><polygon points="30,7.5 60,15 60,25 30,32.5" fill="#0033a0"/>`,
+      '6': `<polygon points="0,0 60,15 60,20 0,20" fill="#000000"/><polygon points="0,20 60,20 60,25 0,40" fill="#ffffff"/>`,
+      '7': `<polygon points="0,0 60,15 60,20 0,20" fill="#ffd100"/><polygon points="0,20 60,20 60,25 0,40" fill="#da291c"/>`,
+      '8': `<polygon points="0,0 60,15 60,25 0,40" fill="#ffffff"/><line x1="16" y1="5" x2="16" y2="35" stroke="#da291c" stroke-width="4"/><line x1="0" y1="20" x2="30" y2="20" stroke="#da291c" stroke-width="4"/>`,
+      '9': `<polygon points="0,0 25,6 25,20 0,20" fill="#ffffff"/><polygon points="25,6 60,15 60,20 25,20" fill="#000000"/><polygon points="0,20 25,20 25,34 0,40" fill="#000000"/><polygon points="25,20 60,20 60,25 25,34" fill="#ffffff"/>`,
+      '0': `<polygon points="0,0 20,5 20,35 0,40" fill="#ffd100"/><polygon points="20,5 40,10 40,30 20,35" fill="#da291c"/><polygon points="40,10 60,15 60,25 40,30" fill="#ffd100"/>`
+    };
+
+    function getSVG(char, w='100%', h='100%') {
+        if(!SVG_RAW[char]) return '';
+        return `<svg viewBox="0 0 60 40" width="${w}" height="${h}" style="display:block;">${SVG_RAW[char]}</svg>`;
+    }
+
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    const numbers = '0123456789'.split('');
+    const allChars = [...letters, ...numbers];
+
+    // =========================================================
+    // UI 控制與主題
+    // =========================================================
+    function toggleTheme() {
+        const html = document.documentElement;
+        const btn = document.getElementById('themeBtn');
+        if (html.getAttribute('data-theme') === 'light') {
+            html.setAttribute('data-theme', 'dark');
+            btn.textContent = '🌞 淺色';
+        } else {
+            html.setAttribute('data-theme', 'light');
+            btn.textContent = '🌙 深色';
+        }
+    }
+
+    function switchTab(id) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        const clickedBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(id));
+        if (clickedBtn) clickedBtn.classList.add('active');
+        document.getElementById(id).classList.add('active');
+        
+        // 切換到燈號時，自動建議深色模式以增加沉浸感 (僅建議，不強制)
+        if(id === 'flashing' && document.documentElement.getAttribute('data-theme') === 'light'){
+            // Optional: 可以自動切換 toggleTheme()，此處留給使用者決定
+        }
+    }
+
+    // =========================================================
+    // 渲染圖鑑 (Lookup) & 研讀中心 (Study)
+    // =========================================================
+    function initLookup() {
+        const gridL = document.getElementById('flagGridLetters');
+        const gridN = document.getElementById('flagGridNumbers');
+        
+        letters.forEach(char => {
+            gridL.innerHTML += `
+                <div class="flag-card" onclick="playAudio('${DB[char].morse}')" title="播放音效">
+                    <div class="flag-svg-box">${getSVG(char)}</div>
+                    <div class="flag-letter">${char}</div>
+                    <div class="flag-morse">${DB[char].morse}</div>
+                </div>`;
+        });
+        numbers.forEach(char => {
+            gridN.innerHTML += `
+                <div class="flag-card" onclick="playAudio('${DB[char].morse}')" title="播放音效">
+                    <div class="flag-svg-box">${getSVG(char)}</div>
+                    <div class="flag-letter">${char}</div>
+                    <div class="flag-morse">${DB[char].morse}</div>
+                </div>`;
+        });
+
+        // Study Center Render (精簡版)
+        const studyHTML = `
+            <div class="study-module">
+                <div class="study-header">國際通訊信號 (單字母含意)</div>
+                <div class="study-body">
+                    <table class="study-table">
+                        <thead><tr><th>代號</th><th>摩斯密碼</th><th>官方含意 (INTERCO)</th></tr></thead>
+                        <tbody>
+                            ${letters.map(c => `<tr><td><strong>${c}</strong></td><td><code style="color:var(--primary); font-weight:bold;">${DB[c].morse}</code></td><td>${DB[c].meaning}</td></tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>`;
+        document.getElementById('studyContentContainer').innerHTML = studyHTML;
+    }
+
+    // =========================================================
+    // 燈號閃爍引擎 (Flashing Light) - Farnsworth Method 支援
+    // =========================================================
+    let flashCancel = false;
+    let isFlashing = false;
+    let currentWpm = 6;
+    const bulb = document.getElementById('lampBulb');
+
+    function updateWpm(val) {
+        currentWpm = parseInt(val);
+        document.getElementById('wpmDisplay').textContent = currentWpm;
+    }
+
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+    async function processFlashing(text) {
+        isFlashing = true;
+        flashCancel = false;
+        
+        // 為了新手學習，燈號發送速度固定，但空白間隔根據 WPM 調整 (Farnsworth 概念)
+        const dot = 100; // 每個 dot 固定 100ms
+        const dash = dot * 3;
+        const symSpace = dot;
+        // WPM 越小，字距越長
+        const charSpace = dot * 3 * (10 / currentWpm); 
+        const wordSpace = dot * 7 * (10 / currentWpm);
+
+        document.getElementById('lampCurrentText').textContent = "發送中...";
+        await sleep(1000);
+
+        for (let i = 0; i < text.length; i++) {
+            if (flashCancel) break;
+            const char = text[i];
+            document.getElementById('lampCurrentText').textContent = `發送中: ${char}`;
+            
+            if (char === ' ') {
+                await sleep(wordSpace - charSpace);
+                continue;
+            }
+
+            const morse = DB[char] ? DB[char].morse : '';
+            for (let j = 0; j < morse.length; j++) {
+                if (flashCancel) break;
+                bulb.classList.add('lit');
+                await sleep(morse[j] === '.' ? dot : dash);
+                bulb.classList.remove('lit');
+                if (j < morse.length - 1) await sleep(symSpace);
+            }
+            await sleep(charSpace);
+        }
+        
+        document.getElementById('lampCurrentText').textContent = flashCancel ? "已停止" : "發送完畢";
+        isFlashing = false;
+    }
+
+    function startFlashing() {
+        if (isFlashing) { flashCancel = true; setTimeout(startFlashing, 300); return; }
+        let text = document.getElementById('lampTextInput').value.trim().toUpperCase();
+        if(!text) {
+            // 隨機產生 5 個字母
+            text = Array.from({length:5}, () => letters[Math.floor(Math.random()*letters.length)]).join('');
+            document.getElementById('lampTextInput').value = text;
+        }
+        processFlashing(text);
+    }
+
+    function stopFlashing() {
+        flashCancel = true;
+        bulb.classList.remove('lit');
+    }
+
+    // =========================================================
+    // 聲音引擎 (Web Audio API)
+    // =========================================================
+    let audioCtx = null;
+    function playAudio(morseStr) {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const dot = 0.08;
+        let offset = 0.05;
+        
+        for (let char of morseStr) {
+            if(char === ' ' || char === '/') { offset += dot * 3; continue; }
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine'; osc.frequency.value = 600;
+            
+            const duration = (char === '-') ? dot * 3 : dot;
+            const start = audioCtx.currentTime + offset;
+            const stop = start + duration;
+            
+            gain.gain.setValueAtTime(0, start);
+            gain.gain.linearRampToValueAtTime(0.3, start + 0.01);
+            gain.gain.setValueAtTime(0.3, stop - 0.01);
+            gain.gain.linearRampToValueAtTime(0, stop);
+            
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(start); osc.stop(stop);
+            
+            offset += duration + dot; // 符號間隔
+        }
+    }
+
+    // =========================================================
+    // 測驗系統 (Quiz Engine) 包含虛擬鍵盤
+    // =========================================================
+    let currentQuizTarget = '';
+    let hasAnswered = false;
+    let quizScore = 0;
+    let quizTotal = 0;
+
+    function renderKeyboard(type) {
+        const kb = document.getElementById('vKeyboard');
+        kb.innerHTML = '';
+        const input = document.getElementById('quizAnswer');
+        
+        // 按鍵點擊事件
+        const kbClick = (val) => {
+            if (val === 'DEL') input.value = input.value.slice(0, -1);
+            else if (val === 'SPACE') input.value += ' ';
+            else input.value += val;
+        };
+
+        if (type === 'alpha') {
+            // A-Z, 0-9 鍵盤
+            const rows = [
+                ['1','2','3','4','5','6','7','8','9','0'],
+                ['Q','W','E','R','T','Y','U','I','O','P'],
+                ['A','S','D','F','G','H','J','K','L'],
+                ['Z','X','C','V','B','N','M', 'DEL']
+            ];
+            rows.forEach(r => {
+                let div = document.createElement('div'); div.className = 'vk-row';
+                r.forEach(k => {
+                    let btn = document.createElement('button');
+                    btn.className = 'vk-key' + (k==='DEL'?' special':'');
+                    btn.textContent = k; btn.onclick = () => kbClick(k);
+                    div.appendChild(btn);
+                });
+                kb.appendChild(div);
+            });
+        } else if (type === 'morse') {
+            // . - 鍵盤
+            let div = document.createElement('div'); div.className = 'vk-row';
+            let dot = document.createElement('button'); dot.className = 'vk-key'; dot.innerHTML = '<h2>.</h2>'; dot.onclick = () => kbClick('.');
+            let dash = document.createElement('button'); dash.className = 'vk-key'; dash.innerHTML = '<h2>-</h2>'; dash.onclick = () => kbClick('-');
+            let del = document.createElement('button'); del.className = 'vk-key special'; del.textContent = 'DEL'; del.onclick = () => kbClick('DEL');
+            div.append(dot, dash, del);
+            kb.appendChild(div);
+        } else if (type === 'text') {
+            // 允許使用實體鍵盤 (隱藏虛擬鍵盤)，開放 input readonly
+            input.removeAttribute('readonly');
+            input.focus();
+            return; 
+        }
+        input.setAttribute('readonly', true); // 虛擬鍵盤模式下防止手機彈出原生鍵盤
+    }
+
+    function generateQuiz() {
+        hasAnswered = false;
+        document.getElementById('quizFeedback').innerHTML = '';
+        document.getElementById('selfEvalBox').style.display = 'none';
+        document.getElementById('quizAnswer').value = '';
+        
+        const mode = document.getElementById('quizMode').value;
+        const display = document.getElementById('quizDisplay');
+        currentQuizTarget = allChars[Math.floor(Math.random() * allChars.length)];
+
+        if (mode === 'flag_to_letter') {
+            display.innerHTML = `<div style="width:120px;height:80px;">${getSVG(currentQuizTarget)}</div>`;
+            renderKeyboard('alpha');
+        } else if (mode === 'morse_to_letter') {
+            display.innerHTML = `<div class="quiz-target-text">${DB[currentQuizTarget].morse}</div>`;
+            playAudio(DB[currentQuizTarget].morse); // 自動發聲
+            renderKeyboard('alpha');
+        } else if (mode === 'flag_to_morse') {
+            display.innerHTML = `<div style="width:120px;height:80px;">${getSVG(currentQuizTarget)}</div>`;
+            renderKeyboard('morse');
+        } else if (mode === 'letter_to_meaning') {
+            currentQuizTarget = letters[Math.floor(Math.random() * letters.length)]; // 只抽字母
+            display.innerHTML = `<div class="quiz-target-text" style="font-size:4rem; color:var(--text);">${currentQuizTarget}</div>`;
+            renderKeyboard('text'); // 開放原生鍵盤打字
+            document.getElementById('quizAnswer').placeholder = "輸入英文關鍵字 (例如 diver, dangerous, yes...)";
+        }
+    }
+
+    function checkAnswer() {
+        if (hasAnswered) return;
+        const mode = document.getElementById('quizMode').value;
+        const ans = document.getElementById('quizAnswer').value.trim().toUpperCase();
+        if (!ans) return;
+
+        const fb = document.getElementById('quizFeedback');
+        let isCorrect = false;
+        hasAnswered = true;
+        quizTotal++;
+
+        if (mode === 'flag_to_letter' || mode === 'morse_to_letter') {
+            isCorrect = (ans === currentQuizTarget);
+            if(isCorrect) fb.innerHTML = `<span style="color:var(--success);">✔ 正確！是 ${currentQuizTarget} (${DB[currentQuizTarget].morse})</span>`;
+            else fb.innerHTML = `<span style="color:var(--danger);">✘ 錯誤！正確為 ${currentQuizTarget} (${DB[currentQuizTarget].morse})</span>`;
+            playAudio(DB[currentQuizTarget].morse);
+            
+        } else if (mode === 'flag_to_morse') {
+            isCorrect = (ans === DB[currentQuizTarget].morse);
+            if(isCorrect) fb.innerHTML = `<span style="color:var(--success);">✔ 正確！${currentQuizTarget} 的摩斯碼為 ${DB[currentQuizTarget].morse}</span>`;
+            else fb.innerHTML = `<span style="color:var(--danger);">✘ 錯誤！${currentQuizTarget} 的正確碼為 ${DB[currentQuizTarget].morse}</span>`;
+            playAudio(DB[currentQuizTarget].morse);
+            
+        } else if (mode === 'letter_to_meaning') {
+            // 含意測驗：模糊比對 + 進入自我評估
+            quizTotal--; // 先不計入總題數，等自我評估後再計
+            const userAns = ans.toLowerCase();
+            const keys = DB[currentQuizTarget].keys;
+            const match = keys.filter(k => userAns.includes(k));
+            
+            if (match.length > 0) fb.innerHTML = `<span style="color:var(--success);">✔ 偵測到關鍵字 (${match.join(', ')})</span>`;
+            else fb.innerHTML = `<span style="color:var(--danger);">⚠️ 未偵測到預設關鍵字</span>`;
+            
+            document.getElementById('officialMeaningText').textContent = DB[currentQuizTarget].meaning;
+            document.getElementById('selfEvalBox').style.display = 'block';
+            return; // 提早結束，等待使用者點擊算我對/錯
+        }
+
+        if (isCorrect) quizScore++;
+        updateScoreBoard();
+    }
+
+    function resolveSelfEval(passed) {
+        quizTotal++;
+        const fb = document.getElementById('quizFeedback');
+        if (passed) {
+            quizScore++;
+            fb.innerHTML += `<br><span style="color:var(--success);">-> 已記錄為：正確 ✔</span>`;
+        } else {
+            fb.innerHTML += `<br><span style="color:var(--danger);">-> 已記錄為：錯誤 ✘</span>`;
+        }
+        document.getElementById('selfEvalBox').style.display = 'none';
+        updateScoreBoard();
+    }
+
+    function updateScoreBoard() {
+        document.getElementById('scoreCorrect').textContent = quizScore;
+        document.getElementById('scoreTotal').textContent = quizTotal;
+    }
+
+    // 實體鍵盤 Enter 支援
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && document.getElementById('quiz').classList.contains('active')) {
+            checkAnswer();
+        }
+    });
+
+    // 初始化
+    window.onload = () => {
+        initLookup();
+        generateQuiz();
+    };
+
+</script>
+</body>
+</html>
