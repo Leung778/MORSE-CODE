@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- PWA 支援標籤 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#0056b3">
@@ -21,6 +20,7 @@
             --nav-inactive: #adb5bd;
             --success: #28a745;
             --danger: #dc3545;
+            --warning: #ffc107;
             --highlight-bg: #fff3cd;
         }
 
@@ -35,6 +35,7 @@
             --nav-active: #66b0ff;
             --nav-inactive: #666666;
             --highlight-bg: #332b00;
+            --warning: #d39e00;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -82,6 +83,10 @@
         .option-btn.correct { background: var(--success); color: white; border-color: var(--success); }
         .option-btn.wrong { background: var(--danger); color: white; border-color: var(--danger); }
 
+        /* 統計區塊 */
+        .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+        .stat-row:last-child { border-bottom: none; }
+
         /* 底部導覽列 */
         nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--nav-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 0.6rem 0; z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
         .nav-item { background: none; border: none; color: var(--nav-inactive); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; width: 25%; font-weight: bold;}
@@ -109,14 +114,22 @@
 
         <div class="card">
             <h3>🗓️ 微學習計畫 <span id="current-day-badge" style="font-size:0.9rem; font-weight:normal; background:var(--primary); color:white; padding:2px 8px; border-radius:12px;">Day 1</span></h3>
-            <p style="font-size: 0.95rem; color: var(--text-sub); margin-bottom: 1rem;">每日 23 詞，精準匹配您的通勤與午飯空檔。</p>
+            <p style="font-size: 0.95rem; color: var(--text-sub); margin-bottom: 1rem;">每日 23 詞，已完成的時段隨時可點擊「重新複習」。</p>
             <div id="schedule-container"></div>
         </div>
 
         <div class="card">
             <h3>📊 總進度與 SRS 記憶庫</h3>
-            <p>已掌握 (秒答): <strong style="color: var(--success);" id="stat-mastered">0</strong> 詞</p>
-            <p>需強化 (模糊/忘記): <strong style="color: var(--danger);" id="stat-learning">161</strong> 詞</p>
+            <p style="font-size:0.9rem; color:var(--text-sub); margin-bottom:10px;">系統根據您的背誦狀態自動分類，並即時更新。</p>
+            <div class="stat-row">
+                <span>✅ 熟悉 (秒答 2 次以上)</span> <strong style="color: var(--success);" id="stat-mastered">0</strong>
+            </div>
+            <div class="stat-row">
+                <span>🤔 模糊 (秒答 1 次)</span> <strong style="color: var(--warning);" id="stat-familiar">0</strong>
+            </div>
+            <div class="stat-row">
+                <span>❌ 陌生 (從未秒答/忘記)</span> <strong style="color: var(--danger);" id="stat-learning">161</strong>
+            </div>
         </div>
     </main>
 
@@ -154,7 +167,7 @@
                     <!-- 自我評估按鈕 (Anki Style) -->
                     <div id="review-grade-btns" style="display:flex; gap:10px; margin-top:1.5rem; width:100%;">
                         <button class="btn" style="background:var(--danger); flex:1; padding:1rem 0;" onclick="gradeReview(0)">❌ 忘記<br><small style="font-weight:normal;">稍後重測</small></button>
-                        <button class="btn" style="background:#ffc107; color:#333; flex:1; padding:1rem 0;" onclick="gradeReview(1)">🤔 模糊<br><small style="font-weight:normal;">維持權重</small></button>
+                        <button class="btn" style="background:var(--warning); color:#333; flex:1; padding:1rem 0;" onclick="gradeReview(1)">🤔 模糊<br><small style="font-weight:normal;">維持權重</small></button>
                         <button class="btn" style="background:var(--success); flex:1; padding:1rem 0;" onclick="gradeReview(2)">✅ 秒答<br><small style="font-weight:normal;">已掌握</small></button>
                     </div>
                 </div>
@@ -166,14 +179,14 @@
     <main id="tab-quiz" class="tab-content">
         <div class="card" id="quiz-setup">
             <h3 style="border-bottom:none; margin-bottom:0.5rem;">📝 自由測驗模式</h3>
-            <p style="color:var(--text-sub); margin-bottom:1.5rem; font-size:0.95rem;">用來檢驗您是否真正記住這些術語的拼寫與對應關係。</p>
+            <p style="color:var(--text-sub); margin-bottom:1.5rem; font-size:0.95rem;">自由隨機測驗，用來驗證您的記憶成果。</p>
             
             <label style="font-weight:bold; display:block; margin-bottom:0.5rem; color:var(--primary);">🎯 選擇題 (Multiple Choice)</label>
-            <button class="btn btn-outline" onclick="startQuiz('mcq-term')">給英文定義 ➔ 選正確術語</button>
-            <button class="btn btn-outline" onclick="startQuiz('mcq-def')">給術語 ➔ 選正確定義</button>
+            <button class="btn btn-outline" onclick="startQuiz('mcq-term')">看英文定義 ➔ 選正確術語</button>
+            <button class="btn btn-outline" onclick="startQuiz('mcq-def')">看術語 ➔ 選正確英文定義</button>
             
             <label style="font-weight:bold; display:block; margin-top:1.5rem; margin-bottom:0.5rem; color:var(--primary);">⌨️ 填空題 (Fill in the Blanks)</label>
-            <button class="btn btn-outline" onclick="startQuiz('input')">給術語 ➔ 拼寫關鍵字 (高容錯)</button>
+            <button class="btn btn-outline" onclick="startQuiz('input')">看術語 ➔ 拼寫關鍵字 (高容錯)</button>
         </div>
 
         <div class="card" id="quiz-area" style="display: none;">
@@ -196,7 +209,16 @@
         </div>
     </main>
 
-    <!-- 4. 字典 -->
+    <!-- 4. SRS (智慧強化) -->
+    <main id="tab-srs" class="tab-content">
+        <div class="card" style="text-align: center; padding: 2rem 1rem;">
+            <h3 style="justify-content: center; font-size:1.5rem; margin-bottom: 1rem;">🧠 弱點強化特訓</h3>
+            <p style="color: var(--text-sub); margin-bottom: 2rem;">系統將從「❌ 陌生」與「🤔 模糊」的記憶庫中，隨機抽取 10 題進行閃卡強化訓練。</p>
+            <button class="btn" style="padding: 1rem; font-size:1.2rem;" onclick="startSRSReview()">開始特訓</button>
+        </div>
+    </main>
+
+    <!-- 5. 字典 -->
     <main id="tab-dict" class="tab-content">
         <div class="card" style="position: sticky; top: 60px; z-index: 90; margin-bottom: 1rem; padding: 1rem;">
             <input type="text" id="search-input" placeholder="🔍 搜尋英文、中文或關鍵字..." onkeyup="renderDict()" style="margin-bottom: 0;">
@@ -214,6 +236,9 @@
         </button>
         <button class="nav-item" onclick="switchTab('tab-quiz', this)">
             <span class="nav-icon">📝</span><span>測驗</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('tab-srs', this)">
+            <span class="nav-icon">🧠</span><span>複習</span>
         </button>
     </nav>
 
@@ -383,7 +408,7 @@
   { "id": "161", "group": "航行告示與常規", "term": "Resume (to)", "en": "here: To re-start a voyage, service or search", "zh": "恢復。中斷後重新開展航行、客運班次或搜救行動。" }
 ];
 
-        // 自動將原始資料轉換為測驗所需格式，並自動抓取英文句子中的核心單字作為防呆關鍵字
+        // 自動轉換為系統所需格式
         const smcpData = rawData.map(item => {
             return {
                 id: parseInt(item.id, 10),
@@ -409,18 +434,21 @@
             updateStats();
         }
 
+        // 初始化記憶庫 (Box=0 代表完全陌生)
         smcpData.forEach(item => {
             if (!userData.srsData[item.id]) {
-                userData.srsData[item.id] = { box: 0, nextReview: getTodayStr() };
+                userData.srsData[item.id] = { box: 0 };
             }
         });
 
+        // 跨日檢查機制
         function checkDailyReset() {
             const today = getTodayStr();
             document.getElementById('current-day-badge').innerText = `Day ${userData.currentDay || 1}`;
             
             if (userData.lastDate !== today) {
                 if (userData.lastDate !== '') {
+                    // 若前一天有進度，才跳下一天
                     const hasProgress = userData.dailyProgress.morning.length > 0 || userData.dailyProgress.lunch.length > 0 || userData.dailyProgress.evening.length > 0;
                     if (hasProgress) {
                         userData.currentDay = (userData.currentDay || 1) + 1;
@@ -439,7 +467,32 @@
             return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
         }
 
-        // === 3. 動態作息模式 (無縫結合您的排班時間) ===
+        // 即時更新首頁的 SRS 數據庫統計
+        function updateStats() {
+            let mastered = 0, familiar = 0, learning = 0;
+            for (let id in userData.srsData) {
+                const box = userData.srsData[id].box;
+                if (box >= 2) mastered++;
+                else if (box === 1) familiar++;
+                else learning++;
+            }
+            document.getElementById('stat-mastered').innerText = mastered;
+            document.getElementById('stat-familiar').innerText = familiar;
+            document.getElementById('stat-learning').innerText = learning;
+        }
+
+        // 處理每一次答對/答錯對權重的影響
+        function processSRS(id, isCorrect) {
+            let data = userData.srsData[id];
+            if (isCorrect) {
+                data.box = Math.min(5, data.box + 1); // 答對，Box 等級提升
+            } else {
+                data.box = 0; // 答錯，直接重置為 0
+            }
+            saveData();
+        }
+
+        // === 3. 動態作息模式 ===
         const schedules = {
             changshawan: {
                 morning: { time: "06:00 - 06:50", label: "🌅 晨間出門前", count: 8 },
@@ -467,10 +520,13 @@
             let html = '';
 
             periods.forEach(p => {
-                const completed = userData.dailyProgress[p].length;
+                const isCompleted = userData.dailyProgress[p].length > 0;
                 const total = s[p].count;
-                const isDone = completed >= total;
-                const btnStatus = isDone ? '<button class="btn" style="background:var(--success); padding:0.6rem;">✅ 已完成</button>' : `<button class="btn" style="padding:0.6rem;" onclick="startReviewRoutine('${p}')">開始背誦 (${completed}/${total})</button>`;
+                
+                // 優化：即使完成，按鈕依然保留，且可點擊重新複習
+                const btnStatus = isCompleted 
+                    ? `<button class="btn" style="background:#e8f5e9; color:var(--success); border:1px solid var(--success); padding:0.6rem;" onclick="startReviewRoutine('${p}')">✅ 已完成 (點擊再次複習)</button>` 
+                    : `<button class="btn" style="padding:0.6rem;" onclick="startReviewRoutine('${p}')">開始背誦 (0/${total})</button>`;
 
                 html += `
                 <div class="routine-slot">
@@ -485,6 +541,7 @@
 
         // === 4. 閃卡背誦模式 (Anki Style: 忘記/模糊/秒答) ===
         let reviewQueue = [];
+        let currentReviewChunk = [];
         let currentPeriod = '';
 
         function startReviewRoutine(period) {
@@ -495,39 +552,70 @@
             const endIdx = day === 7 ? smcpData.length : startIdx + itemsPerDay;
             const dayData = smcpData.slice(startIdx, endIdx);
             
-            if (period === 'morning') reviewQueue = dayData.slice(0, 8);
-            if (period === 'lunch') reviewQueue = dayData.slice(8, 16);
-            if (period === 'evening') reviewQueue = dayData.slice(16, 23);
+            // 根據時段切片
+            if (period === 'morning') currentReviewChunk = dayData.slice(0, 8);
+            if (period === 'lunch') currentReviewChunk = dayData.slice(8, 16);
+            if (period === 'evening') currentReviewChunk = dayData.slice(16, 23);
+            
+            // 複製一份進入作答佇列
+            reviewQueue = [...currentReviewChunk];
+            
+            switchTab('tab-review', document.querySelectorAll('.nav-item')[0]);
+            renderReviewCard();
+        }
+
+        function startSRSReview() {
+            // 從 SRS 記憶庫中篩選出 Box 0 或 1 (陌生與模糊) 的詞彙
+            let srsPool = smcpData.filter(item => userData.srsData[item.id].box <= 1);
+            if(srsPool.length === 0) {
+                alert("🎉 太強了！目前沒有需要強化的詞彙。");
+                return;
+            }
+            
+            // 隨機打亂並抽取最多 10 題
+            srsPool.sort(() => Math.random() - 0.5);
+            currentReviewChunk = srsPool.slice(0, 10);
+            reviewQueue = [...currentReviewChunk];
+            currentPeriod = 'srs';
             
             switchTab('tab-review', document.querySelectorAll('.nav-item')[0]);
             renderReviewCard();
         }
 
         function renderReviewCard() {
+            // 如果佇列清空了，代表本輪完成
             if (reviewQueue.length === 0) {
-                alert('🎉 太棒了！本時段的所有詞彙都已通過「秒答」測試！');
-                userData.dailyProgress[currentPeriod] = [1,2,3,4,5,6,7,8]; 
-                saveData();
+                if(currentPeriod === 'srs') {
+                    alert('🎉 SRS 強化完成！您的記憶已更新。');
+                } else {
+                    alert('🎉 恭喜！本時段的詞彙已經全部背誦完畢！');
+                    userData.dailyProgress[currentPeriod] = currentReviewChunk.map(item => item.id); 
+                    saveData();
+                    updateSchedule();
+                }
                 switchTab('tab-dashboard', document.querySelectorAll('.nav-item')[0]);
-                updateSchedule();
                 return;
             }
             
+            // 永遠取佇列的第一個來測
             const item = reviewQueue[0];
             const direction = document.getElementById('review-direction').value;
             
             document.getElementById('review-progress').innerText = `剩餘 ${reviewQueue.length} 詞`;
             document.getElementById('review-category').innerText = `[${item.category}]`;
             
+            // 雙向背誦邏輯
             if (direction === 'en-to-zh') {
                 document.getElementById('review-term').innerText = item.term;
-                document.getElementById('review-tts').style.display = 'block';
+                document.getElementById('review-tts').style.display = 'inline-flex';
                 document.getElementById('review-tts').onclick = () => playTTS(item.term);
             } else {
+                // 中翻英模式 (正面顯示中文，隱藏語音避免劇透)
                 document.getElementById('review-term').innerText = item.term_zh;
                 document.getElementById('review-tts').style.display = 'none';
             }
             
+            // UI 狀態切換
             document.getElementById('review-answer').style.display = 'none';
             document.getElementById('btn-reveal').style.display = 'block';
         }
@@ -542,8 +630,8 @@
             } else {
                 document.getElementById('review-target-main').innerText = item.term;
                 document.getElementById('review-target-sub').innerHTML = item.meaning_zh;
-                // 中翻英時，答案揭曉後才出現英文語音
-                document.getElementById('review-tts').style.display = 'block';
+                // 中翻英時，答案揭曉後才出現英文語音按鈕
+                document.getElementById('review-tts').style.display = 'inline-flex';
                 document.getElementById('review-tts').onclick = () => playTTS(item.term);
             }
             
@@ -554,19 +642,21 @@
         }
 
         function gradeReview(quality) {
+            // 將這張卡片從佇列中取出
             const item = reviewQueue.shift(); 
             
             if (quality === 0) {
-                // 忘記：塞回佇列尾端，必須重測
+                // ❌ 忘記：塞回佇列尾端，必須重測到會為止
                 reviewQueue.push(item);
                 processSRS(item.id, false);
             } else if (quality === 1) {
-                // 模糊：塞回佇列尾端再測一次
+                // 🤔 模糊：同樣塞回佇列尾端再測一次
                 reviewQueue.push(item);
             } else {
-                // 秒答：真正移出這輪的佇列
+                // ✅ 秒答：真正移出這輪的佇列，並增加 SRS 權重
                 processSRS(item.id, true);
             }
+            
             renderReviewCard();
         }
 
@@ -576,7 +666,7 @@
             }
         }
 
-        // === 5. 測驗模式 (Quiz) ===
+        // === 5. 自由測驗模式 (Quiz) ===
         let currentQuizItem = null;
 
         function startQuiz(quizType) {
@@ -660,10 +750,12 @@
                 btn.classList.add('correct');
                 fb.innerHTML = '✅ 正確！';
                 fb.style.color = 'var(--success)';
+                processSRS(currentQuizItem.id, true);
             } else {
                 btn.classList.add('wrong');
                 fb.innerHTML = `❌ 錯誤。<br><br><span style="font-size:1.1rem; color:var(--text-main);">正解：<br><strong>${currentQuizItem.term}</strong><br>${currentQuizItem.meaning}</span>`;
                 fb.style.color = 'var(--danger)';
+                processSRS(currentQuizItem.id, false);
             }
             document.getElementById('quiz-next-btn').style.display = 'block';
         }
@@ -674,7 +766,7 @@
             const required = Math.max(1, Math.ceil(currentQuizItem.keywords.length / 2));
             const fb = document.getElementById('quiz-feedback');
 
-            let detailHtml = `<div style="text-align:left; background:var(--highlight-bg); padding:10px; border-radius:8px; margin-top:15px; font-size:1rem; line-height:1.4;">
+            let detailHtml = `<div style="text-align:left; background:var(--highlight-bg); padding:10px; border-radius:8px; margin-top:15px; font-size:1rem; line-height:1.4; color:#333;">
                 <strong>標準定義:</strong> ${highlightKeywords(currentQuizItem.meaning, currentQuizItem.keywords)}<br>
                 <div style="margin-top:5px;">${currentQuizItem.keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('')}</div>
             </div>`;
@@ -682,9 +774,11 @@
             if (result.matchCount >= required) {
                 fb.innerHTML = `✅ 命中！(找到 ${result.matchCount}/${required} 詞)` + detailHtml;
                 fb.style.color = 'var(--success)';
+                processSRS(currentQuizItem.id, true);
             } else {
                 fb.innerHTML = `❌ 關鍵字不足。(僅找到 ${result.matchCount}/${required} 詞)` + detailHtml;
                 fb.style.color = 'var(--danger)';
+                processSRS(currentQuizItem.id, false);
             }
             document.getElementById('quiz-next-btn').style.display = 'block';
             document.getElementById('quiz-input-area').style.display = 'none';
@@ -764,33 +858,14 @@
                     </h3>
                     <p style="color:var(--text-sub); font-size:1.1rem; margin-bottom: 0.8rem; font-weight:bold;">${item.term_zh}</p>
                     <p style="margin-bottom:0.5rem;">${highlightedDef}</p>
-                    <p style="background:var(--highlight-bg); padding:8px; border-radius:6px;">${item.meaning_zh}</p>
+                    <p style="background:var(--highlight-bg); padding:8px; border-radius:6px; color:#333;">${item.meaning_zh}</p>
                     <div style="margin-top:0.8rem;">${kwTags}</div>
                 `;
                 list.appendChild(card);
             });
         }
 
-        function processSRS(id, isCorrect) {
-            let data = userData.srsData[id];
-            if (isCorrect) {
-                data.box = Math.min(5, data.box + 1);
-            } else {
-                data.box = 0;
-            }
-            saveData();
-        }
-
-        function updateStats() {
-            let mastered = 0, learning = 0;
-            for (let id in userData.srsData) {
-                if (userData.srsData[id].box >= 3) mastered++;
-                else learning++;
-            }
-            document.getElementById('stat-mastered').innerText = mastered;
-            document.getElementById('stat-learning').innerText = learning;
-        }
-
+        // 初始化
         window.onload = () => {
             checkDailyReset();
             updateSchedule();
