@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- PWA 支援標籤 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#0056b3">
+    <title>SMCP 航海術語 Pro</title>
+    <style>
+        :root {
+            --primary: #0056b3;
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-main: #212529;
+            --text-sub: #6c757d;
+            --border: #dee2e6;
+            --nav-bg: #ffffff;
+            --nav-active: #0056b3;
+            --nav-inactive: #adb5bd;
+            --success: #28a745;
+            --danger: #dc3545;
+            --highlight-bg: #fff3cd;
+        }
+
+        body.dark-mode {
+            --primary: #66b0ff;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-sub: #a0a0a0;
+            --border: #333333;
+            --nav-bg: #1e1e1e;
+            --nav-active: #66b0ff;
+            --nav-inactive: #666666;
+            --highlight-bg: #332b00;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 70px; font-size: 17px; line-height: 1.5; transition: background 0.3s; }
+
+        /* 頂部標題與控制 */
+        header { background: var(--primary); color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        header h1 { font-size: 1.2rem; margin: 0; }
+        .header-controls { display: flex; gap: 10px; align-items: center; }
+        .theme-toggle { background: none; border: none; color: white; font-size: 1.3rem; cursor: pointer; }
+
+        /* 頁面切換 */
+        .tab-content { display: none; padding: 1rem; max-width: 800px; margin: 0 auto; animation: fadeIn 0.3s; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 元件設計 */
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem; margin-bottom: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .card h3 { color: var(--primary); margin-bottom: 0.8rem; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+        
+        .btn { display: block; width: 100%; padding: 0.9rem; background: var(--primary); color: white; text-align: center; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-bottom: 0.8rem; transition: transform 0.1s; }
+        .btn:active { transform: scale(0.98); }
+        .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+        
+        select, input[type="text"] { width: 100%; padding: 0.9rem; background: var(--card-bg); color: var(--text-main); border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; margin-bottom: 1rem; outline: none; }
+        select:focus, input[type="text"]:focus { border-color: var(--primary); }
+
+        /* 動態作息區塊 */
+        .routine-slot { border-left: 5px solid var(--primary); padding-left: 12px; margin-bottom: 1.2rem; background: var(--highlight-bg); padding-top: 10px; padding-bottom: 10px; border-radius: 0 8px 8px 0; }
+        .routine-time { font-size: 0.9rem; color: var(--text-sub); font-weight: bold; margin-bottom: 0.3rem; }
+        .routine-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 0.5rem; }
+
+        /* 字典與高亮 */
+        .tts-btn { background: #e7f1ff; color: #0056b3; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 1rem; margin-left: 10px; flex-shrink: 0;}
+        body.dark-mode .tts-btn { background: #334a66; color: #66b0ff; }
+        .kw-highlight { color: var(--danger); font-weight: bold; }
+        .keyword-tag { display: inline-block; background: var(--border); padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.9rem; margin: 0.3rem 0.3rem 0 0; font-weight: bold;}
+
+        /* 測驗區 */
+        .option-btn { text-align: left; padding: 1.2rem; border: 2px solid var(--border); background: var(--card-bg); color: var(--text-main); border-radius: 8px; cursor: pointer; font-size: 1.1rem; margin-bottom: 0.8rem; width: 100%; line-height: 1.4; }
+        .option-btn.correct { background: var(--success); color: white; border-color: var(--success); }
+        .option-btn.wrong { background: var(--danger); color: white; border-color: var(--danger); }
+
+        /* 底部導覽列 */
+        nav.bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--nav-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 0.6rem 0; z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-item { background: none; border: none; color: var(--nav-inactive); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; width: 25%; font-weight: bold;}
+        .nav-item.active { color: var(--nav-active); }
+        .nav-icon { font-size: 1.6rem; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>⚓ SMCP Pro</h1>
+        <div class="header-controls">
+            <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+        </div>
+    </header>
+
+    <!-- 1. 儀表板 (首頁) -->
+    <main id="tab-dashboard" class="tab-content active">
+        <div class="card">
+            <h3>⚙️ 選擇今日作息模式</h3>
+            <select id="schedule-mode" onchange="updateSchedule()">
+                <option value="changshawan">長沙灣模式 (06:50 出門, 17:30 下班)</option>
+                <option value="sheungwan">上環模式 (07:45 出門, 18:00 下班)</option>
+                <option value="parttime">兼職/假日模式 (08:30 出門, 22:00 下班)</option>
+            </select>
+        </div>
+
+        <div class="card">
+            <h3>🗓️ 今日微學習任務 <span style="font-size:0.9rem; font-weight:normal; color:var(--text-sub);" id="current-date"></span></h3>
+            <p style="font-size: 0.95rem; color: var(--text-sub); margin-bottom: 1rem;">系統已根據您的作息切分記憶進度，避免單次過載。</p>
+            
+            <div id="schedule-container">
+                <!-- 動態生成作息區塊 -->
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>📊 總進度與 SRS 記憶庫</h3>
+            <p>已掌握 (Box 3+): <strong style="color: var(--success);" id="stat-mastered">0</strong> 詞</p>
+            <p>需強化 (Box 0-1): <strong style="color: var(--danger);" id="stat-learning">161</strong> 詞</p>
+            <button class="btn btn-outline" style="margin-top: 1rem;" onclick="switchTab('tab-srs')">進入智慧複習</button>
+        </div>
+    </main>
+
+    <!-- 2. 檢索與字典 -->
+    <main id="tab-dict" class="tab-content">
+        <div class="card" style="position: sticky; top: 60px; z-index: 90; margin-bottom: 1rem; padding: 1rem;">
+            <input type="text" id="search-input" placeholder="🔍 搜尋英文、中文或關鍵字..." onkeyup="renderDict()" style="margin-bottom: 0;">
+        </div>
+        <div id="dict-list"></div>
+    </main>
+
+    <!-- 3. 綜合測驗 -->
+    <main id="tab-quiz" class="tab-content">
+        <div class="card" id="quiz-setup">
+            <h3>📝 隨機訓練</h3>
+            <select id="quiz-type">
+                <option value="mcq-term">選擇題: 看定義 ➔ 選術語</option>
+                <option value="mcq-def">選擇題: 看術語 ➔ 選定義</option>
+                <option value="input">高容錯輸入: 關鍵字拼寫</option>
+            </select>
+            <button class="btn" onclick="startQuiz()">開始測驗</button>
+        </div>
+
+        <div class="card" id="quiz-area" style="display: none;">
+            <h3 id="quiz-question" style="font-size: 1.3rem; color: var(--text-main); margin-bottom: 1.5rem; line-height: 1.5;">Question</h3>
+            
+            <div id="quiz-options"></div>
+            
+            <div id="quiz-input-area" style="display:none;">
+                <p style="font-size: 0.95rem; color: var(--primary); font-weight: bold; margin-bottom: 10px;">至少需命中 <span id="kw-req"></span> 個核心詞 (不限時態/單複數)</p>
+                <input type="text" id="quiz-input-box" placeholder="輸入英文關鍵字..." autocomplete="off">
+                <button class="btn" onclick="checkInputQuiz()">送出解答</button>
+            </div>
+
+            <div id="quiz-feedback" style="margin-top: 1.5rem; font-size: 1.1rem;"></div>
+            <button id="quiz-next-btn" class="btn btn-outline" style="margin-top: 1.5rem; display: none;" onclick="startQuiz()">下一題</button>
+            <button class="btn" style="background: var(--text-sub); margin-top: 0.5rem;" onclick="exitQuiz()">結束測驗</button>
+        </div>
+    </main>
+
+    <!-- 4. SRS 智慧複習 -->
+    <main id="tab-srs" class="tab-content">
+        <div class="card" style="text-align: center;">
+            <h3>🧠 SRS 間隔重複訓練</h3>
+            <p style="color: var(--text-sub); margin-bottom: 1.5rem;">根據您過往的答題紀錄，系統已抓出您最容易忘記的術語進行強化。</p>
+            <button class="btn" onclick="startQuiz(true)">開始複習 (優先抽取高權重詞彙)</button>
+        </div>
+    </main>
+
+    <!-- 底部導覽列 -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('tab-dashboard', this)">
+            <span class="nav-icon">🏠</span><span>首頁</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('tab-dict', this)">
+            <span class="nav-icon">📖</span><span>字典</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('tab-quiz', this)">
+            <span class="nav-icon">📝</span><span>測驗</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('tab-srs', this)">
+            <span class="nav-icon">🧠</span><span>複習</span>
+        </button>
+    </nav>
+
+    <script>
+        // === 1. 資料庫 (請替換為完整的 161 條資料，此處以精簡版示範) ===
+        const smcpData = [
+            {"id":1,"category":"General terms","term":"Abandon vessel","term_zh":"棄船","meaning":"To evacuate crew and passengers from a vessel following a distress","meaning_zh":"船舶遇險後，疏散船上全體船員及乘客","keywords":["evacuate","crew and passengers","distress"]},
+            {"id":3,"category":"General terms","term":"Adrift","term_zh":"漂流","meaning":"Floating, not controlled, without a clearly determinable direction","meaning_zh":"在水面漂浮、處於失控狀態，且無明確可測定的方向","keywords":["floating","not controlled","no direction"]},
+            {"id":29,"category":"General terms","term":"Crash-stop","term_zh":"緊急倒車停船","meaning":"An emergency reversal operation of the main engine(s) to avoid a collision","meaning_zh":"為避免碰撞而對主機施行的緊急全速倒車操作","keywords":["emergency reversal","main engine","avoid collision","stop"]},
+            {"id":51,"category":"General terms","term":"Flooding","term_zh":"大量進水","meaning":"Major flow of seawater into the vessel","meaning_zh":"海水大量湧入船體內部的嚴重險情","keywords":["major flow","seawater inflow","hull breach"]},
+            {"id":160,"category":"VTS special terms","term":"VTS","term_zh":"船舶交通服務","meaning":"Vessel Traffic Services: Services, designed to improve safety and efficiency of vessel traffic and to protect the environment","meaning_zh":"旨在提高船舶交通安全與營運效率之交通服務","keywords":["Vessel Traffic Services","safety and efficiency","environmental protection"]}
+        ];
+
+        // === 2. 本地儲存與狀態管理 (Local Storage) ===
+        let userData = JSON.parse(localStorage.getItem('smcpUserData')) || {
+            lastDate: '',
+            dailyProgress: { morning: [], lunch: [], evening: [] },
+            srsData: {} // id: { box: 0, nextReview: 'YYYY-MM-DD' }
+        };
+
+        function saveData() {
+            localStorage.setItem('smcpUserData', JSON.stringify(userData));
+            updateStats();
+        }
+
+        // 初始化 SRS 預設值
+        smcpData.forEach(item => {
+            if (!userData.srsData[item.id]) {
+                userData.srsData[item.id] = { box: 0, nextReview: getTodayStr() };
+            }
+        });
+
+        // 跨日重置日常任務
+        function checkDailyReset() {
+            const today = getTodayStr();
+            document.getElementById('current-date').innerText = today;
+            if (userData.lastDate !== today) {
+                userData.lastDate = today;
+                userData.dailyProgress = { morning: [], lunch: [], evening: [] };
+                saveData();
+            }
+        }
+
+        function getTodayStr() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
+
+        // === 3. 動態作息模式邏輯 ===
+        const schedules = {
+            changshawan: {
+                morning: { time: "06:00 - 06:50", label: "🌅 晨間出門前", count: 8 },
+                lunch: { time: "12:00 - 13:00", label: "🍱 午休時段", count: 8 },
+                evening: { time: "17:30 後", label: "🚇 下班通勤 (南昌)", count: 7 }
+            },
+            sheungwan: {
+                morning: { time: "06:00 - 07:45", label: "🌅 晨間出門前", count: 8 },
+                lunch: { time: "13:00 - 14:00", label: "🍱 午休時段", count: 8 },
+                evening: { time: "18:00 後", label: "🌙 下班/睡前", count: 7 }
+            },
+            parttime: {
+                morning: { time: "06:00 - 08:30", label: "🌅 晨間出門前", count: 8 },
+                lunch: { time: "13:30 - 14:30", label: "🍱 午休時段", count: 8 },
+                evening: { time: "22:00 後", label: "🌙 睡前鞏固", count: 7 }
+            }
+        };
+
+        function updateSchedule() {
+            const mode = document.getElementById('schedule-mode').value;
+            const s = schedules[mode];
+            const container = document.getElementById('schedule-container');
+            
+            const periods = ['morning', 'lunch', 'evening'];
+            let html = '';
+
+            periods.forEach(p => {
+                const completed = userData.dailyProgress[p].length;
+                const total = s[p].count;
+                const isDone = completed >= total;
+                const btnStatus = isDone ? '<button class="btn" style="background:var(--success); padding:0.6rem;">✅ 已完成</button>' : `<button class="btn" style="padding:0.6rem;" onclick="startRoutine('${p}', ${total})">開始背誦 (${completed}/${total})</button>`;
+
+                html += `
+                <div class="routine-slot">
+                    <div class="routine-time">${s[p].time}</div>
+                    <div class="routine-title">${s[p].label}</div>
+                    ${btnStatus}
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // === 4. UI 與互動邏輯 ===
+        function switchTab(tabId, btnObj) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            if (btnObj) btnObj.classList.add('active');
+
+            if(tabId === 'tab-dashboard') updateSchedule();
+            if(tabId === 'tab-dict') renderDict();
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        function playTTS(text) {
+            if ('speechSynthesis' in window) {
+                // 輕量化：僅朗讀英文術語，不念長句
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9; 
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function highlightKeywords(text, keywords) {
+            let result = text;
+            keywords.forEach(kw => {
+                // 簡單的高亮替換 (忽略大小寫)
+                const regex = new RegExp(`(${kw})`, "gi");
+                result = result.replace(regex, '<span class="kw-highlight">$1</span>');
+            });
+            return result;
+        }
+
+        function renderDict() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const list = document.getElementById('dict-list');
+            list.innerHTML = '';
+
+            const filtered = smcpData.filter(d => 
+                d.term.toLowerCase().includes(query) || 
+                d.meaning.toLowerCase().includes(query) || 
+                d.term_zh.includes(query) ||
+                d.keywords.some(k => k.toLowerCase().includes(query))
+            );
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                const highlightedDef = highlightKeywords(item.meaning, item.keywords);
+                const kwTags = item.keywords.map(k => `<span class="keyword-tag">${k}</span>`).join('');
+
+                card.innerHTML = `
+                    <h3 style="margin-bottom:0;">
+                        <span>#${item.id} ${item.term}</span>
+                        <button class="tts-btn" onclick="playTTS('${item.term.replace(/'/g, "\\'")}')">🔊</button>
+                    </h3>
+                    <p style="color:var(--text-sub); font-size:1.1rem; margin-bottom: 0.8rem; font-weight:bold;">${item.term_zh}</p>
+                    <p style="margin-bottom:0.5rem;">${highlightedDef}</p>
+                    <p style="background:var(--highlight-bg); padding:8px; border-radius:6px;">${item.meaning_zh}</p>
+                    <div style="margin-top:0.8rem;">${kwTags}</div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        // === 5. 高容錯關鍵字驗證 (Fuzzy Matching) ===
+        // 清理單字：轉小寫、去除標點、去除常見複數或ing/ed字尾
+        function cleanWord(w) {
+            return w.toLowerCase()
+                    .replace(/[^a-z0-9]/g, '')
+                    .replace(/(ing|ed|es|s)$/, '');
+        }
+
+        function fuzzyMatch(userInput, keywords) {
+            const userWords = userInput.split(/\s+/).map(cleanWord);
+            let matchCount = 0;
+            let matchedKws = [];
+
+            keywords.forEach(kw => {
+                const cleanKw = cleanWord(kw);
+                // 只要使用者輸入的字根包含關鍵字字根，或關鍵字包含使用者輸入，即算命中
+                if (userWords.some(uw => uw && (uw.includes(cleanKw) || cleanKw.includes(uw)))) {
+                    matchCount++;
+                    matchedKws.push(kw);
+                }
+            });
+            return { matchCount, matchedKws };
+        }
+
+        // === 6. 測驗系統 ===
+        let currentQuizItem = null;
+        let isSRSMode = false;
+
+        function startRoutine(period, total) {
+            alert(`進入日常任務: ${period}。\n(註：此功能將導向測驗並自動記錄進度至 ${total} 題為止。)`);
+            switchTab('tab-quiz', document.querySelectorAll('.nav-item')[2]);
+        }
+
+        function startQuiz(srs = false) {
+            isSRSMode = srs;
+            document.getElementById('quiz-setup').style.display = 'none';
+            document.getElementById('quiz-area').style.display = 'block';
+            generateQuestion();
+        }
+
+        function exitQuiz() {
+            document.getElementById('quiz-setup').style.display = 'block';
+            document.getElementById('quiz-area').style.display = 'none';
+        }
+
+        function generateQuestion() {
+            document.getElementById('quiz-feedback').innerHTML = '';
+            document.getElementById('quiz-next-btn').style.display = 'none';
+            
+            const qType = document.getElementById('quiz-type').value;
+            
+            // 隨機抽題 (SRS模式應根據Box權重抽，此處簡化為全隨機)
+            currentQuizItem = smcpData[Math.floor(Math.random() * smcpData.length)];
+            const qBox = document.getElementById('quiz-question');
+            const optBox = document.getElementById('quiz-options');
+            const inputArea = document.getElementById('quiz-input-area');
+            
+            optBox.innerHTML = '';
+            document.getElementById('quiz-input-box').value = '';
+
+            if (qType.includes('mcq')) {
+                optBox.style.display = 'block';
+                inputArea.style.display = 'none';
+
+                let options = [currentQuizItem];
+                while(options.length < Math.min(4, smcpData.length)) {
+                    let rand = smcpData[Math.floor(Math.random() * smcpData.length)];
+                    if(!options.includes(rand)) options.push(rand);
+                }
+                options.sort(() => Math.random() - 0.5);
+
+                if (qType === 'mcq-term') {
+                    qBox.innerHTML = `請問以下定義對應哪個術語？<br><br><span style="color:var(--primary);">${currentQuizItem.meaning}</span><br><span style="font-size:1rem; color:var(--text-sub); font-weight:normal;">(${currentQuizItem.meaning_zh})</span>`;
+                    options.forEach(opt => {
+                        const btn = document.createElement('button');
+                        btn.className = 'option-btn';
+                        btn.innerHTML = `<strong>${opt.term}</strong> <br><small style="color:var(--text-sub);">${opt.term_zh}</small>`;
+                        btn.onclick = () => checkAnswer(btn, opt.id === currentQuizItem.id);
+                        optBox.appendChild(btn);
+                    });
+                } else {
+                    qBox.innerHTML = `請問 <strong style="color:var(--primary); font-size:1.5rem;">${currentQuizItem.term}</strong> 的定義是？<br><span style="font-size:1rem; color:var(--text-sub); font-weight:normal;">(${currentQuizItem.term_zh})</span>`;
+                    options.forEach(opt => {
+                        const btn = document.createElement('button');
+                        btn.className = 'option-btn';
+                        btn.innerHTML = `<strong>${opt.meaning}</strong>`;
+                        btn.onclick = () => checkAnswer(btn, opt.id === currentQuizItem.id);
+                        optBox.appendChild(btn);
+                    });
+                }
+            } else {
+                // Input 模式
+                optBox.style.display = 'none';
+                inputArea.style.display = 'block';
+                qBox.innerHTML = `請用英文簡述含義 (輸入關鍵字)：<br><br><strong style="color:var(--primary); font-size:1.5rem;">${currentQuizItem.term}</strong><br><span style="font-size:1rem; color:var(--text-sub); font-weight:normal;">(${currentQuizItem.term_zh})</span>`;
+                const required = Math.max(1, Math.ceil(currentQuizItem.keywords.length / 2));
+                document.getElementById('kw-req').innerText = required;
+            }
+        }
+
+        function checkAnswer(btn, isCorrect) {
+            document.querySelectorAll('.option-btn').forEach(b => b.style.pointerEvents = 'none');
+            const fb = document.getElementById('quiz-feedback');
+            
+            if (isCorrect) {
+                btn.classList.add('correct');
+                fb.innerHTML = '✅ 正確！';
+                fb.style.color = 'var(--success)';
+                processSRS(currentQuizItem.id, true);
+            } else {
+                btn.classList.add('wrong');
+                fb.innerHTML = `❌ 錯誤。<br><br><span style="font-size:1.1rem; color:var(--text-main);">正解：<br><strong>${currentQuizItem.term}</strong><br>${currentQuizItem.meaning}</span>`;
+                fb.style.color = 'var(--danger)';
+                processSRS(currentQuizItem.id, false);
+            }
+            document.getElementById('quiz-next-btn').style.display = 'block';
+        }
+
+        function checkInputQuiz() {
+            const userInput = document.getElementById('quiz-input-box').value;
+            const result = fuzzyMatch(userInput, currentQuizItem.keywords);
+            const required = Math.max(1, Math.ceil(currentQuizItem.keywords.length / 2));
+            const fb = document.getElementById('quiz-feedback');
+
+            let detailHtml = `<div style="text-align:left; background:var(--highlight-bg); padding:10px; border-radius:8px; margin-top:15px; font-size:1rem; line-height:1.4;">
+                <strong>標準定義:</strong> ${currentQuizItem.meaning}<br>
+                <strong>所有關鍵字:</strong> ${currentQuizItem.keywords.join(', ')}
+            </div>`;
+
+            if (result.matchCount >= required) {
+                fb.innerHTML = `✅ 命中！(找到 ${result.matchCount}/${required} 詞: ${result.matchedKws.join(', ')})` + detailHtml;
+                fb.style.color = 'var(--success)';
+                processSRS(currentQuizItem.id, true);
+            } else {
+                fb.innerHTML = `❌ 關鍵字不足。(僅找到 ${result.matchCount}/${required} 詞)` + detailHtml;
+                fb.style.color = 'var(--danger)';
+                processSRS(currentQuizItem.id, false);
+            }
+            document.getElementById('quiz-next-btn').style.display = 'block';
+            document.getElementById('quiz-input-area').style.display = 'none';
+        }
+
+        // SRS 狀態寫入
+        function processSRS(id, isCorrect) {
+            let data = userData.srsData[id];
+            if (isCorrect) {
+                data.box = Math.min(5, data.box + 1);
+            } else {
+                data.box = 0;
+            }
+            saveData();
+        }
+
+        function updateStats() {
+            let mastered = 0;
+            let learning = 0;
+            for (let id in userData.srsData) {
+                if (userData.srsData[id].box >= 3) mastered++;
+                else learning++;
+            }
+            document.getElementById('stat-mastered').innerText = mastered;
+            document.getElementById('stat-learning').innerText = learning;
+        }
+
+        // === 初始化 ===
+        window.onload = () => {
+            checkDailyReset();
+            updateSchedule();
+            updateStats();
+        };
+    </script>
+</body>
+</html>
