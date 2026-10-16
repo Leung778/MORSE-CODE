@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>INTERCO 專業海事通訊模擬器 v7.2</title>
+    <title>INTERCO 專業海事通訊模擬器 v7.3</title>
     <style>
         /* CSS 變數定義：支援深淺色主題 */
         :root[data-theme="light"] {
@@ -43,15 +43,15 @@
         .flag-letter { font-size: 1.1rem; font-weight: bold; }
         .flag-morse { font-family: monospace; color: var(--primary); font-weight: bold; }
 
-        /* 燈號區與特效 */
+        /* 燈號區與特效：移除漸變過渡 (transition: none)，確保葉片快門瞬斷、不吞掉停頓時間 */
         .lamp-container { display: flex; flex-direction: column; align-items: center; padding: 20px; background: var(--lamp-bg); border-radius: 10px; border: 1px solid var(--border); }
-        .lamp-box { width: 140px; height: 140px; background-color: var(--lamp-off); border: 6px solid var(--text-muted); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 10px; box-shadow: inset 0 5px 15px rgba(0,0,0,0.8); }
-        .lamp-bulb { width: 90px; height: 90px; background-color: rgba(255,255,255,0.05); border-radius: 50%; transition: background-color 0.03s, box-shadow 0.03s; }
-        .lamp-bulb.lit { background-color: #ffff33; box-shadow: 0 0 40px 10px #ffff33, inset 0 0 20px #fff; }
+        .lamp-box { width: 140px; height: 140px; background-color: #050811; border: 6px solid var(--text-muted); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 10px; box-shadow: inset 0 5px 15px rgba(0,0,0,0.9); }
+        .lamp-bulb { width: 90px; height: 90px; background-color: rgba(255,255,255,0.03); border-radius: 50%; transition: none; }
+        .lamp-bulb.lit { background-color: #ffff33; box-shadow: 0 0 35px 8px #ffff33, inset 0 0 15px #fff; }
         /* 視線不良特效 (Fog) */
         .lamp-bulb.lit.fog-mode { background-color: #c9c935; box-shadow: 0 0 20px 2px #a1a12a; filter: blur(3px); }
         
-        .control-panel { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 10px; background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-top: 10px;}
+        .control-panel { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 10px; background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-top: 10px;}
         .btn-row { display: flex; gap: 10px; width: 100%; }
         button.action-btn { flex: 1; padding: 10px 15px; background-color: var(--primary); color: #fff; border: none; border-radius: 6px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
         button.action-btn:hover { filter: brightness(1.1); }
@@ -74,7 +74,7 @@
         .vk-key.special { max-width: 65px; background: var(--primary); color: white; border-color: var(--primary); }
 
         /* Realism Settings */
-        .realism-box { background: var(--tab-bg); padding: 10px; border-radius: 6px; border: 1px solid var(--border); display: flex; justify-content: space-around; font-size: 0.9rem; font-weight: bold; }
+        .realism-box { background: var(--tab-bg); padding: 10px; border-radius: 6px; border: 1px solid var(--border); display: flex; justify-content: space-around; flex-wrap: wrap; gap: 10px; font-size: 0.9rem; font-weight: bold; }
         .realism-box label { cursor: pointer; display: flex; align-items: center; gap: 5px; }
 
         /* Study Center & Stats */
@@ -123,32 +123,43 @@
             <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom:5px;">提示: 在此頁面按 <b>Space</b> 可重播，按 <b>方向鍵右(➔)</b> 換題</div>
             
             <div class="control-panel">
-                <div class="realism-box" style="margin-bottom: 10px;">
+                <div class="realism-box" style="margin-bottom: 5px;">
                     <label title="模擬起霧或遠距離的模糊黯淡燈光"><input type="checkbox" id="fogToggle"> 🌧️ 視線不良 (Fog)</label>
+                    <label title="模擬實體信號燈葉片開合的機械快門聲，輔助建立時間節奏"><input type="checkbox" id="shutterClickToggle"> 🔊 葉片快門聲</label>
                 </div>
                 
-                <div style="margin-bottom: 10px; font-weight:bold;">
+                <div style="margin-bottom: 5px; font-weight:bold;">
                     <label style="margin-right:15px;"><input type="radio" name="lampMode" value="single" checked onchange="toggleLampMode()"> 單字元訓練</label>
                     <label><input type="radio" name="lampMode" value="block" onchange="toggleLampMode()"> 段落組合訓練</label>
                 </div>
 
-                <div id="lampBlockConfig" style="display: none; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.95rem;">
-                    <span>產生 <input type="number" id="lampGroups" value="3" min="1" max="10" style="width:50px; padding:4px; display:inline-block;"> 組</span>
-                    <span>每組 <input type="number" id="lampChars" value="5" min="1" max="10" style="width:50px; padding:4px; display:inline-block;"> 字</span>
+                <div id="lampBlockConfig" style="display: none; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 0.95rem;">
+                    <span>產生 <input type="number" id="lampGroups" value="3" min="1" max="10" style="width:55px; padding:4px; display:inline-block;"> 組</span>
+                    <span>每組 <input type="number" id="lampChars" value="5" min="1" max="10" style="width:55px; padding:4px; display:inline-block;"> 字</span>
                 </div>
 
-                <div style="display:flex; align-items:center; justify-content: space-between; margin-bottom: 15px;">
-                    <span style="font-weight:bold;">發送速度 (WPM):</span>
+                <div style="display:flex; align-items:center; justify-content: space-between; margin-bottom: 5px;">
+                    <span style="font-weight:bold;">字元閃爍速度 (WPM):</span>
                     <input type="number" id="lampWpmInput" value="6" min="1" max="40" style="width:80px; text-align:center;">
                 </div>
+
+                <div style="display:flex; flex-direction:column; gap:4px; margin-bottom: 10px;">
+                    <span style="font-weight:bold; font-size:0.9rem;">字母與字母之間的停頓比例 (Farnsworth 漸進訓練):</span>
+                    <select id="charSpaceRatio" style="padding: 8px; font-size: 0.9rem;">
+                        <option value="5">1 : 5（初學推薦 — 明顯拉開新字母停頓）</option>
+                        <option value="4" selected>1 : 4（中階過渡 — 補償視覺殘影，強化分辨）</option>
+                        <option value="3.5">1 : 3.5（考前衝刺 — 接近實戰標準）</option>
+                        <option value="3">1 : 3（IMO 標準 — 嚴格實戰比例）</option>
+                    </select>
+                </div>
                 
-                <div class="btn-row" style="margin-bottom: 15px;">
+                <div class="btn-row" style="margin-bottom: 10px;">
                     <button class="action-btn" style="background-color:#0284c7;" onclick="nextLampQuestion()">發送新題</button>
                     <button class="action-btn" style="background-color:#475569;" onclick="replayLampSignal()">重播</button>
                     <button class="action-btn btn-danger" onclick="stopFlashing()">停止</button>
                 </div>
                 
-                <hr style="border: 0; height: 1px; background: var(--border); margin-bottom: 15px;">
+                <hr style="border: 0; height: 1px; background: var(--border); margin-bottom: 10px;">
                 <div style="text-align:left; font-weight:bold; margin-bottom:5px;">請輸入辨識結果：</div>
                 
                 <!-- 提示使用者不需要輸入通訊協定 -->
@@ -363,9 +374,25 @@
     }
 
     // =========================================================
-    // 聲音引擎 (Web Audio API) + QRN 雜訊模擬
+    // 聲音引擎 (Web Audio API) + QRN 雜訊模擬 + 葉片快門聲
     // =========================================================
     let audioCtx = null; let noiseSource = null; let noiseTimeout = null;
+
+    function playShutterClick(isOpen) {
+        if (!document.getElementById('shutterClickToggle').checked) return;
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(isOpen ? 180 : 120, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.015);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.015);
+    }
 
     function startNoise() {
         stopNoise();
@@ -394,20 +421,24 @@
         if (audioCtx.state === 'suspended') audioCtx.resume();
         startNoise();
 
-        // 依據 PARIS 標準動態讀取 WPM 計算點長 (秒)
         let currentWpm = parseFloat(document.getElementById('lampWpmInput').value) || 6;
         if (currentWpm < 1) currentWpm = 1;
         const dot = 1.2 / currentWpm;
+        const charMultiplier = parseFloat(document.getElementById('charSpaceRatio').value) || 3;
         let offset = 0.1; let totalDuration = 0.1;
 
         for (let char of morseStr) {
-            if (char === ' ' || char === '/') { offset += dot * 3; totalDuration += dot * 3; continue; }
+            if (char === ' ' || char === '/') {
+                offset += dot * charMultiplier;
+                totalDuration += dot * charMultiplier;
+                continue;
+            }
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.type = 'sine'; osc.frequency.value = 600;
             const duration = (char === '-') ? dot * 3 : dot;
             const start = audioCtx.currentTime + offset; const stop = start + duration;
-            gain.gain.setValueAtTime(0, start); gain.gain.linearRampToValueAtTime(0.3, start + 0.01);
-            gain.gain.setValueAtTime(0.3, stop - 0.01); gain.gain.linearRampToValueAtTime(0, stop);
+            gain.gain.setValueAtTime(0, start); gain.gain.linearRampToValueAtTime(0.3, start + 0.008);
+            gain.gain.setValueAtTime(0.3, stop - 0.008); gain.gain.linearRampToValueAtTime(0, stop);
             osc.connect(gain); gain.connect(audioCtx.destination);
             osc.start(start); osc.stop(stop);
             offset += duration + dot; totalDuration += duration + dot;
@@ -468,13 +499,14 @@
 
         const isFog = document.getElementById('fogToggle').checked;
         const mode = document.querySelector('input[name="lampMode"]:checked').value;
+        const charMultiplier = parseFloat(document.getElementById('charSpaceRatio').value) || 4;
 
-        // 依據 PARIS 標準動態計算閃燈時間 (毫秒)：1 WPM = 1200ms 點長
+        // PARIS 標準點長計算 (毫秒) + Farnsworth 字母停頓倍率
         const dot = Math.round(1200 / currentWpm);
         const dash = dot * 3;
-        const symSpace = dot;
-        const charSpace = dot * 3;
-        const wordSpace = dot * 7;
+        const symSpace = dot; // 同一個字母內的點劃停頓固定為 1 單位
+        const charSpace = Math.round(dot * charMultiplier); // 字母與字母間停頓 (預設 4 單位，可調回 3 單位)
+        const wordSpace = Math.round(dot * (charMultiplier * 2 + 1)); // 字組與字組間停頓按比例放大
 
         // 段落模式下加入起頭 AA AA AA 與結尾 AR
         let sequenceToFlash = text;
@@ -483,21 +515,27 @@
         }
 
         const fb = document.getElementById('lampFeedback');
-        fb.innerHTML = `<span style='color:var(--secondary);'>發送中 (${currentWpm} WPM，點長 ${dot}ms)... 請專注觀看燈號</span>`;
+        fb.innerHTML = `<span style='color:var(--secondary);'>發送中 (${currentWpm} WPM | 同字停頓 ${symSpace}ms : 換字停頓 ${charSpace}ms)...</span>`;
         await sleep(800);
 
         for (let i = 0; i < sequenceToFlash.length; i++) {
             if (lampCancel) break;
             const char = sequenceToFlash[i];
-            if (char === ' ') { await sleep(wordSpace - charSpace); continue; }
+            if (char === ' ') {
+                await sleep(wordSpace - charSpace);
+                continue;
+            }
             const morse = DB[char] ? DB[char].morse : '';
             for (let j = 0; j < morse.length; j++) {
                 if (lampCancel) break;
                 bulb.className = isFog ? "lamp-bulb lit fog-mode" : "lamp-bulb lit";
+                playShutterClick(true);
                 await sleep(morse[j] === '.' ? dot : dash);
                 bulb.className = "lamp-bulb";
+                playShutterClick(false);
                 if (j < morse.length - 1) await sleep(symSpace);
             }
+            // 每個字母結束後的完整停頓
             await sleep(charSpace);
         }
         if (!lampCancel) fb.innerHTML = "<span style='color:var(--text-muted);'>發送完畢，請在上方輸入您辨識出的內容。</span>";
